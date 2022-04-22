@@ -10,6 +10,7 @@ import com.eleks.academy.whoami.core.Game;
 import com.eleks.academy.whoami.core.Player;
 import com.eleks.academy.whoami.core.impl.RandomGame;
 import com.eleks.academy.whoami.core.impl.RandomPlayer;
+import com.eleks.academy.whoami.networking.client.ClientPlayer;
 
 public class ServerImpl implements Server {
 

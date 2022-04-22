@@ -14,12 +14,14 @@ public class ClientPlayer implements Player {
 	private Socket socket;
 	private BufferedReader reader;
 	private PrintStream writer;
+	private String message;
 
 	public ClientPlayer(String name, Socket socket) throws IOException {
 		this.name = name;
 		this.socket = socket;
 		this.reader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 		this.writer = new PrintStream(socket.getOutputStream());
+		this.message = "test message";
 	}
 
 	@Override
@@ -37,7 +39,9 @@ public class ClientPlayer implements Player {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return question;
+		this.message = this.name + "Asked question" + question;
+		this.getMessage();
+		return question;	
 	}
 
 	@Override
@@ -95,6 +99,11 @@ public class ClientPlayer implements Player {
 			e.printStackTrace();
 		}
 		return answer;
+	}
+	
+	@Override
+	public String getMessage() {
+		return message;
 	}
 
 }

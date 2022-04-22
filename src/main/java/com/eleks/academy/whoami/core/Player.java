@@ -14,4 +14,6 @@ public interface Player {
 
 	String answerGuess(String guess, String character);
 	
+	String getMessage();
+	
 }
