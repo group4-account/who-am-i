@@ -56,7 +56,12 @@ public class RandomPlayer implements Player {
 	public boolean isReadyForGuess() {
 		return availableQuestions.isEmpty();
 	}
-
 	
+	@Override
+	 public void logMessage()
+   {
+		
+   }   
+
 	
 }
