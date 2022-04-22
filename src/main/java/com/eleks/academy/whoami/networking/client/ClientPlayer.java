@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintStream;
 import java.net.Socket;
+import java.util.logging.Logger;
 
 import com.eleks.academy.whoami.core.Player;
 
@@ -15,6 +16,7 @@ public class ClientPlayer implements Player {
 	private BufferedReader reader;
 	private PrintStream writer;
 	private String message;
+	private static Logger log = Logger.getLogger(ClientPlayer.class.getName());
 
 	public ClientPlayer(String name, Socket socket) throws IOException {
 		this.name = name;
@@ -36,11 +38,11 @@ public class ClientPlayer implements Player {
 		try {
 			writer.println("Ask your questinon: ");
 			question = reader.readLine();
+			message = name + " Asked question " + question;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		this.message = this.name + "Asked question" + question;
-		this.getMessage();
+		System.out.println("Player: " + name + ". Asks: " + question);
 		return question;	
 	}
 
@@ -51,6 +53,7 @@ public class ClientPlayer implements Player {
 		try {
 			writer.println("Answer second player question: " + question + "Character is:"+ character);
 			answer = reader.readLine();
+			message = name + " Answer second player question: " + question;
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -62,10 +65,11 @@ public class ClientPlayer implements Player {
 	public String getGuess() {
 		String answer = "";
 		
-	
 		try {
 			writer.println("Write your guess: ");
 			answer = reader.readLine();
+			message = name + " guess answer: " + answer;
+			
 		} catch (IOException e) {
 
 			e.printStackTrace();
@@ -80,6 +84,7 @@ public class ClientPlayer implements Player {
 		try {
 			writer.println("Are you ready to guess? ");
 			answer = reader.readLine();
+			message = name + (answer.equals("Yes") ? " Ready to guess" : " Not ready to guess");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -94,6 +99,7 @@ public class ClientPlayer implements Player {
 		try {
 			writer.println("Write your answer: ");
 			answer = reader.readLine();
+			message = name + " write answer:" + answer;
 		} catch (IOException e) {
 
 			e.printStackTrace();
@@ -102,8 +108,9 @@ public class ClientPlayer implements Player {
 	}
 	
 	@Override
-	public String getMessage() {
-		return message;
-	}
+	 public void logMessage()
+    {
+       log.info(message);
+    }   
 
 }
