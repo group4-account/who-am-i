@@ -47,6 +47,7 @@ class GameServiceTest {
         assertThat(byIdAndPlayer).isNotEmpty();
         assertNotNull(byIdAndPlayer.map(GameDetails::getId));
         assertNotNull(byIdAndPlayer.map(GameDetails::getStatus));
+        assertNotNull(byIdAndPlayer.map(GameDetails::getPlayers));
     }
 
     @Test
