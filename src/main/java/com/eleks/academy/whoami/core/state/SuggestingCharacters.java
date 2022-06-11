@@ -3,6 +3,8 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.GameCharacter;
+import com.eleks.academy.whoami.core.impl.PersistentPlayer;
+import jdk.jfr.Percentage;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -40,7 +42,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 		return Optional.of(this)
 				.filter(SuggestingCharacters::finished)
 				.map(SuggestingCharacters::assignCharacters)
-				.map(then -> new ProcessingQuestion(this.players))
+				.map(then -> new ProcessingQuestion(players.get(0).getName(), this.players))
 				.orElseThrow(() -> new GameException("Cannot start game"));
 	}
 

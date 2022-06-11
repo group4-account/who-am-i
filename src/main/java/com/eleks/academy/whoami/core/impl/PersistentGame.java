@@ -9,6 +9,7 @@ import com.eleks.academy.whoami.core.state.WaitingForPlayers;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -21,7 +22,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	private final Lock turnLock = new ReentrantLock();
 	private final String id;
-
+	private List<PlayerWithState> playerWithStateList = new ArrayList<>();
 	private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 
 	/**
@@ -86,7 +87,7 @@ public class PersistentGame implements Game, SynchronousGame {
 	@Override
 	public List<PlayerWithState> getPlayersInGame() {
 		// TODO: Implement
-		return null;
+		return playerWithStateList;
 	}
 
 	@Override
