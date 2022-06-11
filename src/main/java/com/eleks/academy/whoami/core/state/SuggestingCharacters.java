@@ -19,11 +19,11 @@ public final class SuggestingCharacters extends AbstractGameState {
 
 	private final Lock lock = new ReentrantLock();
 
-	private final Map<String, SynchronousPlayer> players;
+	private final Map<String, PersistentPlayer> players;
 	private final Map<String, List<GameCharacter>> suggestedCharacters;
 	private final Map<String, String> playerCharacterMap;
 
-	public SuggestingCharacters(Map<String, SynchronousPlayer> players) {
+	public SuggestingCharacters(Map<String, PersistentPlayer> players) {
 		super(players.size(), players.size());
 
 		this.players = players;

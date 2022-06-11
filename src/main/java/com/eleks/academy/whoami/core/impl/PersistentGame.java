@@ -20,111 +20,114 @@ import java.util.function.Function;
 
 public class PersistentGame implements Game, SynchronousGame {
 
-	private final Lock turnLock = new ReentrantLock();
-	private final String id;
-	private List<PlayerWithState> playerWithStateList = new ArrayList<>();
-	private final Queue<GameState> turns = new LinkedBlockingQueue<>();
+    private final Lock turnLock = new ReentrantLock();
+    private final String id;
+    private List<PlayerWithState> playerWithStateList = new ArrayList<>();
+    private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 
-	/**
-	 * Creates a new game (game room) and makes a first enrolment turn by a current player
-	 * so that he won't have to enroll to the game he created
-	 *
-	 * @param hostPlayer player to initiate a new game
-	 */
-	public PersistentGame(String hostPlayer, Integer maxPlayers) {
-		this.id = String.format("%d-%d",
-				Instant.now().toEpochMilli(),
-				Double.valueOf(Math.random() * 999).intValue());
+    /**
+     * Creates a new game (game room) and makes a first enrolment turn by a current player
+     * so that he won't have to enroll to the game he created
+     *
+     * @param hostPlayer player to initiate a new game
+     */
+    public PersistentGame(String hostPlayer, Integer maxPlayers) {
+        this.id = String.format("%d-%d",
+                Instant.now().toEpochMilli(),
+                Double.valueOf(Math.random() * 999).intValue());
+        this.turns.add(new WaitingForPlayers(maxPlayers));
 
-	}
+    }
 
-	@Override
-	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return this.applyIfPresent(this.turns.peek(), gameState -> gameState.findPlayer(player));
-	}
+    @Override
+    public Optional<SynchronousPlayer> findPlayer(String player) {
+        return this.applyIfPresent(this.turns.peek(), gameState -> gameState.findPlayer(player));
+    }
 
-	@Override
-	public String getId() {
-		return this.id;
-	}
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
-	@Override
-	public SynchronousPlayer enrollToGame(String player) {
-		// TODO: Add player to players list
-		return new PersistentPlayer(player);
-	}
+    @Override
+    public SynchronousPlayer enrollToGame(String player) {
+        SynchronousPlayer synchronousPlayer = new PersistentPlayer(player);
+        // TODO: Add player to players list
+        return synchronousPlayer;
+    }
 
-	@Override
-	public String getTurn() {
-		return this.applyIfPresent(this.turns.peek(), GameState::getCurrentTurn);
-	}
+    @Override
+    public String getTurn() {
+        return this.applyIfPresent(this.turns.peek(), GameState::getCurrentTurn);
+    }
 
-	@Override
-	public void askQuestion(String player, String message) {
-
-	}
-
-	@Override
-	public void answerQuestion(String player, Answer answer) {
-		// TODO: Implement method
-	}
-
-	@Override
-	public SynchronousGame start() {
-		return null;
-	}
-
-	@Override
-	public boolean isAvailable() {
-		return this.turns.peek() instanceof WaitingForPlayers;
-	}
-
-	@Override
-	public String getStatus() {
-		return this.applyIfPresent(this.turns.peek(), GameState::getStatus);
-	}
-
-	@Override
-	public List<PlayerWithState> getPlayersInGame() {
-		// TODO: Implement
-		return playerWithStateList;
-	}
-
-	@Override
-	public boolean isFinished() {
-		return this.turns.isEmpty();
-	}
+    @Override
+    public void askQuestion(String player, String message) {
 
 
-	@Override
-	public boolean makeTurn() {
-		return true;
-	}
+    }
 
-	@Override
-	public void changeTurn() {
+    @Override
+    public void answerQuestion(String player, Answer answer) {
+        // TODO: Implement method
+    }
 
-	}
+    @Override
+    public SynchronousGame start() {
+        return null;
+    }
 
-	@Override
-	public void initGame() {
+    @Override
+    public boolean isAvailable() {
+        return this.turns.peek() instanceof WaitingForPlayers;
+    }
 
-	}
+    @Override
+    public String getStatus() {
+        return this.applyIfPresent(this.turns.peek(), GameState::getStatus);
+    }
 
-	@Override
-	public void play() {
-		while (!(this.turns.peek() instanceof GameFinished)) {
-			this.makeTurn();
-		}
-	}
+    @Override
+    public List<PlayerWithState> getPlayersInGame() {
+        // TODO: Implement
+        return playerWithStateList;
+    }
 
-	private <T, R> R applyIfPresent(T source, Function<T, R> mapper) {
-		return this.applyIfPresent(source, mapper, null);
-	}
+    @Override
+    public boolean isFinished() {
+        return this.turns.isEmpty();
+    }
 
-	private <T, R> R applyIfPresent(T source, Function<T, R> mapper, R fallback) {
-		return Optional.ofNullable(source)
-				.map(mapper)
-				.orElse(fallback);
-	}
+
+    @Override
+    public boolean makeTurn() {
+        return true;
+    }
+
+    @Override
+    public void changeTurn() {
+
+    }
+
+    @Override
+    public void initGame() {
+
+    }
+
+    @Override
+    public void play() {
+        while (!(this.turns.peek() instanceof GameFinished)) {
+            this.makeTurn();
+        }
+    }
+
+    private <T, R> R applyIfPresent(T source, Function<T, R> mapper) {
+        return this.applyIfPresent(source, mapper, null);
+    }
+
+    private <T, R> R applyIfPresent(T source, Function<T, R> mapper, R fallback) {
+        return Optional.ofNullable(source)
+                .map(mapper)
+                .orElse(fallback);
+    }
 }

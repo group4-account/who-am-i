@@ -14,7 +14,7 @@ public class GameCharacter {
 	private boolean taken;
 
 	public void markTaken() {
-		this.taken = Boolean.FALSE;
+		this.taken = Boolean.TRUE;
 	}
 
 }
