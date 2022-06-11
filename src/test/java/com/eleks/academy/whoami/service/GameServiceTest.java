@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 class GameServiceTest {
     private final GameRepository gameRepository = new GameInMemoryRepository();
     private final GameServiceImpl gameService = new GameServiceImpl(gameRepository);
-    private final NewGameRequest gameRequest = new NewGameRequest();
+    private final NewGameRequest gameRequest = new NewGameRequest(3, 4, 2);
     private String gameId;
 
     @BeforeEach

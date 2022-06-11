@@ -23,5 +23,7 @@ public abstract sealed class AbstractGameState implements GameState
 	public String getCurrentTurn() {
 		return null;
 	}
-
+	public GameState makeTurn() {
+		return null;
+	}
 }
