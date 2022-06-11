@@ -110,5 +110,18 @@ class GameControllerTest {
                                         }"""))
 				.andExpect(status().isBadRequest());
 	}
-
+	@Test
+	void failValidationName() throws Exception {
+		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
+				eq(new CharacterSuggestion("Batman")));
+		this.mockMvc.perform(
+						MockMvcRequestBuilders.post("/games/1234/characters")
+								.header("X-Player", "p")
+								.contentType(APPLICATION_JSON)
+								.content("""
+                                        {
+                                            "character": "Batman"
+                                        }"""))
+				.andExpect(status().isBadRequest());
+	}
 }
