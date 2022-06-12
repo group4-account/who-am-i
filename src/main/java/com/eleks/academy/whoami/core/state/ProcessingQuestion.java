@@ -155,4 +155,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 		});
 	}
 
+	@Override
+	public SynchronousPlayer add(SynchronousPlayer player) {
+		return player;
+	}
+
 }

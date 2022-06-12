@@ -84,4 +84,10 @@ public final class WaitingForPlayers extends AbstractGameState {
         return players.values().stream().toList();
     }
 
+	@Override
+	public SynchronousPlayer add(SynchronousPlayer player) {
+		players.put(player.getName(), player);
+		return player;
+	}
+
 }

@@ -10,6 +10,8 @@ public interface GameRepository {
 
 	Stream<SynchronousGame> findAllAvailable(String player);
 
+	Map<String, SynchronousGame> findAvailableQuickGames();
+
 	SynchronousGame save(SynchronousGame game);
 
 	Optional<SynchronousGame> findById(String id);
