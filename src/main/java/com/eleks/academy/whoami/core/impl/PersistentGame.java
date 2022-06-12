@@ -9,10 +9,7 @@ import com.eleks.academy.whoami.core.state.WaitingForPlayers;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -23,6 +20,7 @@ public class PersistentGame implements Game, SynchronousGame {
     private final Lock turnLock = new ReentrantLock();
     private final String id;
     private List<PlayerWithState> playerWithStateList = new ArrayList<>();
+    private Map<String, PersistentPlayer> players;
     private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 
     /**
@@ -51,9 +49,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public SynchronousPlayer enrollToGame(String player) {
-        SynchronousPlayer synchronousPlayer = new PersistentPlayer(player);
-        // TODO: Add player to players list
-        return synchronousPlayer;
+        return Objects.requireNonNull(this.turns.peek()).enrollToGame(player);
     }
 
     @Override
@@ -89,8 +85,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public List<PlayerWithState> getPlayersInGame() {
-        // TODO: Implement
-        return playerWithStateList;
+        return this.applyIfPresent(this.turns.peek(), GameState::getPlayersWithState);
     }
 
     @Override
@@ -100,8 +95,16 @@ public class PersistentGame implements Game, SynchronousGame {
 
 
     @Override
-    public boolean makeTurn() {
-        return true;
+    public void makeTurn(String player) {
+        this.turnLock.lock();
+
+        try {
+            Optional.ofNullable(this.turns.poll())
+                    .map(gameState -> gameState.makeTurn(player))
+                    .ifPresent(this.turns::add);
+        } finally {
+            this.turnLock.unlock();
+        }
     }
 
     @Override
@@ -116,9 +119,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void play() {
-        while (!(this.turns.peek() instanceof GameFinished)) {
-            this.makeTurn();
-        }
+
     }
 
     private <T, R> R applyIfPresent(T source, Function<T, R> mapper) {

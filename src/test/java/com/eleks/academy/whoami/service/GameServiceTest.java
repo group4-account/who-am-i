@@ -56,9 +56,9 @@ class GameServiceTest {
         final String player = "Anton";
         final String previousName = "Player-1";
         CharacterSuggestion character = new CharacterSuggestion("char");
-        gameService.enrollToGame(gameId, player);
+        gameService.enrollToGame(gameId, previousName);
         Optional<SynchronousPlayer> synchronousPlayer = this.gameRepository.findById(gameId)
-                .flatMap(game -> game.findPlayer(player));
+                .flatMap(game -> game.findPlayer(previousName));
         String playerName = synchronousPlayer.get().getName();
         assertEquals(previousName, playerName);
         gameService.suggestCharacter(gameId, player, character);

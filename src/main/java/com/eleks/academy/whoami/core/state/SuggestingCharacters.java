@@ -4,6 +4,8 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.GameCharacter;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
+import com.eleks.academy.whoami.model.response.PlayerState;
+import com.eleks.academy.whoami.model.response.PlayerWithState;
 import jdk.jfr.Percentage;
 
 import java.util.*;
@@ -22,6 +24,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 	private final Map<String, PersistentPlayer> players;
 	private final Map<String, List<GameCharacter>> suggestedCharacters;
 	private final Map<String, String> playerCharacterMap;
+	private List<PlayerWithState> playerWithStateList;
 
 	public SuggestingCharacters(Map<String, PersistentPlayer> players) {
 		super(players.size(), players.size());
@@ -29,6 +32,11 @@ public final class SuggestingCharacters extends AbstractGameState {
 		this.players = players;
 		this.suggestedCharacters = new HashMap<>(this.players.size());
 		this.playerCharacterMap = new HashMap<>(this.players.size());
+		this.playerWithStateList = new ArrayList<>();
+		this.players.values().forEach(player -> playerWithStateList.add(PlayerWithState.builder()
+				.state(PlayerState.NOT_READY)
+				.player(player)
+				.build()));
 	}
 
 	/**
@@ -49,6 +57,22 @@ public final class SuggestingCharacters extends AbstractGameState {
 	@Override
 	public Optional<SynchronousPlayer> findPlayer(String player) {
 		return Optional.ofNullable(this.players.get(player));
+	}
+
+	@Override
+	public List<PlayerWithState> getPlayersWithState() {
+		List<PlayerWithState> playerWithStateList = new ArrayList<>();
+		this.players.values().forEach(player -> playerWithStateList.add(PlayerWithState.builder()
+				.state(PlayerState.NOT_READY)
+				.player(player)
+				.build()));
+		return  playerWithStateList;
+
+	}
+
+	@Override
+	public GameState makeTurn(String player) {
+		return null;
 	}
 
 	// TODO: Consider extracting into {@link GameState}
@@ -77,6 +101,11 @@ public final class SuggestingCharacters extends AbstractGameState {
 		characters.add(GameCharacter.of(character, player));
 
 		return this;
+	}
+
+	@Override
+	public GameState makeTurn() {
+		return null;
 	}
 
 	/**
@@ -139,7 +168,6 @@ public final class SuggestingCharacters extends AbstractGameState {
 			return gameCharacters.get(randomPos);
 		};
 	}
-
 	private <T> BiFunction<List<T>, T, T> cyclicNext() {
 		return (list, item) -> {
 			final var index = list.indexOf(item);
@@ -150,5 +178,4 @@ public final class SuggestingCharacters extends AbstractGameState {
 					.orElseGet(() -> list.get(0));
 		};
 	}
-
 }

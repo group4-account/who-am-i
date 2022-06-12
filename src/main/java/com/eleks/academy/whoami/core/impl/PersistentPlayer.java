@@ -10,7 +10,7 @@ import java.util.concurrent.Future;
 
 public class PersistentPlayer implements Player, SynchronousPlayer {
 
-	private final String name;
+	private String name;
 	private final CompletableFuture<String> character = new CompletableFuture<>();
 
 
@@ -66,6 +66,11 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	@Override
 	public void close() {
 
+	}
+
+	@Override
+	public void setName(String name) {
+		this.name = name;
 	}
 
 	@Override

@@ -60,6 +60,9 @@ public class GameServiceImpl implements GameService {
 		this.gameRepository.findById(id)
 				.flatMap(game -> game.findPlayer(player))
 				.ifPresent(p -> p.setCharacter(suggestion.getCharacter()));
+		this.gameRepository.findById(id)
+				.flatMap(game -> game.findPlayer(player))
+				.ifPresent(p -> p.setName(player));
 	}
 
 	@Override

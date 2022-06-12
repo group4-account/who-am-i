@@ -1,7 +1,10 @@
 package com.eleks.academy.whoami.core.state;
 
+import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+
+import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
@@ -10,7 +13,6 @@ public abstract sealed class AbstractGameState implements GameState
 
 	private final int playersInGame;
 	private final int maxPlayers;
-
 	// TODO: Implement for each state
 	@Override
 	public String getStatus() {

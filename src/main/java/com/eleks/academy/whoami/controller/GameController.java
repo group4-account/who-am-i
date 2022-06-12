@@ -61,9 +61,8 @@ public class GameController {
 	public void suggestCharacter(@PathVariable("id") String id,
 								 @RequestHeader(PLAYER) String player,
 								 @Valid @RequestBody CharacterSuggestion suggestion) {
-        Predicate<String> predicate = string -> string.matches(".{2,50}");
         Optional.of(player)
-                .filter(predicate)
+                .filter(string -> string.matches(".{2,50}"))
 				.orElseThrow(() -> new GameException("Player name must be between 2 and 50 characters"));
 		this.gameService.suggestCharacter(id, player, suggestion);
 	}
