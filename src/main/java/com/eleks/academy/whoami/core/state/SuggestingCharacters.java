@@ -29,6 +29,11 @@ public final class SuggestingCharacters extends AbstractGameState {
 		this.playerCharacterMap = new HashMap<>(this.players.size());
 	}
 
+	@Override
+	public SynchronousPlayer add(SynchronousPlayer player) {
+		return player;
+	}
+
 	/**
 	 * Randomly assigns characters to players and returns a next stage
 	 * or throws {@link GameException} in case {@link this#finished()} returns {@code false}
