@@ -17,6 +17,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +31,27 @@ public class GameServiceImpl implements GameService {
 				.map(GameLight::of)
 				.toList();
 	}
+
+	@Override
+	public Optional<GameDetails> findAvailableQuickGame(String player) {
+		Map<String, SynchronousGame> games = gameRepository.findAvailableQuickGames();
+
+		if (games.isEmpty()) {
+			GameDetails game = createQuickGame();
+			enrollToGame(game.getId(), player);
+			return gameRepository.findById(game.getId()).map(GameDetails::of);
+		}
+
+		String firstGame = games.keySet().stream().findFirst().get();
+		SynchronousPlayer enrolledPlayer = enrollToGame(games.get(firstGame).getId(), player);
+		String gameFromRepository = games.get(firstGame).getId();
+		return gameRepository.findById(gameFromRepository).map(GameDetails::of);
+	}
+
+	private GameDetails createQuickGame() {
+		return GameDetails.of(gameRepository.save(new PersistentGame(4)));
+	}
+
 
 	@Override
 	public GameDetails createGame(String player, NewGameRequest gameRequest) {

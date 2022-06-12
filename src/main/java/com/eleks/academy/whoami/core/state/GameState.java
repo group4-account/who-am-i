@@ -32,6 +32,8 @@ public sealed interface GameState permits AbstractGameState {
 	 */
 	int getPlayersInGame();
 
+	SynchronousPlayer add(SynchronousPlayer player);
+
 	/**
 	 * Used for presentation purposes only
 	 *

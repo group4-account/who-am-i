@@ -112,8 +112,8 @@ class GameApiTest {
 		try (InputStream in = getClass().getResourceAsStream("/models/game/get-game-by-id-response.json")) {
 			String expectedResponse = new String(in.readAllBytes());
 			wireMockServer
-					.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/games/1234-Uid")).withHeader("X-Player",
-							equalTo("Example"))
+					.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/games/1234-Uid"))
+							.withHeader("X-Player", equalTo("Example"))
 					.willReturn(WireMock.aResponse().withBody(expectedResponse).withStatus(HttpStatus.OK.value())
 							.withHeader("Content-Type", "application/json")));
 
@@ -134,7 +134,7 @@ class GameApiTest {
 			gameDetails.currentTurn("1");
 			gameDetails.players(singletonList(playerWithState));
 
-			assertThat(gameApi.findById("1234-Uid", "Example"))
+			assertThat(gameApi.findById("Example", "1234-Uid"))
 				.isEqualTo(gameDetails);
 		}
 	}
@@ -145,7 +145,7 @@ class GameApiTest {
 			String expectedResponse = new String(in1.readAllBytes());
 			
 			wireMockServer
-					.stubFor(WireMock.post(WireMock.urlMatching("/api/v1/games/1234-Uid/"))
+					.stubFor(WireMock.post(WireMock.urlMatching("/api/v1/games/1234-Uid"))
 							.withHeader("X-Player", equalTo("Example"))
 					.willReturn(WireMock.aResponse().withBody(expectedResponse)
 							.withStatus(HttpStatus.OK.value())
@@ -168,7 +168,7 @@ class GameApiTest {
 			gameDetails.currentTurn("1");
 			gameDetails.players(singletonList(playerWithState));
 			
-			assertThat(gameApi.startGame("1234-Uid", "Example")).isEqualTo(gameDetails);
+			assertThat(gameApi.startGame("Example", "1234-Uid")).isEqualTo(gameDetails);
 		}
 	}
 	
@@ -190,7 +190,7 @@ class GameApiTest {
 			synchronousPlayer.name("Example");
 			synchronousPlayer.character("Batman");
 			
-			assertThat(gameApi.enrollToGame("1234-Uid", "Example")).isEqualTo(synchronousPlayer);
+			assertThat(gameApi.enrollToGame("Example", "1234-Uid")).isEqualTo(synchronousPlayer);
 		}
 	}
 	
@@ -210,7 +210,7 @@ class GameApiTest {
 			CharacterSuggestion characterSuggestion = new CharacterSuggestion();
 			characterSuggestion.character("Batman");
 			
-			gameApi.suggestCharacter(characterSuggestion, "1234-Uid", "Example");
+			gameApi.suggestCharacter(characterSuggestion, "Example", "1234-Uid");
 		}
 	}
 	
@@ -219,8 +219,8 @@ class GameApiTest {
 		try (InputStream in = getClass().getResourceAsStream("/models/game/get-current-turn-response.json")) {
 			String expectedResponse = new String(in.readAllBytes());
 			wireMockServer
-					.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/games/1234-Uid/turn")).withHeader("X-Player",
-							equalTo("Example"))
+					.stubFor(WireMock.get(WireMock.urlMatching("/api/v1/games/1234-Uid/turn"))
+							.withHeader("X-Player", equalTo("Example"))
 					.willReturn(WireMock.aResponse().withBody(expectedResponse).withStatus(HttpStatus.OK.value())
 							.withHeader("Content-Type", "application/json")));
 
@@ -239,7 +239,7 @@ class GameApiTest {
 			turnDetails.players(singletonList(playerWithState));
 			turnDetails.currentPlayer(synchronousPlayer);
 
-			assertThat(gameApi.findTurnInfo("1234-Uid", "Example"))
+			assertThat(gameApi.findTurnInfo("Example", "1234-Uid"))
 				.isEqualTo(turnDetails);
 		}
 	}
@@ -260,7 +260,7 @@ class GameApiTest {
 			Message message = new Message();
 			message.message("Question");
 			
-			gameApi.askQuestion(message, "1234-Uid", "Example");
+			gameApi.askQuestion(message, "Example", "1234-Uid");
 		}
 	}
 	
@@ -280,7 +280,8 @@ class GameApiTest {
 			Message message = new Message();
 			message.message("Question");
 			
-			gameApi.submitGuess(message, "1234-Uid", "Example");
+			gameApi.submitGuess(message, "Example", "1234-Uid");
+
 		}
 	}
 	
@@ -300,7 +301,7 @@ class GameApiTest {
 			Message message = new Message();
 			message.message("Question");
 			
-			gameApi.answerQuestion(message, "1234-Uid", "Example");
+			gameApi.answerQuestion(message, "Example", "1234-Uid");
 		}
 	}
 	
