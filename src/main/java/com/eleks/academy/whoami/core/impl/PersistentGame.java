@@ -49,13 +49,15 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public SynchronousPlayer enrollToGame(String player) {
-        return Objects.requireNonNull(this.turns.peek()).enrollToGame(player);
+        throw new UnsupportedOperationException();
     }
 
     @Override
     public String getTurn() {
         return this.applyIfPresent(this.turns.peek(), GameState::getCurrentTurn);
     }
+
+
 
     @Override
     public void askQuestion(String player, String message) {
@@ -95,12 +97,12 @@ public class PersistentGame implements Game, SynchronousGame {
 
 
     @Override
-    public void makeTurn(String player) {
+    public void makeTurn(Answer answer) {
         this.turnLock.lock();
 
         try {
             Optional.ofNullable(this.turns.poll())
-                    .map(gameState -> gameState.makeTurn(player))
+                    .map(gameState -> gameState.makeTurn(answer))
                     .ifPresent(this.turns::add);
         } finally {
             this.turnLock.unlock();

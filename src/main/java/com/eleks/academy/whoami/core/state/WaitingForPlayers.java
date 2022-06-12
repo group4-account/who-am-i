@@ -2,6 +2,7 @@ package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
+import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerState;
@@ -54,12 +55,12 @@ public final class WaitingForPlayers extends AbstractGameState {
 	}
 
 	@Override
-	public GameState makeTurn(String player) {
+	public GameState makeTurn(Answer answer) {
 		Map<String, PersistentPlayer> nextPlayers = new HashMap<>(this.players);
-		if (nextPlayers.containsKey(player) || maxPlayers == this.getPlayersInGame()) {
+		if (nextPlayers.containsKey(answer.getPlayer()) || maxPlayers == this.getPlayersInGame()) {
 			throw new GameException("Cannot enroll to the game");
 		} else {
-			nextPlayers.put(player, new PersistentPlayer(player));
+			nextPlayers.put(answer.getPlayer(), new PersistentPlayer(answer.getPlayer()));
 		}
 		if (nextPlayers.size() == getMaxPlayers()) {
 			return new SuggestingCharacters(nextPlayers);

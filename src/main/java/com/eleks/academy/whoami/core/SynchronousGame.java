@@ -22,7 +22,7 @@ public interface SynchronousGame {
 	boolean isAvailable();
 
 	String getTurn();
-	void makeTurn(String player);
+	void makeTurn(Answer player);
 
 	void askQuestion(String player, String message);
 

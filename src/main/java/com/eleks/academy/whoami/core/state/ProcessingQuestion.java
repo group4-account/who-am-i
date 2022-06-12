@@ -2,6 +2,7 @@ package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
+import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerState;
@@ -60,7 +61,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 
     @Override
-    public GameState makeTurn(String player) {
+    public GameState makeTurn(Answer answer) {
         PersistentPlayer currentPlayer = players.get(this.currentPlayer);
         String question = null;
         try {

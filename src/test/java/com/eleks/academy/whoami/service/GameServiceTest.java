@@ -5,6 +5,7 @@ import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
+import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 import com.eleks.academy.whoami.repository.GameRepository;
 import com.eleks.academy.whoami.repository.impl.GameInMemoryRepository;
@@ -56,18 +57,23 @@ class GameServiceTest {
 
     @Test
     @SneakyThrows
-    void suggestCharacterAndSetPlayerNames() {
+    void testSetStateInSuggestCharacters() {
         final String player = "Anton";
-        final String previousName = "Player-1";
+        final PlayerState previousState = PlayerState.NOT_READY;
+        final PlayerState updateState = PlayerState.READY;
         CharacterSuggestion character = new CharacterSuggestion("char");
-        gameService.enrollToGame(gameId, previousName);
-        Optional<SynchronousPlayer> synchronousPlayer = this.gameRepository.findById(gameId)
-                .flatMap(game -> game.findPlayer(previousName));
-        String playerName = synchronousPlayer.get().getName();
-        assertEquals(previousName, playerName);
+        gameService.enrollToGame(gameId, player);
+        gameService.enrollToGame(gameId, player+"1");
+        gameService.enrollToGame(gameId, player+"2");
+        PlayerState playerState = this.gameRepository.findById(gameId)
+                .filter(game -> game.findPlayer(player).isPresent())
+                .map(GameDetails::of).get().getPlayers().get(0).getState();
+        assertEquals(playerState, previousState);
         gameService.suggestCharacter(gameId, player, character);
-        playerName = synchronousPlayer.get().getName();
-        assertEquals(player, playerName);
+        playerState = this.gameRepository.findById(gameId)
+                .filter(game -> game.findPlayer(player).isPresent())
+                .map(GameDetails::of).get().getPlayers().get(1).getState();
+        assertEquals(updateState, playerState);
 
     }
 

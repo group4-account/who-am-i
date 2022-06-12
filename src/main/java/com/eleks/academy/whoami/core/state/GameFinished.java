@@ -1,6 +1,7 @@
 package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
@@ -30,7 +31,7 @@ public final class GameFinished extends AbstractGameState {
 	}
 
 	@Override
-	public GameState makeTurn(String player) {
+	public GameState makeTurn(Answer player) {
 		return null;
 	}
 }

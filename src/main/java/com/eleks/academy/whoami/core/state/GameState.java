@@ -2,6 +2,7 @@ package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
+import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
@@ -48,5 +49,5 @@ public sealed interface GameState permits AbstractGameState {
     	throw new GameException("Cannot enroll to game");
 	}
 
-    GameState makeTurn(String player);
+    GameState makeTurn(Answer player);
 }
