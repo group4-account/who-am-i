@@ -35,10 +35,4 @@ public final class WaitingForPlayers extends AbstractGameState {
 		return this.players.size();
 	}
 
-	@Override
-	public SynchronousPlayer add(SynchronousPlayer player) {
-		players.put(player.getName(), player);
-		return player;
-	}
-
 }
