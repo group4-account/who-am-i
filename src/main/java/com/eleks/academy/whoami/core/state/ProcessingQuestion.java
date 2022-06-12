@@ -38,4 +38,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return this.currentPlayer;
 	}
 
+	@Override
+	public SynchronousPlayer add(SynchronousPlayer player) {
+		return player;
+	}
+
 }

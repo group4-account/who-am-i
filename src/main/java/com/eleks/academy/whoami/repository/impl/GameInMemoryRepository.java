@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @Repository
@@ -25,6 +26,18 @@ public class GameInMemoryRepository implements GameRepository {
 		return this.games.values()
 				.stream()
 				.filter(freeToJoin.or(playersGame));
+	}
+
+	@Override
+	public Map<String, SynchronousGame> findAvailableQuickGames() {
+		return filterByValue(games, availableStatus -> availableStatus.isAvailable() == true);
+	}
+
+	private static <K, V> Map<K, V> filterByValue(Map<K, V> map, Predicate<V> predicate) {
+		return map.entrySet()
+				.stream()
+				.filter(entry -> predicate.test(entry.getValue()))
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 	}
 
 	@Override
