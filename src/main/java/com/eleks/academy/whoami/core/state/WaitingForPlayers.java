@@ -56,13 +56,13 @@ public final class WaitingForPlayers extends AbstractGameState {
 	@Override
 	public GameState makeTurn(String player) {
 		Map<String, PersistentPlayer> nextPlayers = new HashMap<>(this.players);
-		if (nextPlayers.containsKey(player) || maxPlayers >= this.getPlayersInGame()) {
+		if (nextPlayers.containsKey(player) || maxPlayers == this.getPlayersInGame()) {
 			throw new GameException("Cannot enroll to the game");
 		} else {
 			nextPlayers.put(player, new PersistentPlayer(player));
 		}
-		if (players.size() == getMaxPlayers()) {
-			return new SuggestingCharacters(players);
+		if (nextPlayers.size() == getMaxPlayers()) {
+			return new SuggestingCharacters(nextPlayers);
 		} else {
 			return new WaitingForPlayers(getMaxPlayers(), nextPlayers);
 		}

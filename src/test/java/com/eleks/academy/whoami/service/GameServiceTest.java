@@ -5,6 +5,7 @@ import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
+import com.eleks.academy.whoami.model.response.PlayerWithState;
 import com.eleks.academy.whoami.repository.GameRepository;
 import com.eleks.academy.whoami.repository.impl.GameInMemoryRepository;
 import com.eleks.academy.whoami.service.impl.GameServiceImpl;
@@ -40,11 +41,14 @@ class GameServiceTest {
 
     @Test
     public void enrollToGame() {
-        String player = "Anton";
+        String player = "Anton1";
         gameService.enrollToGame(gameId, player);
         assertNotNull(gameService.findByIdAndPlayer(gameId, player));
         Optional<GameDetails> byIdAndPlayer = gameService.findByIdAndPlayer(gameId, player);
         assertThat(byIdAndPlayer).isNotEmpty();
+        Optional<SynchronousPlayer> synchronousPlayer =
+                byIdAndPlayer.map(GameDetails::getPlayers).map(a -> a.get(0)).map(PlayerWithState::getPlayer);
+        assertEquals(synchronousPlayer.get().getName(), player);
         assertNotNull(byIdAndPlayer.map(GameDetails::getId));
         assertNotNull(byIdAndPlayer.map(GameDetails::getStatus));
         assertNotNull(byIdAndPlayer.map(GameDetails::getPlayers));

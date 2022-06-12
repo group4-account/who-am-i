@@ -52,7 +52,7 @@ public class GameController {
 	@PostMapping("/{id}/players")
 	public SynchronousPlayer enrollToGame(@PathVariable("id") String id,
 										  @RequestHeader(PLAYER) String player) {
-		return this.gameService.enrollToGame(id, player);
+		return this.gameService.enrollToGame(id, player).orElseThrow(() -> new GameException("No player"));
 
 	}
 
