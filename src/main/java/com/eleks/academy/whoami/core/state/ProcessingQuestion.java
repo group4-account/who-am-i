@@ -2,7 +2,9 @@ package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
+import com.eleks.academy.whoami.model.response.PlayerWithState;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,5 +39,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public String getCurrentTurn() {
 		return this.currentPlayer;
 	}
+    @Override
+    public List<PlayerWithState> getPlayers() {
+        return null;
+    }
 
 }

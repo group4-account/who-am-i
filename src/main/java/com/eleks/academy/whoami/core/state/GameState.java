@@ -1,7 +1,9 @@
 package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.model.response.PlayerWithState;
 
+import java.util.List;
 import java.util.Optional;
 
 public sealed interface GameState permits AbstractGameState {
@@ -38,5 +40,7 @@ public sealed interface GameState permits AbstractGameState {
 	 * @return the maximum allowed count of the players
 	 */
 	int getMaxPlayers();
+
+	List<PlayerWithState> getPlayers();
 
 }

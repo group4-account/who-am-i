@@ -35,6 +35,8 @@ public class PersistentGame implements Game, SynchronousGame {
 				Instant.now().toEpochMilli(),
 				Double.valueOf(Math.random() * 999).intValue());
 
+				this.enrollToGame(hostPlayer);
+
 	}
 
 	@Override
@@ -49,8 +51,12 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	@Override
 	public SynchronousPlayer enrollToGame(String player) {
-		// TODO: Add player to players list
-		return new PersistentPlayer(player);
+		if (turns.isEmpty()){
+			turns.add(new WaitingForPlayers(4));
+		}
+		var turn = turns.peek();
+		var toReturn = ((WaitingForPlayers)turn).AddPlayer(player);
+		return toReturn;
 	}
 
 	@Override
@@ -85,8 +91,11 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	@Override
 	public List<PlayerWithState> getPlayersInGame() {
-		// TODO: Implement
-		return null;
+		var lastTurn = turns.peek();
+		if (lastTurn instanceof WaitingForPlayers){
+			return lastTurn.getPlayers();
+		}
+		return null;//turns.peek();
 	}
 
 	@Override

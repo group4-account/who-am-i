@@ -3,6 +3,7 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.GameCharacter;
+import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -148,5 +149,10 @@ public final class SuggestingCharacters extends AbstractGameState {
 					.orElseGet(() -> list.get(0));
 		};
 	}
+    @Override
+    public List<PlayerWithState> getPlayers() {
+        // TODO Auto-generated method stub
+        return null;
+    }
 
 }
