@@ -1,93 +1,61 @@
 package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
-import com.eleks.academy.whoami.core.exception.GameException;
-import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
-import java.util.*;
-
-import static com.eleks.academy.whoami.model.response.PlayerState.*;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 public final class WaitingForPlayers extends AbstractGameState {
 
-    private final Map<String, PlayerWithState> players;
-    private int maxPlayers;
+	private final Map<String, PlayerWithState> players;
 
-    public WaitingForPlayers(int maxPlayers) {
-        super(0, maxPlayers);
-        this.maxPlayers = maxPlayers;
-        this.players = new HashMap<>(maxPlayers);
-    }
+	public WaitingForPlayers(int maxPlayers) {
+		super(0, maxPlayers);
+		this.players = new HashMap<>(maxPlayers);
+	}
 
+	private WaitingForPlayers(int maxPlayers, Map<String, PlayerWithState> players) {
+		super(players.size(), maxPlayers);
+		this.players = players;
+	}
 
-    private WaitingForPlayers(int maxPlayers, Map<String, PlayerWithState> players) {
-        super(players.size(), maxPlayers);
-        this.players = players;
-    }
-
-    @Override
-    public GameState next() {
-        return new SuggestingCharacters(this.players);
-    }
-
-    @Override
-    public Optional<SynchronousPlayer> findPlayer(String player) {
-        return Optional.ofNullable(this.players.get(player))
-                .map(PlayerWithState::getPlayer);
-    }
-
-    @Override
-    public int getPlayersInGame() {
-        return this.players.size();
-    }
-
-    @Override
-    public SynchronousPlayer enrollToGame(String player) {
-        throw new UnsupportedOperationException();
-    }
-
-    @Override
-    public GameState makeTurn(Answer answer) {
-        Map<String, PlayerWithState> nextPlayers = new HashMap<>(this.players);
-        if (nextPlayers.containsKey(answer.getPlayer()) || maxPlayers == this.getPlayersInGame()) {
-            throw new GameException("Cannot enroll to the game");
-        } else {
-            PersistentPlayer persistentPlayer = new PersistentPlayer(answer.getPlayer());
-            nextPlayers.put(answer.getPlayer(),
-                    new PlayerWithState(persistentPlayer, null, NOT_READY));
-        }
-        if (nextPlayers.size() == getMaxPlayers()) {
-            return new SuggestingCharacters(nextPlayers);
-        } else {
-            return new WaitingForPlayers(getMaxPlayers(), nextPlayers);
-        }
-    }
-
-    @Override
-    public GameState leaveGame(String player) {
-        Map<String, PlayerWithState> players = new HashMap<>(this.players);
-        if (findPlayer(player).isPresent()) {
-            players.remove(player);
-        }
-        if (players.size() == getMaxPlayers()) {
-            return new SuggestingCharacters(players);
-        } else {
-            return new WaitingForPlayers(getMaxPlayers(), players);
-        }
-    }
-
-    @Override
-    public List<PlayerWithState> getPlayersWithState() {
-        return players.values().stream().toList();
+	@Override
+	public GameState next() {
+		var synchronousPlayers = this.players
+			.entrySet()
+        	.stream()
+        	.collect(Collectors.toMap(
+        		Map.Entry::getKey, 
+        		e -> e.getValue().getPlayer()));
+ 
+		return new SuggestingCharacters (synchronousPlayers);
+	}
+    public SynchronousPlayer AddPlayer(String playerName){
+        var player = new PlayerWithState(new PersistentPlayer(playerName),null,PlayerState.READY);
+        this.players.put(playerName, player);
+        return player.getPlayer();
     }
 
 	@Override
-	public SynchronousPlayer add(SynchronousPlayer player) {
-		players.put(player.getName(), player);
-		return player;
+	public Optional<SynchronousPlayer> findPlayer(String player) {
+		return Optional.ofNullable(this.players.get(player))
+			.map(p -> p.getPlayer());
+	}
+
+	@Override
+	public int getPlayersInGame() {
+		return this.players.size();
+	}
+
+	@Override
+	public List<PlayerWithState> getPlayers() {
+		return players.values().stream().collect(Collectors.toList());
 	}
 
 }

@@ -2,13 +2,9 @@ package com.eleks.academy.whoami.service.impl;
 
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
-import com.eleks.academy.whoami.core.exception.GameException;
-import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
-import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
-import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.PlayerState;
@@ -20,12 +16,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
+
 	private final GameRepository gameRepository;
 
 	@Override
@@ -36,42 +33,6 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public Optional<GameDetails> findAvailableQuickGame(String player) {
-		Map<String, SynchronousGame> games = this.gameRepository.findAvailableQuickGames();
-
-		if (games.isEmpty()) {
-			GameDetails game = createQuickGame();
-			enrollToGame(game.getId(), player);
-			return gameRepository.findById(game.getId()).map(GameDetails::of);
-		}
-
-		String firstGame = games.keySet().stream().findFirst().get();
-		Optional<SynchronousPlayer> enrolledPlayer = enrollToGame(games.get(firstGame).getId(), player);
-		String gameFromRepository = games.get(firstGame).getId();
-		return gameRepository.findById(gameFromRepository).map(GameDetails::of);
-	}
-
-	@Override
-	public int getAllPlayersCount() {
-		return this.gameRepository.getAllPlayersCount();
-	}
-
-	@Override
-	public int getReadyPlayersCount(String id, String player) {
-		return this.gameRepository.findById(id)
-				.map(currentGame -> (int) currentGame.getPlayersInGame()
-						.stream()
-						.filter(p -> p.getState().equals(PlayerState.READY))
-						.count())
-				.orElse(0);
-	}
-
-	private GameDetails createQuickGame() {
-		int playersSize = 4;
-		return GameDetails.of(gameRepository.save(new PersistentGame(playersSize)));
-	}
-
-	@Override
 	public GameDetails createGame(String player, NewGameRequest gameRequest) {
 		final var game = this.gameRepository.save(new PersistentGame(player, gameRequest.getMaxPlayers()));
 
@@ -79,17 +40,13 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public Optional<SynchronousPlayer> enrollToGame(String id, String player) {
-		this.gameRepository.findById(id)
-				.filter(SynchronousGame::isAvailable)
-				.ifPresentOrElse(
-						game -> game.makeTurn(new Answer(player)),
-						() -> {
-							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
-						}
-				);
+	public SynchronousPlayer enrollToGame(String id, String player) {
 		return this.gameRepository.findById(id)
-				.map(game -> game.findPlayer(player).orElseThrow());
+				.filter(SynchronousGame::isAvailable)
+				.map(game -> game.enrollToGame(player))
+				.orElseThrow(
+						() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot enroll to a game")
+				);
 	}
 
 	@Override
@@ -102,13 +59,8 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void suggestCharacter(String id, String player, CharacterSuggestion suggestion) {
 		this.gameRepository.findById(id)
-				.ifPresentOrElse(
-						game -> game.makeTurn(new Answer(player, suggestion.getCharacter(), suggestion.getName())),
-						() -> {
-							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
-						}
-				);
-
+				.flatMap(game -> game.findPlayer(player))
+				.ifPresent(p -> p.setCharacter(suggestion.getCharacter()));
 	}
 
 	@Override
@@ -126,48 +78,38 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public Optional<TurnDetails> findTurnInfo(String id, String player) {
-
-		final var currentGame = gameRepository.findById(id);
-		var answers = currentGame
-				.flatMap(SynchronousGame::getCurrentTurnInfo);
-
-		var currentPlayer = answers
-				.flatMap(answer -> answer.findPlayer(player))
-				.orElseThrow(() -> new NoSuchElementException("Player has not answered"));
-
-		return answers
-				.map(gamestate -> new TurnDetails(
-						currentPlayer,
-						answers.map(GameState::getPlayersWithState)
-								.orElse(new ArrayList<>())));
+		return Optional.empty();
 	}
 
 	@Override
-	public void submitGuess(String id, String player, QuestionAnswer guess) {
+	public void submitGuess(String id, String player, String guess) {
 
 	}
 
 	@Override
-	public void answerQuestion(String gameId, String player, String answer) {
-		this.gameRepository.findById(gameId)
-				.ifPresent(game -> game.answerQuestion(player, answer));
+	public void answerQuestion(String id, String player, String answer) {
+
 	}
-
 	@Override
-	public void leaveGame(String gameId, String playerId)
-	{
-		SynchronousGame game = this.gameRepository.findById(gameId)
-				.orElseThrow(
-						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
-		var gamePlayers = game.getPlayersInGame();
-		gamePlayers.stream()
-				.filter(playerWithState -> playerWithState.getPlayer().equals(playerId))
-				.collect(Collectors.toList())
-				.forEach(gamePlayers::remove);
-		game.removeFromGame(gameId, playerId);
-		if (game.getPlayersInGame().size() == 0){
-			this.gameRepository.remove(game);
-		}
+	public int getPlayersCount(String id, String player) {
+		 var currentGame =this.gameRepository.findById(id);
+		 if (currentGame != null){
+			 return currentGame.get().getPlayersInGame().size();
+		 }
 
+		 return 0;
+	}
+	@Override
+	public int getReadyPlayersCount(String id, String player) {
+		 var currentGame =this.gameRepository.findById(id);
+		 if (currentGame != null){
+			 return (int) currentGame.get()
+			 	.getPlayersInGame()
+			 	.stream()
+				.filter(p -> p.getState() == PlayerState.READY)
+				.count();
+		 }
+
+		 return 0;
 	}
 }
