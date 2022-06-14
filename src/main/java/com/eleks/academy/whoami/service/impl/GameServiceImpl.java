@@ -109,7 +109,7 @@ public class GameServiceImpl implements GameService {
 	}
 	@Override
 	public int getPlayersCount(String id, String player) {
-		 var currentGame =this.gameRepository.findById(id);
+		 var currentGame = this.gameRepository.findById(id);
 		 if (currentGame != null){
 			 return currentGame.get().getPlayersInGame().size();
 		 }
@@ -118,7 +118,7 @@ public class GameServiceImpl implements GameService {
 	}
 	@Override
 	public int getReadyPlayersCount(String id, String player) {
-		 var currentGame =this.gameRepository.findById(id);
+		 var currentGame = this.gameRepository.findById(id);
 		 if (currentGame != null){
 			 return (int) currentGame.get()
 			 	.getPlayersInGame()
