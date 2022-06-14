@@ -16,7 +16,7 @@ public interface GameService {
 
 	GameDetails createGame(String player, NewGameRequest gameRequest);
 
-	SynchronousPlayer enrollToGame(String id, String player);
+	Optional<SynchronousPlayer> enrollToGame(String id, String player);
 
 	Optional<GameDetails> findByIdAndPlayer(String id, String player);
 

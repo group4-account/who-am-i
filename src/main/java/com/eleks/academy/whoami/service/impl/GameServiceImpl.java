@@ -2,11 +2,13 @@ package com.eleks.academy.whoami.service.impl;
 
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
+import com.eleks.academy.whoami.model.response.PlayerWithState;
 import com.eleks.academy.whoami.model.response.TurnDetails;
 import com.eleks.academy.whoami.repository.GameRepository;
 import com.eleks.academy.whoami.service.GameService;
@@ -17,6 +19,7 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -39,13 +42,17 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public SynchronousPlayer enrollToGame(String id, String player) {
-		return this.gameRepository.findById(id)
+	public Optional<SynchronousPlayer> enrollToGame(String id, String player) {
+		this.gameRepository.findById(id)
 				.filter(SynchronousGame::isAvailable)
-				.map(game -> game.enrollToGame(player))
-				.orElseThrow(
-						() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "Cannot enroll to a game")
+				.ifPresentOrElse(
+						game -> game.makeTurn(new Answer(player)),
+						() -> {
+							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
+						}
 				);
+		return this.gameRepository.findById(id)
+				.map(game -> game.findPlayer(player).orElseThrow());
 	}
 
 	@Override
@@ -58,8 +65,18 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void suggestCharacter(String id, String player, CharacterSuggestion suggestion) {
 		this.gameRepository.findById(id)
+				.ifPresentOrElse(
+						game -> game.makeTurn(new Answer(player)),
+						() -> {
+							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
+						}
+				);
+		this.gameRepository.findById(id)
 				.flatMap(game -> game.findPlayer(player))
 				.ifPresent(p -> p.setCharacter(suggestion.getCharacter()));
+		this.gameRepository.findById(id)
+				.flatMap(game -> game.findPlayer(player))
+				.ifPresent(p -> p.setName(player));
 	}
 
 	@Override
