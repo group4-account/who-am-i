@@ -9,6 +9,7 @@ import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class WaitingForPlayers extends AbstractGameState {
 
@@ -20,32 +21,25 @@ public final class WaitingForPlayers extends AbstractGameState {
 		this.players = new HashMap<>(maxPlayers);
 	}
 
-	private WaitingForPlayers(int maxPlayers, Map<String, PlayerWithState> players) {
+	private WaitingForPlayers(int maxPlayers, Map<String, PersistentPlayer> players) {
 		super(players.size(), maxPlayers);
 		this.players = players;
 	}
 
 	@Override
 	public GameState next() {
-		var synchronousPlayers = this.players
-			.entrySet()
-        	.stream()
-        	.collect(Collectors.toMap(
-        		Map.Entry::getKey, 
-        		e -> e.getValue().getPlayer()));
- 
-		return new SuggestingCharacters (synchronousPlayers);
+
+		return new SuggestingCharacters (players);
 	}
     public SynchronousPlayer AddPlayer(String playerName){
-        var player = new PlayerWithState(new PersistentPlayer(playerName),null,PlayerState.READY);
+        var player = new PersistentPlayer(playerName);
         this.players.put(playerName, player);
-        return player.getPlayer();
+        return player;
     }
 
 	@Override
 	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return Optional.ofNullable(this.players.get(player))
-			.map(p -> p.getPlayer());
+		return Optional.ofNullable(this.players.get(player));
 	}
 
 	@Override
@@ -55,7 +49,12 @@ public final class WaitingForPlayers extends AbstractGameState {
 
 	@Override
 	public List<PlayerWithState> getPlayers() {
-		return players.values().stream().collect(Collectors.toList());
+		return players.values().stream().map(player -> PlayerWithState.builder()
+				.state(PlayerState.NOT_READY)
+				.player(player)
+				.build())
+				.collect(Collectors.toList());
+	}
 	public SynchronousPlayer enrollToGame(String player) {
 		PersistentPlayer synchronousPlayer = null;
 
