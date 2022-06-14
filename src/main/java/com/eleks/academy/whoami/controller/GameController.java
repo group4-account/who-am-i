@@ -1,6 +1,7 @@
 package com.eleks.academy.whoami.controller;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.Message;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
@@ -15,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Predicate;
 
 import static com.eleks.academy.whoami.utils.StringUtils.Headers.PLAYER;
 
@@ -49,7 +52,8 @@ public class GameController {
 	@PostMapping("/{id}/players")
 	public SynchronousPlayer enrollToGame(@PathVariable("id") String id,
 										  @RequestHeader(PLAYER) String player) {
-		return this.gameService.enrollToGame(id, player);
+		return this.gameService.enrollToGame(id, player).orElseThrow(() -> new GameException("No player"));
+
 	}
 
 	@GetMapping("/{id}/playersCount")
@@ -69,6 +73,9 @@ public class GameController {
 	public void suggestCharacter(@PathVariable("id") String id,
 								 @RequestHeader(PLAYER) String player,
 								 @Valid @RequestBody CharacterSuggestion suggestion) {
+        Optional.of(player)
+                .filter(string -> string.matches(".{2,50}"))
+				.orElseThrow(() -> new GameException("Player name must be between 2 and 50 characters"));
 		this.gameService.suggestCharacter(id, player, suggestion);
 	}
 

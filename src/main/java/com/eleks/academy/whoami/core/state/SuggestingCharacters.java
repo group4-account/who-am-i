@@ -2,8 +2,13 @@ package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
+import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.GameCharacter;
+import com.eleks.academy.whoami.core.impl.PersistentPlayer;
+import com.eleks.academy.whoami.core.impl.StartGameAnswer;
+import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
+import jdk.jfr.Percentage;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -18,16 +23,22 @@ public final class SuggestingCharacters extends AbstractGameState {
 
 	private final Lock lock = new ReentrantLock();
 
-	private final Map<String, SynchronousPlayer> players;
+	private final Map<String, PersistentPlayer> players;
 	private final Map<String, List<GameCharacter>> suggestedCharacters;
 	private final Map<String, String> playerCharacterMap;
+	private List<PlayerWithState> playerWithStateList;
 
-	public SuggestingCharacters(Map<String, SynchronousPlayer> players) {
+	public SuggestingCharacters(Map<String, PersistentPlayer> players) {
 		super(players.size(), players.size());
 
 		this.players = players;
 		this.suggestedCharacters = new HashMap<>(this.players.size());
 		this.playerCharacterMap = new HashMap<>(this.players.size());
+		this.playerWithStateList = new ArrayList<>();
+		this.players.values().forEach(player -> playerWithStateList.add(PlayerWithState.builder()
+				.state(PlayerState.NOT_READY)
+				.player(player)
+				.build()));
 	}
 
 	/**
@@ -41,7 +52,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 		return Optional.of(this)
 				.filter(SuggestingCharacters::finished)
 				.map(SuggestingCharacters::assignCharacters)
-				.map(then -> new ProcessingQuestion(this.players))
+				.map(then -> new ProcessingQuestion(players.get(0).getName(), this.players))
 				.orElseThrow(() -> new GameException("Cannot start game"));
 	}
 
@@ -49,6 +60,14 @@ public final class SuggestingCharacters extends AbstractGameState {
 	public Optional<SynchronousPlayer> findPlayer(String player) {
 		return Optional.ofNullable(this.players.get(player));
 	}
+
+	@Override
+	public List<PlayerWithState> getPlayersWithState() {
+		return  playerWithStateList;
+
+	}
+
+
 
 	// TODO: Consider extracting into {@link GameState}
 	private Boolean finished() {
@@ -76,6 +95,25 @@ public final class SuggestingCharacters extends AbstractGameState {
 		characters.add(GameCharacter.of(character, player));
 
 		return this;
+	}
+
+	@Override
+	public GameState makeTurn(Answer answer) {
+		this.lock.lock();
+		try {
+			for (int i = 0; i < playerWithStateList.size(); i++) {
+				if (playerWithStateList.get(i).getPlayer().equals(this.findPlayer(answer.getPlayer()).get())) {
+					playerWithStateList.get(i).setState(PlayerState.READY);
+				}
+			}
+			return Optional.of(answer)
+					.filter(StartGameAnswer.class::isInstance)
+					.map(StartGameAnswer.class::cast)
+					.map(then -> this.next())
+					.orElseGet(() -> this.suggestCharacter(answer.getPlayer(), answer.getMessage()));
+		} finally {
+			this.lock.unlock();
+		}
 	}
 
 	/**
@@ -138,7 +176,6 @@ public final class SuggestingCharacters extends AbstractGameState {
 			return gameCharacters.get(randomPos);
 		};
 	}
-
 	private <T> BiFunction<List<T>, T, T> cyclicNext() {
 		return (list, item) -> {
 			final var index = list.indexOf(item);
