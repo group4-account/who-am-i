@@ -9,9 +9,7 @@ import com.eleks.academy.whoami.core.state.WaitingForPlayers;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.Queue;
+import java.util.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -19,35 +17,35 @@ import java.util.function.Function;
 
 public class PersistentGame implements Game, SynchronousGame {
 
-	private final Lock turnLock = new ReentrantLock();
-	private final String id;
+    private final Lock turnLock = new ReentrantLock();
+    private final String id;
+    private List<PlayerWithState> playerWithStateList = new ArrayList<>();
+    private Map<String, PersistentPlayer> players;
+    private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 
-	private final Queue<GameState> turns = new LinkedBlockingQueue<>();
+    /**
+     * Creates a new game (game room) and makes a first enrolment turn by a current player
+     * so that he won't have to enroll to the game he created
+     *
+     * @param hostPlayer player to initiate a new game
+     */
+    public PersistentGame(String hostPlayer, Integer maxPlayers) {
+        this.id = String.format("%d-%d",
+                Instant.now().toEpochMilli(),
+                Double.valueOf(Math.random() * 999).intValue());
+        this.turns.add(new WaitingForPlayers(maxPlayers));
+        this.enrollToGame(hostPlayer);
+    }
 
-	/**
-	 * Creates a new game (game room) and makes a first enrolment turn by a current player
-	 * so that he won't have to enroll to the game he created
-	 *
-	 * @param hostPlayer player to initiate a new game
-	 */
-	public PersistentGame(String hostPlayer, Integer maxPlayers) {
-		this.id = String.format("%d-%d",
-				Instant.now().toEpochMilli(),
-				Double.valueOf(Math.random() * 999).intValue());
+    @Override
+    public Optional<SynchronousPlayer> findPlayer(String player) {
+        return this.applyIfPresent(this.turns.peek(), gameState -> gameState.findPlayer(player));
+    }
 
-				this.enrollToGame(hostPlayer);
-
-	}
-
-	@Override
-	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return this.applyIfPresent(this.turns.peek(), gameState -> gameState.findPlayer(player));
-	}
-
-	@Override
-	public String getId() {
-		return this.id;
-	}
+    @Override
+    public String getId() {
+        return this.id;
+    }
 
 	@Override
 	public SynchronousPlayer enrollToGame(String player) {
@@ -98,41 +96,47 @@ public class PersistentGame implements Game, SynchronousGame {
 		return null;//turns.peek();
 	}
 
-	@Override
-	public boolean isFinished() {
-		return this.turns.isEmpty();
-	}
+    @Override
+    public boolean isFinished() {
+        return this.turns.isEmpty();
+    }
 
 
-	@Override
-	public boolean makeTurn() {
-		return true;
-	}
+    @Override
+    public void makeTurn(Answer answer) {
+        this.turnLock.lock();
 
-	@Override
-	public void changeTurn() {
+        try {
+            Optional.ofNullable(this.turns.poll())
+                    .map(gameState -> gameState.makeTurn(answer))
+                    .ifPresent(this.turns::add);
+        } finally {
+            this.turnLock.unlock();
+        }
+    }
 
-	}
+    @Override
+    public void changeTurn() {
 
-	@Override
-	public void initGame() {
+    }
 
-	}
+    @Override
+    public void initGame() {
 
-	@Override
-	public void play() {
-		while (!(this.turns.peek() instanceof GameFinished)) {
-			this.makeTurn();
-		}
-	}
+    }
 
-	private <T, R> R applyIfPresent(T source, Function<T, R> mapper) {
-		return this.applyIfPresent(source, mapper, null);
-	}
+    @Override
+    public void play() {
 
-	private <T, R> R applyIfPresent(T source, Function<T, R> mapper, R fallback) {
-		return Optional.ofNullable(source)
-				.map(mapper)
-				.orElse(fallback);
-	}
+    }
+
+    private <T, R> R applyIfPresent(T source, Function<T, R> mapper) {
+        return this.applyIfPresent(source, mapper, null);
+    }
+
+    private <T, R> R applyIfPresent(T source, Function<T, R> mapper, R fallback) {
+        return Optional.ofNullable(source)
+                .map(mapper)
+                .orElse(fallback);
+    }
 }
