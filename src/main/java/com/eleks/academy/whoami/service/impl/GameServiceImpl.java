@@ -109,24 +109,19 @@ public class GameServiceImpl implements GameService {
 	}
 	@Override
 	public int getPlayersCount(String id, String player) {
-		 var currentGame = this.gameRepository.findById(id);
-		 if (currentGame != null){
-			 return currentGame.get().getPlayersInGame().size();
-		 }
+			 return this.gameRepository.findById(id)
+					 .map(item -> item.getPlayersInGame().size())
+					 .orElse(0);
 
-		 return 0;
 	}
 	@Override
 	public int getReadyPlayersCount(String id, String player) {
-		 var currentGame = this.gameRepository.findById(id);
-		 if (currentGame != null){
-			 return (int) currentGame.get()
-			 	.getPlayersInGame()
-			 	.stream()
-				.filter(p -> p.getState() == PlayerState.READY)
-				.count();
-		 }
+		return this.gameRepository.findById(id)
+				.map(currentGame -> (int) currentGame.getPlayersInGame()
+						.stream()
+						.filter(p -> p.getState().equals(PlayerState.READY))
+						.count())
+				.orElse(0);
 
-		 return 0;
 	}
 }
