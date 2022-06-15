@@ -44,8 +44,12 @@ public final class ProcessingQuestion extends AbstractGameState {
         return Optional.ofNullable(this.players.get(player));
     }
 
+	@Override
+	public String getCurrentTurn() {
+		return this.currentPlayer;
+	}
     @Override
-    public String getCurrentTurn() {
+    public List<PlayerWithState> getPlayers() {
         return null;
     }
 

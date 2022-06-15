@@ -56,6 +56,18 @@ public class GameController {
 
 	}
 
+	@GetMapping("/{id}/playersCount")
+	public int getPlayersCount(@PathVariable("id") String id,
+										  @RequestHeader(PLAYER) String player) {
+		return this.gameService.getPlayersCount(id, player);
+	}
+
+	@GetMapping("/{id}/readyPlayersCount")
+	public int getReadyPlayersCount(@PathVariable("id") String id,
+										  @RequestHeader(PLAYER) String player) {
+		return this.gameService.getReadyPlayersCount(id, player);
+	}
+
 	@PostMapping("/{id}/characters")
 	@ResponseStatus(HttpStatus.OK)
 	public void suggestCharacter(@PathVariable("id") String id,

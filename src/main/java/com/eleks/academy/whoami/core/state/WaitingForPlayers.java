@@ -3,12 +3,12 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 public final class WaitingForPlayers extends AbstractGameState {
 
@@ -20,7 +20,6 @@ public final class WaitingForPlayers extends AbstractGameState {
 		this.players = new HashMap<>(maxPlayers);
 	}
 
-
 	private WaitingForPlayers(int maxPlayers, Map<String, PersistentPlayer> players) {
 		super(players.size(), maxPlayers);
 		this.players = players;
@@ -28,8 +27,14 @@ public final class WaitingForPlayers extends AbstractGameState {
 
 	@Override
 	public GameState next() {
-		return new SuggestingCharacters(this.players);
+
+		return new SuggestingCharacters (players);
 	}
+    public SynchronousPlayer addPlayer(String playerName){
+        var player = new PersistentPlayer(playerName);
+        this.players.put(playerName, player);
+        return player;
+    }
 
 	@Override
 	public Optional<SynchronousPlayer> findPlayer(String player) {
@@ -42,6 +47,13 @@ public final class WaitingForPlayers extends AbstractGameState {
 	}
 
 	@Override
+	public List<PlayerWithState> getPlayers() {
+		return players.values().stream().map(player -> PlayerWithState.builder()
+				.state(PlayerState.NOT_READY)
+				.player(player)
+				.build())
+				.collect(Collectors.toList());
+	}
 	public SynchronousPlayer enrollToGame(String player) {
 		PersistentPlayer synchronousPlayer = null;
 

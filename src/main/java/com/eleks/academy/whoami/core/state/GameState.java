@@ -45,6 +45,8 @@ public sealed interface GameState permits AbstractGameState {
 	 */
 	int getMaxPlayers();
 
+	List<PlayerWithState> getPlayers();
+
     default SynchronousPlayer enrollToGame(String player) {
     	throw new GameException("Cannot enroll to game");
 	}

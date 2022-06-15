@@ -186,4 +186,10 @@ public final class SuggestingCharacters extends AbstractGameState {
 					.orElseGet(() -> list.get(0));
 		};
 	}
+    @Override
+    public List<PlayerWithState> getPlayers() {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
 }

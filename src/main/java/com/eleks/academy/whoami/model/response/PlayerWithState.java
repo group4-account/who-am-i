@@ -16,5 +16,5 @@ public class PlayerWithState {
 	private QuestionAnswer answer;
 
 	private PlayerState state;
-
+	
 }

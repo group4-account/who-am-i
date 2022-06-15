@@ -31,4 +31,8 @@ public interface GameService {
 	void submitGuess(String id, String player, String guess);
 
 	void answerQuestion(String id, String player, String answer);
+
+	int getPlayersCount(String id, String player);
+
+	int getReadyPlayersCount(String id, String player);
 }

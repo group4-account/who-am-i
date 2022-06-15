@@ -3,7 +3,6 @@ package com.eleks.academy.whoami.core.impl;
 import com.eleks.academy.whoami.core.Game;
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
-import com.eleks.academy.whoami.core.state.GameFinished;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.core.state.WaitingForPlayers;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
@@ -34,7 +33,6 @@ public class PersistentGame implements Game, SynchronousGame {
                 Instant.now().toEpochMilli(),
                 Double.valueOf(Math.random() * 999).intValue());
         this.turns.add(new WaitingForPlayers(maxPlayers));
-
     }
 
     @Override
@@ -47,48 +45,50 @@ public class PersistentGame implements Game, SynchronousGame {
         return this.id;
     }
 
-    @Override
-    public SynchronousPlayer enrollToGame(String player) {
-        throw new UnsupportedOperationException();
-    }
+	@Override
+	public SynchronousPlayer enrollToGame(String player) {
+		if (turns.isEmpty()){
+			turns.add(new WaitingForPlayers(4));
+		}
+		var turn = turns.peek();
+		var toReturn = ((WaitingForPlayers)turn).addPlayer(player);
+		return toReturn;
+	}
 
-    @Override
-    public String getTurn() {
-        return this.applyIfPresent(this.turns.peek(), GameState::getCurrentTurn);
-    }
+	@Override
+	public String getTurn() {
+		return this.applyIfPresent(this.turns.peek(), GameState::getCurrentTurn);
+	}
 
+	@Override
+	public void askQuestion(String player, String message) {
 
+	}
 
-    @Override
-    public void askQuestion(String player, String message) {
+	@Override
+	public void answerQuestion(String player, Answer answer) {
+		// TODO: Implement method
+	}
 
+	@Override
+	public SynchronousGame start() {
+		return null;
+	}
 
-    }
+	@Override
+	public boolean isAvailable() {
+		return this.turns.peek() instanceof WaitingForPlayers;
+	}
 
-    @Override
-    public void answerQuestion(String player, Answer answer) {
-        // TODO: Implement method
-    }
+	@Override
+	public String getStatus() {
+		return this.applyIfPresent(this.turns.peek(), GameState::getStatus);
+	}
 
-    @Override
-    public SynchronousGame start() {
-        return null;
-    }
-
-    @Override
-    public boolean isAvailable() {
-        return this.turns.peek() instanceof WaitingForPlayers;
-    }
-
-    @Override
-    public String getStatus() {
-        return this.applyIfPresent(this.turns.peek(), GameState::getStatus);
-    }
-
-    @Override
-    public List<PlayerWithState> getPlayersInGame() {
+	@Override
+	public List<PlayerWithState> getPlayersInGame() {
         return this.applyIfPresent(this.turns.peek(), GameState::getPlayersWithState);
-    }
+	}
 
     @Override
     public boolean isFinished() {

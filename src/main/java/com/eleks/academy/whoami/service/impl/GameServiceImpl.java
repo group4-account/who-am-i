@@ -8,6 +8,7 @@ import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
+import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 import com.eleks.academy.whoami.model.response.TurnDetails;
 import com.eleks.academy.whoami.repository.GameRepository;
@@ -106,5 +107,21 @@ public class GameServiceImpl implements GameService {
 	public void answerQuestion(String id, String player, String answer) {
 
 	}
+	@Override
+	public int getPlayersCount(String id, String player) {
+			 return this.gameRepository.findById(id)
+					 .map(item -> item.getPlayersInGame().size())
+					 .orElse(0);
 
+	}
+	@Override
+	public int getReadyPlayersCount(String id, String player) {
+		return this.gameRepository.findById(id)
+				.map(currentGame -> (int) currentGame.getPlayersInGame()
+						.stream()
+						.filter(p -> p.getState().equals(PlayerState.READY))
+						.count())
+				.orElse(0);
+
+	}
 }
