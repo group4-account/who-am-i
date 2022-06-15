@@ -101,11 +101,11 @@ public final class SuggestingCharacters extends AbstractGameState {
 	public GameState makeTurn(Answer answer) {
 		this.lock.lock();
 		try {
-			for (int i = 0; i < playerWithStateList.size(); i++) {
-				if (playerWithStateList.get(i).getPlayer().equals(this.findPlayer(answer.getPlayer()).get())) {
-					playerWithStateList.get(i).setState(PlayerState.READY);
-				}
-			}
+
+			playerWithStateList.stream()
+					.filter(a-> a.getPlayer().equals(this.findPlayer(answer.getPlayer()).get()))
+					.findAny().ifPresent(a -> a.setState(PlayerState.READY));
+
 			return Optional.of(answer)
 					.filter(StartGameAnswer.class::isInstance)
 					.map(StartGameAnswer.class::cast)
