@@ -3,7 +3,6 @@ package com.eleks.academy.whoami.core.impl;
 import com.eleks.academy.whoami.core.Game;
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
-import com.eleks.academy.whoami.core.state.GameFinished;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.core.state.WaitingForPlayers;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
@@ -53,7 +52,7 @@ public class PersistentGame implements Game, SynchronousGame {
 			turns.add(new WaitingForPlayers(4));
 		}
 		var turn = turns.peek();
-		var toReturn = ((WaitingForPlayers)turn).AddPlayer(player);
+		var toReturn = ((WaitingForPlayers)turn).addPlayer(player);
 		return toReturn;
 	}
 

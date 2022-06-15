@@ -3,7 +3,6 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
@@ -31,7 +30,7 @@ public final class WaitingForPlayers extends AbstractGameState {
 
 		return new SuggestingCharacters (players);
 	}
-    public SynchronousPlayer AddPlayer(String playerName){
+    public SynchronousPlayer addPlayer(String playerName){
         var player = new PersistentPlayer(playerName);
         this.players.put(playerName, player);
         return player;
