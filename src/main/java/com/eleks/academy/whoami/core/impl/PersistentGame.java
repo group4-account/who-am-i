@@ -19,8 +19,6 @@ public class PersistentGame implements Game, SynchronousGame {
 
     private final Lock turnLock = new ReentrantLock();
     private final String id;
-    private List<PlayerWithState> playerWithStateList = new ArrayList<>();
-    private Map<String, PersistentPlayer> players;
     private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 
     /**
@@ -58,7 +56,6 @@ public class PersistentGame implements Game, SynchronousGame {
     }
 
 
-
     @Override
     public void askQuestion(String player, String message) {
 
@@ -72,7 +69,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public SynchronousGame start() {
-        return null;
+        throw new UnsupportedOperationException();
     }
 
     @Override

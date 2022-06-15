@@ -12,71 +12,61 @@ import java.util.*;
 
 public final class WaitingForPlayers extends AbstractGameState {
 
-	private final Map<String, PersistentPlayer> players;
-	private int maxPlayers;
-	public WaitingForPlayers(int maxPlayers) {
-		super(0, maxPlayers);
-		this.maxPlayers = maxPlayers;
-		this.players = new HashMap<>(maxPlayers);
-	}
+    private final Map<String, PlayerWithState> players;
+    private int maxPlayers;
+
+    public WaitingForPlayers(int maxPlayers) {
+        super(0, maxPlayers);
+        this.maxPlayers = maxPlayers;
+        this.players = new HashMap<>(maxPlayers);
+    }
 
 
-	private WaitingForPlayers(int maxPlayers, Map<String, PersistentPlayer> players) {
-		super(players.size(), maxPlayers);
-		this.players = players;
-	}
+    private WaitingForPlayers(int maxPlayers, Map<String, PlayerWithState> players) {
+        super(players.size(), maxPlayers);
+        this.players = players;
+    }
 
-	@Override
-	public GameState next() {
-		return new SuggestingCharacters(this.players);
-	}
+    @Override
+    public GameState next() {
+        return new SuggestingCharacters(this.players);
+    }
 
-	@Override
-	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return Optional.ofNullable(this.players.get(player));
-	}
+    @Override
+    public Optional<SynchronousPlayer> findPlayer(String player) {
+        return Optional.ofNullable(this.players.get(player).getPlayer());
+    }
 
-	@Override
-	public int getPlayersInGame() {
-		return this.players.size();
-	}
+    @Override
+    public int getPlayersInGame() {
+        return this.players.size();
+    }
 
-	@Override
-	public SynchronousPlayer enrollToGame(String player) {
-		PersistentPlayer synchronousPlayer = null;
+    @Override
+    public SynchronousPlayer enrollToGame(String player) {
+        throw new UnsupportedOperationException();
+    }
 
-		if(this.getPlayersInGame() < this.maxPlayers){
-			synchronousPlayer = new PersistentPlayer(player);
-			this.players.put(player, synchronousPlayer);
-		}
-		if (this.getPlayersInGame() == this.maxPlayers)
-			this.next();
-		return synchronousPlayer;
-	}
+    @Override
+    public GameState makeTurn(Answer answer) {
+        Map<String, PlayerWithState> nextPlayers = new HashMap<>(this.players);
+        if (nextPlayers.containsKey(answer.getPlayer()) || maxPlayers == this.getPlayersInGame()) {
+            throw new GameException("Cannot enroll to the game");
+        } else {
+            PersistentPlayer persistentPlayer = new PersistentPlayer(answer.getPlayer());
+            nextPlayers.put(answer.getPlayer(),
+                    new PlayerWithState(persistentPlayer, null, PlayerState.NOT_READY));
+        }
+        if (nextPlayers.size() == getMaxPlayers()) {
+            return new SuggestingCharacters(nextPlayers);
+        } else {
+            return new WaitingForPlayers(getMaxPlayers(), nextPlayers);
+        }
+    }
 
-	@Override
-	public GameState makeTurn(Answer answer) {
-		Map<String, PersistentPlayer> nextPlayers = new HashMap<>(this.players);
-		if (nextPlayers.containsKey(answer.getPlayer()) || maxPlayers == this.getPlayersInGame()) {
-			throw new GameException("Cannot enroll to the game");
-		} else {
-			nextPlayers.put(answer.getPlayer(), new PersistentPlayer(answer.getPlayer()));
-		}
-		if (nextPlayers.size() == getMaxPlayers()) {
-			return new SuggestingCharacters(nextPlayers);
-		} else {
-			return new WaitingForPlayers(getMaxPlayers(), nextPlayers);
-		}
-	}
-
-	@Override
-	public List<PlayerWithState> getPlayersWithState() {
-		List<PlayerWithState> playerWithStateList = new ArrayList<>();
-		this.players.values().forEach(player -> playerWithStateList.add(PlayerWithState.builder()
-						.state(PlayerState.NOT_READY)
-						.player(player)
-						.build()));
-		return playerWithStateList;
-	}
+    @Override
+    public List<PlayerWithState> getPlayersWithState() {
+        return players.values().stream().toList();
+    }
 
 }

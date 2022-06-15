@@ -23,22 +23,16 @@ public final class SuggestingCharacters extends AbstractGameState {
 
 	private final Lock lock = new ReentrantLock();
 
-	private final Map<String, PersistentPlayer> players;
+	private final Map<String, PlayerWithState> players;
 	private final Map<String, List<GameCharacter>> suggestedCharacters;
 	private final Map<String, String> playerCharacterMap;
-	private List<PlayerWithState> playerWithStateList;
 
-	public SuggestingCharacters(Map<String, PersistentPlayer> players) {
+	public SuggestingCharacters(Map<String, PlayerWithState> players) {
 		super(players.size(), players.size());
 
 		this.players = players;
 		this.suggestedCharacters = new HashMap<>(this.players.size());
 		this.playerCharacterMap = new HashMap<>(this.players.size());
-		this.playerWithStateList = new ArrayList<>();
-		this.players.values().forEach(player -> playerWithStateList.add(PlayerWithState.builder()
-				.state(PlayerState.NOT_READY)
-				.player(player)
-				.build()));
 	}
 
 	/**
@@ -52,18 +46,18 @@ public final class SuggestingCharacters extends AbstractGameState {
 		return Optional.of(this)
 				.filter(SuggestingCharacters::finished)
 				.map(SuggestingCharacters::assignCharacters)
-				.map(then -> new ProcessingQuestion(players.get(0).getName(), this.players))
+				.map(then -> new ProcessingQuestion(players.get(0).getPlayer().getName(), this.players))
 				.orElseThrow(() -> new GameException("Cannot start game"));
 	}
 
 	@Override
 	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return Optional.ofNullable(this.players.get(player));
+		return Optional.ofNullable(this.players.get(player).getPlayer());
 	}
 
 	@Override
 	public List<PlayerWithState> getPlayersWithState() {
-		return  playerWithStateList;
+		return players.values().stream().toList();
 
 	}
 
@@ -102,7 +96,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 		this.lock.lock();
 		try {
 
-			playerWithStateList.stream()
+			players.values().stream()
 					.filter(a-> a.getPlayer().equals(this.findPlayer(answer.getPlayer()).get()))
 					.findAny().ifPresent(a -> a.setState(PlayerState.READY));
 
@@ -164,7 +158,6 @@ public final class SuggestingCharacters extends AbstractGameState {
 
 					nonTakenCharacters.remove(character);
 				});
-
 		return this;
 	}
 

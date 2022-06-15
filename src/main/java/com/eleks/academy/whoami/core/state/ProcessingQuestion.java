@@ -23,10 +23,10 @@ import static java.util.stream.Collectors.*;
 public final class ProcessingQuestion extends AbstractGameState {
 
     private final String currentPlayer;
-    private final Map<String, PersistentPlayer> players;
+    private final Map<String, PlayerWithState> players;
     private int currentPlayerIndex;
 
-    public ProcessingQuestion(String currentPlayer, Map<String, PersistentPlayer> players) {
+    public ProcessingQuestion(String currentPlayer, Map<String, PlayerWithState> players) {
         super(players.size(), players.size());
 
         this.players = players;
@@ -41,7 +41,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
     @Override
     public Optional<SynchronousPlayer> findPlayer(String player) {
-        return Optional.ofNullable(this.players.get(player));
+        return Optional.ofNullable(this.players.get(player).getPlayer());
     }
 
     @Override
@@ -51,21 +51,16 @@ public final class ProcessingQuestion extends AbstractGameState {
 
     @Override
     public List<PlayerWithState> getPlayersWithState() {
-        List<PlayerWithState> playerWithStateList = new ArrayList<>();
-        this.players.values().forEach(player -> playerWithStateList.add(PlayerWithState.builder()
-                .state(PlayerState.NOT_READY)
-                .player(player)
-                .build()));
-        return  playerWithStateList;
+        return players.values().stream().toList();
     }
 
 
     @Override
     public GameState makeTurn(Answer answer) {
-        PersistentPlayer currentPlayer = players.get(this.currentPlayer);
+        PersistentPlayer currentPlayer = players.get(this.currentPlayer).getPlayer();
         String question = null;
         try {
-            question = players.get(this.currentPlayer).getQuestion().get();
+            question = players.get(this.currentPlayer).getPlayer().getQuestion().get();
         } catch (InterruptedException | ExecutionException e) {
             e.printStackTrace();
         }
@@ -73,7 +68,7 @@ public final class ProcessingQuestion extends AbstractGameState {
         String finalQuestion = question;
         List<String> answers = this.players.values().stream().map(player1 -> {
             try {
-                return player1.answerQuestion(finalQuestion, currentPlayer.getCharacter()).get();
+                return player1.getPlayer().answerQuestion(finalQuestion, currentPlayer.getCharacter()).get();
             } catch (InterruptedException | ExecutionException e) {
                 throw new RuntimeException(e);
             }
