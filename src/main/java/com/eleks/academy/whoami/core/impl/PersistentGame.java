@@ -70,7 +70,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public SynchronousGame start() {
-        this.applyIfPresent(this.turns.peek(), GameState::next);
+        this.makeTurn(new Answer("answer"));
         return this;
     }
 

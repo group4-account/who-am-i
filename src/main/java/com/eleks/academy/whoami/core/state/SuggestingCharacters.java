@@ -95,7 +95,9 @@ public final class SuggestingCharacters extends AbstractGameState {
     public GameState makeTurn(Answer answer) {
         this.lock.lock();
         try {
-
+            if(finished()){
+                return this.next();
+            }
             players.values().stream()
                     .filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getName(),
                             players.get(answer.getPlayer()).getPlayer().getName()))
