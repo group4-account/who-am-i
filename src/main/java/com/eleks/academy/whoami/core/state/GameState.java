@@ -1,7 +1,12 @@
 package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.core.exception.GameException;
+import com.eleks.academy.whoami.core.impl.Answer;
+import com.eleks.academy.whoami.core.impl.PersistentPlayer;
+import com.eleks.academy.whoami.model.response.PlayerWithState;
 
+import java.util.List;
 import java.util.Optional;
 
 public sealed interface GameState permits AbstractGameState {
@@ -34,6 +39,7 @@ public sealed interface GameState permits AbstractGameState {
 
 	SynchronousPlayer add(SynchronousPlayer player);
 
+	List<PlayerWithState> getPlayersWithState();
 	/**
 	 * Used for presentation purposes only
 	 *
@@ -41,4 +47,11 @@ public sealed interface GameState permits AbstractGameState {
 	 */
 	int getMaxPlayers();
 
+	List<PlayerWithState> getPlayers();
+
+    default SynchronousPlayer enrollToGame(String player) {
+    	throw new GameException("Cannot enroll to game");
+	}
+
+    GameState makeTurn(Answer player);
 }

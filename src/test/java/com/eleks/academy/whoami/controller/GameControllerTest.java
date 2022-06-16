@@ -22,6 +22,7 @@ import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.times;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -94,5 +95,33 @@ class GameControllerTest {
 										"}"))
 				.andExpect(status().isOk());
 		verify(gameService, times(1)).suggestCharacter(eq("1234"), eq("player"), any(CharacterSuggestion.class));
+	}
+	@Test
+	void failValidationSuggestCharacter() throws Exception {
+		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
+				eq(new CharacterSuggestion("Batman")));
+		this.mockMvc.perform(
+						MockMvcRequestBuilders.post("/games/1234/characters")
+								.header("X-Player", "player")
+								.contentType(APPLICATION_JSON)
+								.content("""
+                                        {
+                                            "character": "a"
+                                        }"""))
+				.andExpect(status().isBadRequest());
+	}
+	@Test
+	void failValidationName() throws Exception {
+		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
+				eq(new CharacterSuggestion("Batman")));
+		this.mockMvc.perform(
+						MockMvcRequestBuilders.post("/games/1234/characters")
+								.header("X-Player", "p")
+								.contentType(APPLICATION_JSON)
+								.content("""
+                                        {
+                                            "character": "Batman"
+                                        }"""))
+				.andExpect(status().isBadRequest());
 	}
 }

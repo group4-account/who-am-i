@@ -11,10 +11,20 @@ import org.springframework.context.annotation.FilterType;
 @ComponentScan(basePackages = {"com.eleks.academy.whoami"}, excludeFilters = {
 		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = ApiClient.class),
 		@ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = GameApi.class)})
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.FilterType;
+import org.springframework.web.client.RestTemplate;
+
+@SpringBootApplication
+@ComponentScan(basePackages = {"com.eleks.academy.whoami"}, excludeFilters = {
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = ApiClient.class),
+        @ComponentScan.Filter(type = FilterType.ASSIGNABLE_TYPE, value = GameApi.class)
+})
 public class WhoAmIApplication {
 
-	public static void main(String[] args) {
-		SpringApplication.run(WhoAmIApplication.class, args);
-	}
+    public static void main(String[] args) {
+        SpringApplication.run(WhoAmIApplication.class, args);
+    }
 
 }
