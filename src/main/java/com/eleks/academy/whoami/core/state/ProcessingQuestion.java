@@ -24,7 +24,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 
     private final String currentPlayer;
     private final Map<String, PlayerWithState> players;
-    private int currentPlayerIndex;
 
     public ProcessingQuestion(String currentPlayer, Map<String, PlayerWithState> players) {
         super(players.size(), players.size());
@@ -76,10 +75,10 @@ public final class ProcessingQuestion extends AbstractGameState {
         long yesAnswers = answers.stream().filter("YES"::equals).count();
         long noAnswers = answers.stream().filter("NO"::equals).count();
         if (yesAnswers < noAnswers) {
-            currentPlayerIndex = 0;
+            int currentPlayerIndex = 0;
             List<String> collect = new ArrayList<>(this.players.keySet());
             currentPlayerIndex = collect.indexOf(currentPlayer.getName());
-            this.currentPlayerIndex = this.currentPlayerIndex + 1 >= this.players.size() ? 0 : this.currentPlayerIndex + 1;
+            currentPlayerIndex = currentPlayerIndex + 1 >= this.players.size() ? 0 : currentPlayerIndex + 1;
             return new ProcessingQuestion(collect.get(currentPlayerIndex), players);
         } else {
             return new ProcessingQuestion(currentPlayer.getName(), players);
