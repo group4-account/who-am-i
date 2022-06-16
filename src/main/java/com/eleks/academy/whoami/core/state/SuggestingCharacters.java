@@ -140,22 +140,26 @@ public final class SuggestingCharacters extends AbstractGameState {
         });
 
         final var authorsSet = new HashSet<>(authors);
+
+        final var nonTakenCharacters = this.suggestedCharacters.values()
+                .stream()
+                .flatMap(Collection::stream)
+                .filter(GameCharacter::isTaken)
+                .collect(toList());
+
         this.players.keySet()
                 .stream()
                 .filter(authorsSet::contains)
                 .forEach(player -> {
-                    var character = this.getRandomCharacter().apply(this.authorsCharacters.values()
-                            .stream().toList());
-                    while(player.equals(character.getAuthor())) {
-                        character = this.getRandomCharacter().apply(this.authorsCharacters.values()
-                                .stream().toList());
-                    }
+                    final var character = this.getRandomCharacter().apply(nonTakenCharacters);
+
                     character.markTaken();
 
                     this.playerCharacterMap.put(player, character.getCharacter());
                     this.players.get(player).getPlayer().setCharacter(character.getCharacter());
-                    authorsCharacters.remove(character.getAuthor());
+                    nonTakenCharacters.remove(character);
                 });
+
         return this;
     }
 
