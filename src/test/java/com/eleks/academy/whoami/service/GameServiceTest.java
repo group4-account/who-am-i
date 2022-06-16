@@ -112,6 +112,8 @@ class GameServiceTest {
         assertNotEquals(character1,playerWithStateMap.get("host").getPlayer().getCharacter());
         assertNotEquals(character2,playerWithStateMap.get("Anton1").getPlayer().getCharacter());
 
+        System.out.println(this.gameRepository.findById(gameId).get().getStatus());
+
     }
 
     @Test

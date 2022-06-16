@@ -63,10 +63,9 @@ public class RandomPlayer implements Player {
 		return CompletableFuture.completedFuture(availableQuestions.isEmpty());
 	}
 
-	@Override
-	public Future<String> suggestCharacter() {
+	public String suggestCharacter() {
 		// TODO: remove a suggestion from the collection
-		return CompletableFuture.completedFuture(characterPool.iterator().next());
+		return characterPool.iterator().next();
 	}
 
 	@Override
