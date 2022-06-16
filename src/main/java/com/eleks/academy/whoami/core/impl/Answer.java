@@ -15,5 +15,5 @@ public sealed class Answer permits StartGameAnswer {
 
 	private final String player;
 	private String message;
-
+	private String newName;
 }

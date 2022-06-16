@@ -90,30 +90,33 @@ class GameControllerTest {
 						MockMvcRequestBuilders.post("/games/1234/characters")
 								.header("X-Player", "player")
 								.contentType(MediaType.APPLICATION_JSON)
-								.content("{\n" +
-										"    \"character\": \" char\"\n" +
-										"}"))
+								.content("""
+										{
+										    "character": "char",
+										    "name": "Genry"
+										}"""))
 				.andExpect(status().isOk());
 		verify(gameService, times(1)).suggestCharacter(eq("1234"), eq("player"), any(CharacterSuggestion.class));
 	}
 	@Test
 	void failValidationSuggestCharacter() throws Exception {
 		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
-				eq(new CharacterSuggestion("Batman")));
+				eq(new CharacterSuggestion("Batman", "Edgard")));
 		this.mockMvc.perform(
 						MockMvcRequestBuilders.post("/games/1234/characters")
 								.header("X-Player", "player")
 								.contentType(APPLICATION_JSON)
 								.content("""
                                         {
-                                            "character": "a"
+                                            "character": "a",
+                                            "name": "name
                                         }"""))
 				.andExpect(status().isBadRequest());
 	}
 	@Test
 	void failValidationName() throws Exception {
 		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
-				eq(new CharacterSuggestion("Batman")));
+				eq(new CharacterSuggestion("Batman", "Valentine")));
 		this.mockMvc.perform(
 						MockMvcRequestBuilders.post("/games/1234/characters")
 								.header("X-Player", "p")

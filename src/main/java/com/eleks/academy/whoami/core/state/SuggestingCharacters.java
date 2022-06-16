@@ -23,7 +23,6 @@ public final class SuggestingCharacters extends AbstractGameState {
 
     private final Map<String, PlayerWithState> players;
     private final Map<String, List<GameCharacter>> suggestedCharacters;
-    private final Map<String, GameCharacter> authorsCharacters;
     private final Map<String, String> playerCharacterMap;
 
     public SuggestingCharacters(Map<String, PlayerWithState> players) {
@@ -32,7 +31,6 @@ public final class SuggestingCharacters extends AbstractGameState {
         this.players = players;
         this.suggestedCharacters = new HashMap<>(this.players.size());
         this.playerCharacterMap = new HashMap<>(this.players.size());
-        this.authorsCharacters = new HashMap<>();
     }
 
     /**
@@ -82,7 +80,6 @@ public final class SuggestingCharacters extends AbstractGameState {
             final var newCharacters = new ArrayList<GameCharacter>();
 
             this.suggestedCharacters.put(player, newCharacters);
-            this.authorsCharacters.put(player, GameCharacter.of(character, player));
             characters = newCharacters;
         }
 
@@ -98,16 +95,19 @@ public final class SuggestingCharacters extends AbstractGameState {
             if(finished()){
                 return this.next();
             }
-            players.values().stream()
+            this.players.values().stream()
                     .filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getName(),
                             players.get(answer.getPlayer()).getPlayer().getName()))
                     .findFirst()
                     .ifPresent(a -> a.setState(PlayerState.READY));
+
+            this.players.put(answer.getNewName(), this.players.remove(answer.getPlayer()));
+            this.players.get(answer.getNewName()).getPlayer().setName(answer.getNewName());
             return Optional.of(answer)
                     .filter(StartGameAnswer.class::isInstance)
                     .map(StartGameAnswer.class::cast)
                     .map(then -> this.next())
-                    .orElseGet(() -> this.suggestCharacter(answer.getPlayer(), answer.getMessage()));
+                    .orElseGet(() -> this.suggestCharacter(answer.getNewName(), answer.getMessage()));
         } finally {
             this.lock.unlock();
         }
@@ -137,7 +137,7 @@ public final class SuggestingCharacters extends AbstractGameState {
                     .apply(this.suggestedCharacters.get(this.<String>cyclicNext().apply(authors, author)));
 
             character.markTaken();
-
+            this.players.get(author).getPlayer().setCharacter(character.getCharacter());
             this.playerCharacterMap.put(author, character.getCharacter());
         });
 
@@ -146,12 +146,12 @@ public final class SuggestingCharacters extends AbstractGameState {
         final var nonTakenCharacters = this.suggestedCharacters.values()
                 .stream()
                 .flatMap(Collection::stream)
-                .filter(GameCharacter::isTaken)
+                .filter(gameCharacter -> !gameCharacter.isTaken())
                 .collect(toList());
 
         this.players.keySet()
                 .stream()
-                .filter(authorsSet::contains)
+                .filter(player -> !authorsSet.contains(player))
                 .forEach(player -> {
                     final var character = this.getRandomCharacter().apply(nonTakenCharacters);
 

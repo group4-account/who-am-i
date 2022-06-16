@@ -62,55 +62,66 @@ class GameServiceTest {
     @Test
     @SneakyThrows
     void testSetStateInSuggestCharacters() {
-        final String player = "Anton";
+        final String player = "Player-1";
+        final String player1 = "Player-2";
+        final String newPlayer = "Anton";
+        final String newPlayer1 = "Anton-1";
         final PlayerState previousState = PlayerState.NOT_READY;
         final PlayerState updateState = PlayerState.READY;
-        CharacterSuggestion character = new CharacterSuggestion("char");
+        CharacterSuggestion character = new CharacterSuggestion("char", newPlayer);
         gameService.enrollToGame(gameId, player);
-        gameService.enrollToGame(gameId, player+"1");
+        gameService.enrollToGame(gameId, player1);
         PlayerState playerState = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().get(0).getState();
         assertEquals(playerState, previousState);
         gameService.suggestCharacter(gameId, player, character);
         playerState = this.gameRepository.findById(gameId)
-                .filter(game -> game.findPlayer(player).isPresent())
-                .map(GameDetails::of).get().getPlayers().get(2).getState();
+                .filter(game -> game.findPlayer(newPlayer).isPresent())
+                .map(GameDetails::of).get().getPlayers().get(1).getState();
         assertEquals(updateState, playerState);
 
     }
     @Test
     @SneakyThrows
     void testAssignCharacter() {
-        final String player = "Anton";
+        final String player = "Player-1";
+        final String player1 = "Player-2";
+        final String player2 = "host";
+        final String newPlayer = "Anton-1";
+        final String newPlayer1 = "Anton-2";
+        final String newPlayer2 = "Anton-3";
+        final String char1 = "char";
+        final String char2 = "char1";
+        final String char3 = "char2";
         final PlayerState previousState = PlayerState.NOT_READY;
         final PlayerState updateState = PlayerState.READY;
-        CharacterSuggestion character = new CharacterSuggestion("char");
-        CharacterSuggestion character1 = new CharacterSuggestion("char1");
-        CharacterSuggestion character2 = new CharacterSuggestion("char2");
+        CharacterSuggestion character = new CharacterSuggestion(char1, newPlayer);
+        CharacterSuggestion character1 = new CharacterSuggestion(char2, newPlayer1);
+        CharacterSuggestion character2 = new CharacterSuggestion(char3, newPlayer2);
         gameService.enrollToGame(gameId, player);
-        gameService.enrollToGame(gameId, player+"1");
+        gameService.enrollToGame(gameId, player1);
         PlayerState playerState = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().get(0).getState();
         assertEquals(playerState, previousState);
         gameService.suggestCharacter(gameId, player, character);
-        gameService.suggestCharacter(gameId, "host", character1);
-        gameService.suggestCharacter(gameId, "Anton1", character2);
+        gameService.suggestCharacter(gameId, player1, character1);
+        gameService.suggestCharacter(gameId, player2, character2);
         playerState = this.gameRepository.findById(gameId)
-                .filter(game -> game.findPlayer(player).isPresent())
+                .filter(game -> game.findPlayer(newPlayer).isPresent())
                 .map(GameDetails::of).get().getPlayers().get(2).getState();
-        System.out.println(gameService.startGame(gameId, player).get()
+        System.out.println(gameService.startGame(gameId, newPlayer).get()
                 .getPlayers().stream().map(PlayerWithState::getPlayer).collect(Collectors.toList()));
         System.out.println();
         Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
-                .filter(game -> game.findPlayer(player).isPresent())
+                .filter(game -> game.findPlayer(newPlayer).isPresent())
                 .map(GameDetails::of).get().getPlayers().stream()
                 .collect(Collectors.toMap(a-> a.getPlayer().getName(), Function.identity()));
         assertEquals(updateState, playerState);
-        assertNotEquals(character,playerWithStateMap.get(player).getPlayer().getCharacter());
-        assertNotEquals(character1,playerWithStateMap.get("host").getPlayer().getCharacter());
-        assertNotEquals(character2,playerWithStateMap.get("Anton1").getPlayer().getCharacter());
+        assertNotEquals(char1,playerWithStateMap.get(newPlayer).getPlayer().getCharacter());
+        assertNotEquals(char2,playerWithStateMap.get(newPlayer1).getPlayer().getCharacter());
+        assertNotEquals(char3,playerWithStateMap.get(newPlayer2).getPlayer().getCharacter());
 
         System.out.println(this.gameRepository.findById(gameId).get().getStatus());
 
