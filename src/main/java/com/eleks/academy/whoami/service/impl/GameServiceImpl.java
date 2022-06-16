@@ -9,7 +9,6 @@ import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.PlayerState;
-import com.eleks.academy.whoami.model.response.PlayerWithState;
 import com.eleks.academy.whoami.model.response.TurnDetails;
 import com.eleks.academy.whoami.repository.GameRepository;
 import com.eleks.academy.whoami.service.GameService;
@@ -21,7 +20,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +45,7 @@ public class GameServiceImpl implements GameService {
 		}
 
 		String firstGame = games.keySet().stream().findFirst().get();
-		SynchronousPlayer enrolledPlayer = enrollToGame(games.get(firstGame).getId(), player);
+		Optional<SynchronousPlayer> enrolledPlayer = enrollToGame(games.get(firstGame).getId(), player);
 		String gameFromRepository = games.get(firstGame).getId();
 		return gameRepository.findById(gameFromRepository).map(GameDetails::of);
 	}
@@ -88,18 +86,8 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void suggestCharacter(String id, String player, CharacterSuggestion suggestion) {
 		this.gameRepository.findById(id)
-				.ifPresentOrElse(
-						game -> game.makeTurn(new Answer(player)),
-						() -> {
-							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
-						}
-				);
-		this.gameRepository.findById(id)
 				.flatMap(game -> game.findPlayer(player))
 				.ifPresent(p -> p.setCharacter(suggestion.getCharacter()));
-		this.gameRepository.findById(id)
-				.flatMap(game -> game.findPlayer(player))
-				.ifPresent(p -> p.setName(player));
 	}
 
 	@Override
@@ -129,11 +117,12 @@ public class GameServiceImpl implements GameService {
 	public void answerQuestion(String id, String player, String answer) {
 
 	}
+
 	@Override
 	public int getPlayersCount(String id, String player) {
-			 return this.gameRepository.findById(id)
-					 .map(item -> item.getPlayersInGame().size())
-					 .orElse(0);
+		return this.gameRepository.findById(id)
+				.map(item -> item.getPlayersInGame().size())
+				.orElse(0);
 
 	}
 	@Override
@@ -146,4 +135,5 @@ public class GameServiceImpl implements GameService {
 				.orElse(0);
 
 	}
+
 }

@@ -37,7 +37,7 @@ public sealed interface GameState permits AbstractGameState {
 	 */
 	int getPlayersInGame();
 
-	SynchronousPlayer add(SynchronousPlayer player);
+	SynchronousPlayer addPlayer(SynchronousPlayer player);
 
 	List<PlayerWithState> getPlayersWithState();
 	/**
@@ -54,4 +54,5 @@ public sealed interface GameState permits AbstractGameState {
 	}
 
     GameState makeTurn(Answer player);
+
 }

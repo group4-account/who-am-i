@@ -41,7 +41,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 				.build()));
 	}
 
-	@Override
+//	@Override
 	public SynchronousPlayer add(SynchronousPlayer player) {
 		return player;
 	}

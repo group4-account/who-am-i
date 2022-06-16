@@ -46,17 +46,11 @@ public final class WaitingForPlayers extends AbstractGameState {
 		return this.players.size();
 	}
 
-	@Override
-	public SynchronousPlayer add(SynchronousPlayer player) {
-		players.put(player.getName(), player);
-		return player;
-	public List<PlayerWithState> getPlayers() {
-		return players.values().stream().map(player -> PlayerWithState.builder()
-				.state(PlayerState.NOT_READY)
-				.player(player)
-				.build())
-				.collect(Collectors.toList());
-	}
+//	@Override
+//	public SynchronousPlayer add(SynchronousPlayer player) {
+//		players.put(player.getName(), player);
+//		return player;
+//	}
 	public SynchronousPlayer enrollToGame(String player) {
 		PersistentPlayer synchronousPlayer = null;
 
@@ -92,6 +86,11 @@ public final class WaitingForPlayers extends AbstractGameState {
 						.player(player)
 						.build()));
 		return playerWithStateList;
+	}
+
+	@Override
+	public List<PlayerWithState> getPlayers() {
+		return null;
 	}
 
 }

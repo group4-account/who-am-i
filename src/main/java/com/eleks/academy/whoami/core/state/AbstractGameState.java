@@ -1,5 +1,6 @@
 package com.eleks.academy.whoami.core.state;
 
+import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import lombok.Getter;
@@ -18,6 +19,11 @@ public abstract sealed class AbstractGameState implements GameState
 	@Override
 	public String getStatus() {
 		return this.getClass().getName();
+	}
+
+	@Override
+	public SynchronousPlayer addPlayer(SynchronousPlayer player) {
+		return player;
 	}
 
 	/**

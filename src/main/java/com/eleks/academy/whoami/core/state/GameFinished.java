@@ -26,13 +26,9 @@ public final class GameFinished extends AbstractGameState {
 	}
 
 	@Override
-	public SynchronousPlayer add(SynchronousPlayer player) {
-		return player;
-	
-    @Override
-    public List<PlayerWithState> getPlayers() {
-        return null;
-    }
+	public List<PlayerWithState> getPlayers() {
+		return null;
+	}
 
 	@Override
 	public List<PlayerWithState> getPlayersWithState() {
@@ -42,5 +38,10 @@ public final class GameFinished extends AbstractGameState {
 	@Override
 	public GameState makeTurn(Answer player) {
 		return null;
+	}
+
+//	@Override
+	public SynchronousPlayer add(SynchronousPlayer player) {
+		return player;
 	}
 }
