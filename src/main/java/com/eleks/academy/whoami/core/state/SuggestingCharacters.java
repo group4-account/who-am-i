@@ -4,11 +4,9 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.GameCharacter;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.core.impl.StartGameAnswer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
-import jdk.jfr.Percentage;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -25,6 +23,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 
     private final Map<String, PlayerWithState> players;
     private final Map<String, List<GameCharacter>> suggestedCharacters;
+    private final Map<String, GameCharacter> authorsCharacters;
     private final Map<String, String> playerCharacterMap;
 
     public SuggestingCharacters(Map<String, PlayerWithState> players) {
@@ -33,6 +32,7 @@ public final class SuggestingCharacters extends AbstractGameState {
         this.players = players;
         this.suggestedCharacters = new HashMap<>(this.players.size());
         this.playerCharacterMap = new HashMap<>(this.players.size());
+        this.authorsCharacters = new HashMap<>();
     }
 
     /**
@@ -43,10 +43,11 @@ public final class SuggestingCharacters extends AbstractGameState {
      */
     @Override
     public GameState next() {
+        List<String> playersName = players.keySet().stream().toList();
         return Optional.of(this)
                 .filter(SuggestingCharacters::finished)
                 .map(SuggestingCharacters::assignCharacters)
-                .map(then -> new ProcessingQuestion(players.get(0).getPlayer().getName(), this.players))
+                .map(then -> new ProcessingQuestion(playersName.get(0), this.players))
                 .orElseThrow(() -> new GameException("Cannot start game"));
     }
 
@@ -81,7 +82,7 @@ public final class SuggestingCharacters extends AbstractGameState {
             final var newCharacters = new ArrayList<GameCharacter>();
 
             this.suggestedCharacters.put(player, newCharacters);
-
+            this.authorsCharacters.put(player, GameCharacter.of(character, player));
             characters = newCharacters;
         }
 
@@ -100,7 +101,6 @@ public final class SuggestingCharacters extends AbstractGameState {
                             players.get(answer.getPlayer()).getPlayer().getName()))
                     .findFirst()
                     .ifPresent(a -> a.setState(PlayerState.READY));
-
             return Optional.of(answer)
                     .filter(StartGameAnswer.class::isInstance)
                     .map(StartGameAnswer.class::cast)
@@ -140,33 +140,28 @@ public final class SuggestingCharacters extends AbstractGameState {
         });
 
         final var authorsSet = new HashSet<>(authors);
-
-        final var nonTakenCharacters = this.suggestedCharacters.values()
-                .stream()
-                .flatMap(Collection::stream)
-                .filter(character -> !character.isTaken())
-                .collect(toList());
-
         this.players.keySet()
                 .stream()
-                .filter(player -> !authorsSet.contains(player))
+                .filter(authorsSet::contains)
                 .forEach(player -> {
-                    final var character = this.getRandomCharacter().apply(nonTakenCharacters);
-
+                    var character = this.getRandomCharacter().apply(this.authorsCharacters.values()
+                            .stream().toList());
+                    while(player.equals(character.getAuthor())) {
+                        character = this.getRandomCharacter().apply(this.authorsCharacters.values()
+                                .stream().toList());
+                    }
                     character.markTaken();
 
                     this.playerCharacterMap.put(player, character.getCharacter());
                     this.players.get(player).getPlayer().setCharacter(character.getCharacter());
-                    nonTakenCharacters.remove(character);
+                    authorsCharacters.remove(character.getAuthor());
                 });
         return this;
     }
 
-
     private Function<List<GameCharacter>, GameCharacter> getRandomCharacter() {
         return gameCharacters -> {
             int randomPos = (int) (Math.random() * gameCharacters.size());
-
             return gameCharacters.get(randomPos);
         };
     }

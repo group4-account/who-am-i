@@ -32,6 +32,7 @@ public class PersistentGame implements Game, SynchronousGame {
                 Instant.now().toEpochMilli(),
                 Double.valueOf(Math.random() * 999).intValue());
         this.turns.add(new WaitingForPlayers(maxPlayers));
+        this.makeTurn(new Answer(hostPlayer));
 
     }
 
@@ -69,7 +70,8 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public SynchronousGame start() {
-        throw new UnsupportedOperationException();
+        this.applyIfPresent(this.turns.peek(), GameState::next);
+        return this;
     }
 
     @Override

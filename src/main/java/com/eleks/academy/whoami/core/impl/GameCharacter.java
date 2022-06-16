@@ -1,9 +1,11 @@
 package com.eleks.academy.whoami.core.impl;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 
-@Getter
+@Data
 @RequiredArgsConstructor(staticName = "of")
 public class GameCharacter {
 

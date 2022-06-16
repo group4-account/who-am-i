@@ -6,7 +6,6 @@ public interface Player {
 
 	String getName();
 
-	Future<String> suggestCharacter();
 
 	Future<String> getQuestion();
 

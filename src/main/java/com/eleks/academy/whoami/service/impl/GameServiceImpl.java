@@ -66,14 +66,12 @@ public class GameServiceImpl implements GameService {
 	public void suggestCharacter(String id, String player, CharacterSuggestion suggestion) {
 		this.gameRepository.findById(id)
 				.ifPresentOrElse(
-						game -> game.makeTurn(new Answer(player)),
+						game -> game.makeTurn(new Answer(player, suggestion.getCharacter())),
 						() -> {
 							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
 						}
 				);
-		this.gameRepository.findById(id)
-				.flatMap(game -> game.findPlayer(player))
-				.ifPresent(p -> p.setCharacter(suggestion.getCharacter()));
+
 		this.gameRepository.findById(id)
 				.flatMap(game -> game.findPlayer(player))
 				.ifPresent(p -> p.setName(player));
