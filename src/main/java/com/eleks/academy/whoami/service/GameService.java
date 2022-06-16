@@ -14,6 +14,8 @@ public interface GameService {
 
 	List<GameLight> findAvailableGames(String player);
 
+	Optional<GameDetails> findAvailableQuickGame(String player);
+
 	GameDetails createGame(String player, NewGameRequest gameRequest);
 
 	Optional<SynchronousPlayer> enrollToGame(String id, String player);
@@ -35,4 +37,5 @@ public interface GameService {
 	int getPlayersCount(String id, String player);
 
 	int getReadyPlayersCount(String id, String player);
+
 }

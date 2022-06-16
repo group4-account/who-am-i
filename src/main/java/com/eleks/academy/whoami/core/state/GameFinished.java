@@ -24,6 +24,10 @@ public final class GameFinished extends AbstractGameState {
 	public Optional<SynchronousPlayer> findPlayer(String player) {
 		return Optional.empty();
 	}
+
+	@Override
+	public SynchronousPlayer add(SynchronousPlayer player) {
+		return player;
 	
     @Override
     public List<PlayerWithState> getPlayers() {

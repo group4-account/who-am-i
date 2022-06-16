@@ -74,6 +74,11 @@ public final class ProcessingQuestion extends AbstractGameState {
             e.printStackTrace();
         }
 
+	@Override
+	public SynchronousPlayer add(SynchronousPlayer player) {
+		return player;
+	}
+
         String finalQuestion = question;
         List<String> answers = this.players.values().stream().map(player1 -> {
             try {

@@ -33,11 +33,19 @@ public class GameController {
 		return this.gameService.findAvailableGames(player);
 	}
 
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
+//	@PostMapping
+//	@ResponseStatus(HttpStatus.CREATED)
 	public GameDetails createGame(@RequestHeader(PLAYER) String player,
 								  @Valid @RequestBody NewGameRequest gameRequest) {
 		return this.gameService.createGame(player, gameRequest);
+	}
+
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public ResponseEntity<GameDetails> findQuickGame(@RequestHeader(PLAYER) String player) {
+		return gameService.findAvailableQuickGame(player)
+				.map(ResponseEntity::ok)
+				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
 
 	@GetMapping("/{id}")

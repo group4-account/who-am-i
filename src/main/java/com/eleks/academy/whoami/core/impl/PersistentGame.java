@@ -13,9 +13,55 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
+import java.util.ArrayList;
 
 public class PersistentGame implements Game, SynchronousGame {
 
+	private final String id;
+
+	private int maxPlayers;
+
+	private List<PlayerWithState> playerWithStateList = new ArrayList<>();
+
+	private final Queue<GameState> turns = new LinkedBlockingQueue<>();
+
+	/**
+	 * Creates a new game (game room) and makes a first enrolment turn by a current player
+	 * so that he won't have to enroll to the game he created
+	 *
+	 * @param hostPlayer player to initiate a new game
+	 */
+	public PersistentGame(String hostPlayer, Integer maxPlayers) {
+		this.id = String.format("%d-%d",
+				Instant.now().toEpochMilli(),
+				Double.valueOf(Math.random() * 999).intValue());
+
+	}
+
+	public PersistentGame(Integer maxPlayers) {
+		this.id = String.format("%d-%d",
+				Instant.now().toEpochMilli(),
+				Double.valueOf(Math.random() * 999).intValue());
+
+		this.maxPlayers = maxPlayers;
+		this.turns.add(new WaitingForPlayers(this.maxPlayers));
+	}
+
+	@Override
+	public Optional<SynchronousPlayer> findPlayer(String player) {
+		return this.applyIfPresent(this.turns.peek(), gameState -> gameState.findPlayer(player));
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
+	}
+
+	@Override
+	public SynchronousPlayer enrollToGame(String player) {
+		SynchronousPlayer synchronousPlayer = new PersistentPlayer(player);
+		playerWithStateList.add(new PlayerWithState(synchronousPlayer, null, null));
+		return synchronousPlayer;
     private final Lock turnLock = new ReentrantLock();
     private final String id;
     private List<PlayerWithState> playerWithStateList = new ArrayList<>();
@@ -77,7 +123,10 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	@Override
 	public boolean isAvailable() {
-		return this.turns.peek() instanceof WaitingForPlayers;
+		if (playerWithStateList.size() == maxPlayers && turns.peek() instanceof WaitingForPlayers) {
+			turns.add(turns.poll().next());
+		}
+		return playerWithStateList.size() < maxPlayers;
 	}
 
 	@Override
