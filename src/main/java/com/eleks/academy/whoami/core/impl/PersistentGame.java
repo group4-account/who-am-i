@@ -5,6 +5,7 @@ import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.core.state.WaitingForPlayers;
+import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
@@ -22,6 +23,7 @@ public class PersistentGame implements Game, SynchronousGame {
 	private int maxPlayers;
 	private Map<String, PersistentPlayer> players;
 	private final Queue<GameState> turns = new LinkedBlockingQueue<>();
+	private final Queue<PlayerState> playerStates = new LinkedBlockingQueue<>();
 
 	/**
 	 * Creates a new game (game room) and makes a first enrolment turn by a current player
@@ -57,12 +59,10 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	@Override
 	public SynchronousPlayer enrollToGame(String player) {
-		if (turns.isEmpty()){
-			turns.add(new WaitingForPlayers(4));
-		}
-		var turn = turns.peek();
-		var toReturn = ((WaitingForPlayers)turn).addPlayer(player);
-		return toReturn;
+		var playerState = playerStates.peek();
+		SynchronousPlayer synchronousPlayer = new PersistentPlayer(player);
+		playerWithStateList.add(new PlayerWithState(synchronousPlayer, null, playerState));
+		return synchronousPlayer;
 	}
 
 	@Override
@@ -87,11 +87,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	@Override
 	public boolean isAvailable() {
-//		return this.turns.peek() instanceof WaitingForPlayers;
-		if (playerWithStateList.size() == maxPlayers && turns.peek() instanceof WaitingForPlayers) {
-			turns.add(turns.poll().next());
-		}
-		return playerWithStateList.size() < maxPlayers;
+		return this.turns.peek() instanceof WaitingForPlayers;
 	}
 
 	@Override

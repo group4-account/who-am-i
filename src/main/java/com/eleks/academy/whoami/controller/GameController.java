@@ -42,10 +42,8 @@ public class GameController {
 
 	@PostMapping
 	@ResponseStatus(HttpStatus.CREATED)
-	public ResponseEntity<GameDetails> findQuickGame(@RequestHeader(PLAYER) String player) {
-		return gameService.findAvailableQuickGame(player)
-				.map(ResponseEntity::ok)
-				.orElseGet(() -> ResponseEntity.notFound().build());
+	public Optional<GameDetails> findQuickGame(@RequestHeader(PLAYER) String player) {
+		return gameService.findAvailableQuickGame(player);
 	}
 
 	@GetMapping("/{id}")
@@ -58,6 +56,7 @@ public class GameController {
 
 
 	@PostMapping("/{id}/players")
+	@ResponseStatus(HttpStatus.CREATED)
 	public SynchronousPlayer enrollToGame(@PathVariable("id") String id,
 										  @RequestHeader(PLAYER) String player) {
 		return this.gameService.enrollToGame(id, player).orElseThrow(() -> new GameException("No player"));
@@ -77,7 +76,7 @@ public class GameController {
 	}
 
 	@PostMapping("/{id}/characters")
-	@ResponseStatus(HttpStatus.OK)
+	@ResponseStatus(HttpStatus.CREATED)
 	public void suggestCharacter(@PathVariable("id") String id,
 								 @RequestHeader(PLAYER) String player,
 								 @Valid @RequestBody CharacterSuggestion suggestion) {

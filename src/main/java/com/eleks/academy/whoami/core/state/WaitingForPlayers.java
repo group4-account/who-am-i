@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public final class WaitingForPlayers extends AbstractGameState {
 
-	private final Map<String, PersistentPlayer> players;
+	private final Map<String, SynchronousPlayer> players;
 	private int maxPlayers;
 	public WaitingForPlayers(int maxPlayers) {
 		super(0, maxPlayers);
@@ -20,7 +20,7 @@ public final class WaitingForPlayers extends AbstractGameState {
 		this.players = new HashMap<>(maxPlayers);
 	}
 
-	private WaitingForPlayers(int maxPlayers, Map<String, PersistentPlayer> players) {
+	private WaitingForPlayers(int maxPlayers, Map<String, SynchronousPlayer> players) {
 		super(players.size(), maxPlayers);
 		this.players = players;
 	}
@@ -30,10 +30,9 @@ public final class WaitingForPlayers extends AbstractGameState {
 
 		return new SuggestingCharacters (players);
 	}
-    public SynchronousPlayer addPlayer(String playerName){
-        var player = new PersistentPlayer(playerName);
-        this.players.put(playerName, player);
-        return player;
+    public SynchronousPlayer addPlayer(SynchronousPlayer player){
+		players.put(player.getName(), player);
+		return player;
     }
 
 	@Override
@@ -46,28 +45,11 @@ public final class WaitingForPlayers extends AbstractGameState {
 		return this.players.size();
 	}
 
-//	@Override
-//	public SynchronousPlayer add(SynchronousPlayer player) {
-//		players.put(player.getName(), player);
-//		return player;
-//	}
-	public SynchronousPlayer enrollToGame(String player) {
-		PersistentPlayer synchronousPlayer = null;
-
-		if(this.getPlayersInGame() < this.maxPlayers){
-			synchronousPlayer = new PersistentPlayer(player);
-			this.players.put(player, synchronousPlayer);
-		}
-		if (this.getPlayersInGame() == this.maxPlayers)
-			this.next();
-		return synchronousPlayer;
-	}
-
 	@Override
 	public GameState makeTurn(Answer answer) {
-		Map<String, PersistentPlayer> nextPlayers = new HashMap<>(this.players);
+		Map<String, SynchronousPlayer> nextPlayers = new HashMap<>(this.players);
 		if (nextPlayers.containsKey(answer.getPlayer()) || maxPlayers == this.getPlayersInGame()) {
-			throw new GameException("Cannot enroll to the game");
+//			new GameException("Cannot enroll to the game");
 		} else {
 			nextPlayers.put(answer.getPlayer(), new PersistentPlayer(answer.getPlayer()));
 		}

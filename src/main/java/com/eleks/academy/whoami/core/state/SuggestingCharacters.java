@@ -4,11 +4,9 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.GameCharacter;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.core.impl.StartGameAnswer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
-import jdk.jfr.Percentage;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -23,12 +21,12 @@ public final class SuggestingCharacters extends AbstractGameState {
 
 	private final Lock lock = new ReentrantLock();
 
-	private final Map<String, PersistentPlayer> players;
+	private final Map<String, SynchronousPlayer> players;
 	private final Map<String, List<GameCharacter>> suggestedCharacters;
 	private final Map<String, String> playerCharacterMap;
 	private List<PlayerWithState> playerWithStateList;
 
-	public SuggestingCharacters(Map<String, PersistentPlayer> players) {
+	public SuggestingCharacters(Map<String, SynchronousPlayer> players) {
 		super(players.size(), players.size());
 
 		this.players = players;
@@ -41,7 +39,6 @@ public final class SuggestingCharacters extends AbstractGameState {
 				.build()));
 	}
 
-//	@Override
 	public SynchronousPlayer add(SynchronousPlayer player) {
 		return player;
 	}

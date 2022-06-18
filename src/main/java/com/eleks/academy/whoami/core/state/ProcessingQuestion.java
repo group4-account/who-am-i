@@ -15,9 +15,9 @@ import java.util.Optional;
 public final class ProcessingQuestion extends AbstractGameState {
 
     private final String currentPlayer;
-    private final Map<String, PersistentPlayer> players;
+    private final Map<String, SynchronousPlayer> players;
 
-    public ProcessingQuestion(String currentPlayer, Map<String, PersistentPlayer> players) {
+    public ProcessingQuestion(String currentPlayer, Map<String, SynchronousPlayer> players) {
         super(players.size(), players.size());
 
         this.players = players;
