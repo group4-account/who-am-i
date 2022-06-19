@@ -119,10 +119,8 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public int getPlayersCount(String id, String player) {
-		return this.gameRepository.findById(id)
-				.map(item -> item.getPlayersInGame().size())
-				.orElse(0);
+	public int getAllPlayersCount() {
+		return this.gameRepository.getAllPlayersCount();
 
 	}
 	@Override

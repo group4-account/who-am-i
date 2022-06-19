@@ -52,4 +52,12 @@ public class GameInMemoryRepository implements GameRepository {
 		return Optional.ofNullable(this.games.get(id));
 	}
 
+	@Override
+	public int getAllPlayersCount() {
+		return games.values()
+				.stream()
+				.map(game -> game.getPlayersInGame().size())
+				.collect(Collectors.summingInt(Integer::intValue));
+	}
+
 }
