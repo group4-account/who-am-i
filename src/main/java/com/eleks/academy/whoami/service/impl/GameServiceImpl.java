@@ -105,7 +105,19 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public Optional<TurnDetails> findTurnInfo(String id, String player) {
-		return Optional.empty();
+		var currentGame = gameRepository.findById(id);
+		var answers = currentGame.map(x -> x.getCurrentTurnInfo())
+				.orElse(Optional.empty());
+
+		var currentPlayer = answers
+				.map(answer -> answer.findPlayer(player))
+				.orElse(Optional.empty());
+
+		return answers
+					.map(gamestate -> new TurnDetails(
+							currentPlayer.get(),
+							answers.get().getPlayersWithState()));
+
 	}
 
 	@Override
