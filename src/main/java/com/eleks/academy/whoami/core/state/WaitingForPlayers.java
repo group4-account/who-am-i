@@ -65,6 +65,11 @@ public final class WaitingForPlayers extends AbstractGameState {
     }
 
     @Override
+    public void makeLeave(Answer answer) {
+        players.remove(answer.getPlayer());
+    }
+
+    @Override
     public List<PlayerWithState> getPlayersWithState() {
         return players.values().stream().toList();
     }

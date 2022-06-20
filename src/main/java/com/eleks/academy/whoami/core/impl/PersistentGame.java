@@ -59,7 +59,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void askQuestion(String player, String message) {
-
+        this.makeTurn(new Answer(player, message, null));
 
     }
 
@@ -113,6 +113,17 @@ public class PersistentGame implements Game, SynchronousGame {
         } finally {
             this.turnLock.unlock();
         }
+    }
+    @Override
+    public void makeLeave(Answer answer) {
+        this.turnLock.lock();
+
+
+            Optional.ofNullable(this.turns.peek()).ifPresent(
+                    gameState -> makeLeave(answer)
+            );
+
+            this.turnLock.unlock();
     }
 
     @Override

@@ -26,6 +26,11 @@ public final class GameFinished extends AbstractGameState {
 	}
 
 	@Override
+	public void makeLeave(Answer answer) {
+
+	}
+
+	@Override
 	public List<PlayerWithState> getPlayersWithState() {
 		return null;
 	}

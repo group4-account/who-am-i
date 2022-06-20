@@ -50,4 +50,6 @@ public sealed interface GameState permits AbstractGameState {
 	}
 
     GameState makeTurn(Answer player);
+
+	void makeLeave(Answer answer);
 }

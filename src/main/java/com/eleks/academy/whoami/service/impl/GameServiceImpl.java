@@ -101,5 +101,15 @@ public class GameServiceImpl implements GameService {
 	public void answerQuestion(String id, String player, String answer) {
 
 	}
+	@Override
+	public void leaveGame(String id, String player) {
+		this.gameRepository.findById(id)
+				.ifPresentOrElse(
+						game -> game.makeLeave(new Answer(player)),
+						() -> {
+							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
+						}
+				);
 
+	}
 }

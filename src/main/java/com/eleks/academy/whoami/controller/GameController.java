@@ -101,5 +101,9 @@ public class GameController {
 		this.gameService.answerQuestion(id, player, message.getMessage());
 
 	}
-
+	@PostMapping("/{id}/leaveGame")
+	public void leaveGame(@PathVariable("id") String id,
+							 @RequestHeader(PLAYER) String player) {
+		this.gameService.findAvailableGames();
+	}
 }

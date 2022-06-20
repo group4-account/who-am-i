@@ -29,4 +29,7 @@ public interface SynchronousGame {
 	void answerQuestion(String player, Answer answer);
 
 	SynchronousGame start();
+
+	void makeLeave(Answer answer);
+
 }

@@ -26,7 +26,7 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 
 	@Override
 	public Future<String> getQuestion() {
-		return null;
+		return question;
 	}
 
 	@Override

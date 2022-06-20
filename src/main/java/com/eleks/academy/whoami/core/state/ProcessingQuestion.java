@@ -8,15 +8,13 @@ import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.util.stream.Collectors.*;
 
 // TODO: Implement makeTurn(...) and next() methods, pass a turn to next player
@@ -31,6 +29,11 @@ public final class ProcessingQuestion extends AbstractGameState {
         this.players = players;
 
         this.currentPlayer = currentPlayer;
+
+        players.get(this.currentPlayer).setState(ASKING);
+        players.values().stream()
+                .filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getName(), this.currentPlayer))
+                .forEach(player -> player.setState(ANSWERING));
     }
 
     @Override
@@ -43,10 +46,7 @@ public final class ProcessingQuestion extends AbstractGameState {
         return Optional.ofNullable(this.players.get(player).getPlayer());
     }
 
-    @Override
-    public String getCurrentTurn() {
-        return null;
-    }
+
 
     @Override
     public List<PlayerWithState> getPlayersWithState() {
@@ -75,7 +75,7 @@ public final class ProcessingQuestion extends AbstractGameState {
         long yesAnswers = answers.stream().filter("YES"::equals).count();
         long noAnswers = answers.stream().filter("NO"::equals).count();
         if (yesAnswers < noAnswers) {
-            int currentPlayerIndex = 0;
+            int currentPlayerIndex;
             List<String> collect = new ArrayList<>(this.players.keySet());
             currentPlayerIndex = collect.indexOf(currentPlayer.getName());
             currentPlayerIndex = currentPlayerIndex + 1 >= this.players.size() ? 0 : currentPlayerIndex + 1;
@@ -83,5 +83,10 @@ public final class ProcessingQuestion extends AbstractGameState {
         } else {
             return new ProcessingQuestion(currentPlayer.getName(), players);
         }
+    }
+
+    @Override
+    public void makeLeave(Answer answer) {
+
     }
 }
