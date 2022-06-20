@@ -16,4 +16,5 @@ public interface GameRepository {
 
 	Optional<SynchronousGame> findById(String id);
 
+    int getAllPlayersCount();
 }

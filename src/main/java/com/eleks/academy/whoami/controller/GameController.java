@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static com.eleks.academy.whoami.utils.StringUtils.Headers.PLAYER;
 
@@ -63,13 +62,12 @@ public class GameController {
 
 	}
 
-	@GetMapping("/{id}/playersCount")
-	public int getPlayersCount(@PathVariable("id") String id,
-										  @RequestHeader(PLAYER) String player) {
-		return this.gameService.getPlayersCount(id, player);
+	@GetMapping("/all-players-count")
+	public int getAllPlayersCount() {
+		return this.gameService.getAllPlayersCount();
 	}
 
-	@GetMapping("/{id}/readyPlayersCount")
+	@GetMapping("/{id}/ready-players-count")
 	public int getReadyPlayersCount(@PathVariable("id") String id,
 										  @RequestHeader(PLAYER) String player) {
 		return this.gameService.getReadyPlayersCount(id, player);

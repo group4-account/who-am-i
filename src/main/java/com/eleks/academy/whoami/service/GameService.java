@@ -34,7 +34,7 @@ public interface GameService {
 
 	void answerQuestion(String id, String player, String answer);
 
-	int getPlayersCount(String id, String player);
+	int getAllPlayersCount();
 
 	int getReadyPlayersCount(String id, String player);
 
