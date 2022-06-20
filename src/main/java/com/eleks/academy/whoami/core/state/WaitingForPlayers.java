@@ -3,7 +3,6 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
@@ -65,8 +64,10 @@ public final class WaitingForPlayers extends AbstractGameState {
     }
 
     @Override
-    public void makeLeave(Answer answer) {
-        players.remove(answer.getPlayer());
+    public GameState makeLeave(Answer answer) {
+        Map<String, PlayerWithState> nextPlayers = new HashMap<>(this.players);
+        nextPlayers.remove(answer.getPlayer());
+        return new WaitingForPlayers(getMaxPlayers(), nextPlayers);
     }
 
     @Override

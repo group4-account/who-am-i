@@ -3,16 +3,11 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
-import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.util.stream.Collectors.*;
@@ -86,7 +81,7 @@ public final class ProcessingQuestion extends AbstractGameState {
     }
 
     @Override
-    public void makeLeave(Answer answer) {
-
+    public GameState makeLeave(Answer answer) {
+        return null;
     }
 }

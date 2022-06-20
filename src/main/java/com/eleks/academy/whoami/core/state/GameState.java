@@ -3,7 +3,6 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.List;
@@ -51,5 +50,5 @@ public sealed interface GameState permits AbstractGameState {
 
     GameState makeTurn(Answer player);
 
-	void makeLeave(Answer answer);
+	GameState makeLeave(Answer answer);
 }

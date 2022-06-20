@@ -118,12 +118,13 @@ public class PersistentGame implements Game, SynchronousGame {
     public void makeLeave(Answer answer) {
         this.turnLock.lock();
 
-
-            Optional.ofNullable(this.turns.peek()).ifPresent(
-                    gameState -> makeLeave(answer)
-            );
-
+        try {
+            Optional.ofNullable(this.turns.poll())
+                    .map(gameState -> gameState.makeLeave(answer))
+                    .ifPresent(this.turns::add);
+        } finally {
             this.turnLock.unlock();
+        }
     }
 
     @Override

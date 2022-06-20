@@ -74,9 +74,10 @@ public final class SuggestingCharacters extends AbstractGameState {
     }
 
     @Override
-    public void makeLeave(Answer answer) {
+    public GameState makeLeave(Answer answer) {
         this.players.remove(answer.getPlayer());
         this.suggestedCharacters.remove(answer.getPlayer());
+        return this;
     }
 
     private GameState suggestCharacter(String player, String character) {

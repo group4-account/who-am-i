@@ -1,5 +1,6 @@
 package com.eleks.academy.whoami.service;
 
+import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
@@ -18,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -133,5 +135,25 @@ class GameServiceTest {
         GameDetails gameDetails = gameService.createGame("player-1", gameRequest);
         String status = gameDetails.getStatus();
         assertEquals(waitingForPlayersStatus, status);
+    }
+    @Test
+    void leaveTheGame() {
+        final String playerId = "player";
+        final String playerId2 = "player2";
+        AtomicReference<Integer> id1 = new AtomicReference<>();
+        Optional<SynchronousGame> game = gameRepository.findById(gameId);
+        game.ifPresent(a -> id1.set(a.getPlayersInGame().size()));
+        gameService.enrollToGame(gameId, playerId);
+        game.ifPresent(a -> id1.set(a.getPlayersInGame().size()));
+        assertThat(id1.get()).isEqualTo(2);
+        gameService.leaveGame(gameId, playerId);
+        game.ifPresent(a -> id1.set(a.getPlayersInGame().size()));
+        assertThat(id1.get()).isEqualTo(1);
+        gameService.enrollToGame(gameId, playerId2);
+        gameService.enrollToGame(gameId, "sas");
+        game.ifPresent(a -> id1.set(a.getPlayersInGame().size()));
+        assertThat(id1.get()).isEqualTo(3);
+
+
     }
 }

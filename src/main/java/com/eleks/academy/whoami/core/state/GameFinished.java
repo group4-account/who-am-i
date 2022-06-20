@@ -2,10 +2,8 @@ package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,8 +24,8 @@ public final class GameFinished extends AbstractGameState {
 	}
 
 	@Override
-	public void makeLeave(Answer answer) {
-
+	public GameState makeLeave(Answer answer) {
+		return null;
 	}
 
 	@Override
