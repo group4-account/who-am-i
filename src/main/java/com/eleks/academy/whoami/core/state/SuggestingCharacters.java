@@ -7,6 +7,8 @@ import com.eleks.academy.whoami.core.impl.GameCharacter;
 import com.eleks.academy.whoami.core.impl.StartGameAnswer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -77,7 +79,7 @@ public final class SuggestingCharacters extends AbstractGameState {
     public GameState makeLeave(Answer answer) {
         this.players.remove(answer.getPlayer());
         this.suggestedCharacters.remove(answer.getPlayer());
-        return this;
+        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game is disbanded you are looser");
     }
 
     private GameState suggestCharacter(String player, String character) {
