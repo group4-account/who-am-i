@@ -62,12 +62,12 @@ public class GameController {
 
 	}
 
-	@GetMapping("/allPlayersCount")
+	@GetMapping("/all-players-count")
 	public int getAllPlayersCount() {
 		return this.gameService.getAllPlayersCount();
 	}
 
-	@GetMapping("/{id}/readyPlayersCount")
+	@GetMapping("/{id}/ready-players-count")
 	public int getReadyPlayersCount(@PathVariable("id") String id,
 										  @RequestHeader(PLAYER) String player) {
 		return this.gameService.getReadyPlayersCount(id, player);
