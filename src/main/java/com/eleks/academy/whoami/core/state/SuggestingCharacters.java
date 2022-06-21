@@ -48,7 +48,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 	public GameState next() {
 		List<String> playersName = players.keySet().stream().toList();
 		return Optional.of(this)
-				.filter(SuggestingCharacters::fincdcdished)
+				.filter(SuggestingCharacters::finished)
 				.map(SuggestingCharacters::assignCharacters)
 				.map(then -> new ProcessingQuestion(playersName.get(0), this.players))
 				.orElseThrow(() -> new GameException("Cannot start game"));
