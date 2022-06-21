@@ -19,9 +19,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	private final Lock turnLock = new ReentrantLock();
 	private final String id;
-	private List<PlayerWithState> playerWithStateList = new ArrayList<>();
 	private int maxPlayers;
-	private Map<String, PersistentPlayer> players;
 	private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 	private final Queue<PlayerState> playerStates = new LinkedBlockingQueue<>();
 
@@ -59,10 +57,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	@Override
 	public SynchronousPlayer enrollToGame(String player) {
-		var playerState = playerStates.peek();
-		SynchronousPlayer synchronousPlayer = new PersistentPlayer(player);
-		playerWithStateList.add(new PlayerWithState(synchronousPlayer, null, playerState));
-		return synchronousPlayer;
+		throw new UnsupportedOperationException();
 	}
 
 	@Override
@@ -82,7 +77,15 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	@Override
 	public SynchronousGame start() {
-		return null;
+		this.turnLock.lock();
+		try {
+			Optional.ofNullable(this.turns.poll())
+					.map(GameState::next)
+					.ifPresent(this.turns::add);
+		} finally {
+			this.turnLock.unlock();
+		}
+		return this;
 	}
 
 	@Override

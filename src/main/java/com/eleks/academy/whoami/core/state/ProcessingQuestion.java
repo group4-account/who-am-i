@@ -15,9 +15,9 @@ import java.util.Optional;
 public final class ProcessingQuestion extends AbstractGameState {
 
     private final String currentPlayer;
-    private final Map<String, SynchronousPlayer> players;
+    private final Map<String, PlayerWithState> players;
 
-    public ProcessingQuestion(String currentPlayer, Map<String, SynchronousPlayer> players) {
+    public ProcessingQuestion(String currentPlayer, Map<String, PlayerWithState> players) {
         super(players.size(), players.size());
 
         this.players = players;
@@ -32,7 +32,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
     @Override
     public Optional<SynchronousPlayer> findPlayer(String player) {
-        return Optional.ofNullable(this.players.get(player));
+        return Optional.ofNullable(this.players.get(player).getPlayer());
     }
 
     @Override
@@ -47,12 +47,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
     @Override
     public List<PlayerWithState> getPlayersWithState() {
-        List<PlayerWithState> playerWithStateList = new ArrayList<>();
-        this.players.values().forEach(player -> playerWithStateList.add(PlayerWithState.builder()
-                .state(PlayerState.NOT_READY)
-                .player(player)
-                .build()));
-        return  playerWithStateList;
+        return players.values().stream().toList();
     }
 
     @Override

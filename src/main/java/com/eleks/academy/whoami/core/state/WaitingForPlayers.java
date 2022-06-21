@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 public final class WaitingForPlayers extends AbstractGameState {
 
-	private final Map<String, SynchronousPlayer> players;
+	private final Map<String, PlayerWithState> players;
 	private int maxPlayers;
 	public WaitingForPlayers(int maxPlayers) {
 		super(0, maxPlayers);
@@ -20,7 +20,7 @@ public final class WaitingForPlayers extends AbstractGameState {
 		this.players = new HashMap<>(maxPlayers);
 	}
 
-	private WaitingForPlayers(int maxPlayers, Map<String, SynchronousPlayer> players) {
+	private WaitingForPlayers(int maxPlayers, Map<String, PlayerWithState> players) {
 		super(players.size(), maxPlayers);
 		this.players = players;
 	}
@@ -28,16 +28,12 @@ public final class WaitingForPlayers extends AbstractGameState {
 	@Override
 	public GameState next() {
 
-		return new SuggestingCharacters (players);
+		return new SuggestingCharacters (this.players);
 	}
-    public SynchronousPlayer addPlayer(SynchronousPlayer player){
-		players.put(player.getName(), player);
-		return player;
-    }
 
 	@Override
 	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return Optional.ofNullable(this.players.get(player));
+		return Optional.ofNullable(this.players.get(player).getPlayer());
 	}
 
 	@Override
@@ -47,11 +43,13 @@ public final class WaitingForPlayers extends AbstractGameState {
 
 	@Override
 	public GameState makeTurn(Answer answer) {
-		Map<String, SynchronousPlayer> nextPlayers = new HashMap<>(this.players);
+		Map<String, PlayerWithState> nextPlayers = new HashMap<>(this.players);
 		if (nextPlayers.containsKey(answer.getPlayer()) || maxPlayers == this.getPlayersInGame()) {
 //			new GameException("Cannot enroll to the game");
 		} else {
-			nextPlayers.put(answer.getPlayer(), new PersistentPlayer(answer.getPlayer()));
+			PersistentPlayer persistentPlayer = new PersistentPlayer(answer.getPlayer());
+			nextPlayers.put(answer.getPlayer(),
+					new PlayerWithState(persistentPlayer, null, PlayerState.NOT_READY));
 		}
 		if (nextPlayers.size() == getMaxPlayers()) {
 			return new SuggestingCharacters(nextPlayers);
@@ -62,12 +60,7 @@ public final class WaitingForPlayers extends AbstractGameState {
 
 	@Override
 	public List<PlayerWithState> getPlayersWithState() {
-		List<PlayerWithState> playerWithStateList = new ArrayList<>();
-		this.players.values().forEach(player -> playerWithStateList.add(PlayerWithState.builder()
-						.state(PlayerState.NOT_READY)
-						.player(player)
-						.build()));
-		return playerWithStateList;
+		return players.values().stream().toList();
 	}
 
 	@Override
