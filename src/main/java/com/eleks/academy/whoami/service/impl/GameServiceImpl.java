@@ -4,6 +4,7 @@ import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
+import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.response.GameDetails;
@@ -17,9 +18,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -110,7 +109,20 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public Optional<TurnDetails> findTurnInfo(String id, String player) {
-		return Optional.empty();
+
+		final var currentGame = gameRepository.findById(id);
+		var answers = currentGame
+				.flatMap(SynchronousGame::getCurrentTurnInfo);
+
+		var currentPlayer = answers
+				.flatMap(answer -> answer.findPlayer(player))
+				.orElseThrow(/* some exception*/);
+
+		return answers
+				.map(gamestate -> new TurnDetails(
+						currentPlayer,
+						answers.map(GameState::getPlayersWithState)
+								.orElse(new ArrayList<>())));
 	}
 
 	@Override
