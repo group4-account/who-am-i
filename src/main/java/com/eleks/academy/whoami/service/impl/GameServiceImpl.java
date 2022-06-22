@@ -38,15 +38,6 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public Optional<GameDetails> findAvailableQuickGame(String player) {
 		Map<String, SynchronousGame> games = this.gameRepository.findAvailableQuickGames();
-		Map<String, SynchronousGame> notAvailableQuickGames = this.gameRepository.findNotAvailableQuickGames();
-		if (!notAvailableQuickGames.isEmpty()) {
-		notAvailableQuickGames.values().stream()
-					.filter(game -> game.getPlayersInGame().size() == playersSize)
-					.filter(synchronousGame -> synchronousGame.getStatus().equals(suggestingCharactersStatus))
-					.filter(game2 -> game2.getPlayersInGame().stream()
-							.filter(player1 -> player1.getState().equals(PlayerState.READY)).count() == 4)
-					.forEach(SynchronousGame::start);
-		}
 
 		if (games.isEmpty()) {
 			GameDetails game = createQuickGame();
