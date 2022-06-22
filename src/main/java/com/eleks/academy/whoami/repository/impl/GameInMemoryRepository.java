@@ -32,6 +32,10 @@ public class GameInMemoryRepository implements GameRepository {
 	public Map<String, SynchronousGame> findAvailableQuickGames() {
 		return filterByValue(games, availableStatus -> availableStatus.isAvailable() == true);
 	}
+	@Override
+	public Map<String, SynchronousGame> findNotAvailableQuickGames() {
+		return filterByValue(games, availableStatus -> availableStatus.isAvailable() == false);
+	}
 
 	private static <K, V> Map<K, V> filterByValue(Map<K, V> map, Predicate<V> predicate) {
 		return map.entrySet()

@@ -12,6 +12,8 @@ public interface GameRepository {
 
 	Map<String, SynchronousGame> findAvailableQuickGames();
 
+	Map<String, SynchronousGame> findNotAvailableQuickGames();
+
 	SynchronousGame save(SynchronousGame game);
 
 	Optional<SynchronousGame> findById(String id);
