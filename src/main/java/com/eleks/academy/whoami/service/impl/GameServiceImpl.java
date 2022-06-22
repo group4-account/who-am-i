@@ -116,7 +116,7 @@ public class GameServiceImpl implements GameService {
 
 		var currentPlayer = answers
 				.flatMap(answer -> answer.findPlayer(player))
-				.orElseThrow(NoSuchElementException::new);
+				.orElseThrow(() -> new NoSuchElementException("Player has not answered"));
 
 		return answers
 				.map(gamestate -> new TurnDetails(

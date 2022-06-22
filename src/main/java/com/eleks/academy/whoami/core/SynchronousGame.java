@@ -30,5 +30,5 @@ public interface SynchronousGame {
 
 	SynchronousGame start();
 
-	Optional <GameState> getCurrentTurnInfo();
+	Optional<GameState> getCurrentTurnInfo();
 }
