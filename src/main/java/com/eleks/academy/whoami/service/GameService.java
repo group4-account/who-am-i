@@ -33,4 +33,6 @@ public interface GameService {
 	void answerQuestion(String id, String player, String answer);
 
 	void leaveGame(String id, String player);
+
+	Optional<GameDetails> findAvailableQuickGame(String player);
 }

@@ -18,13 +18,14 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
-
+	private int playersSize = 4;
 	private final GameRepository gameRepository;
 
 	@Override
@@ -32,6 +33,26 @@ public class GameServiceImpl implements GameService {
 		return this.gameRepository.findAllAvailable(player)
 				.map(GameLight::of)
 				.toList();
+	}
+
+	@Override
+	public Optional<GameDetails> findAvailableQuickGame(String player) {
+		Map<String, SynchronousGame> games = this.gameRepository.findAvailableQuickGames();
+
+		if (games.isEmpty()) {
+			GameDetails game = createQuickGame();
+			enrollToGame(game.getId(), player);
+			return gameRepository.findById(game.getId()).map(GameDetails::of);
+		}
+
+		String firstGame = games.keySet().stream().findFirst().get();
+		Optional<SynchronousPlayer> enrolledPlayer = enrollToGame(games.get(firstGame).getId(), player);
+		String gameFromRepository = games.get(firstGame).getId();
+		return gameRepository.findById(gameFromRepository).map(GameDetails::of);
+	}
+
+	private GameDetails createQuickGame() {
+		return GameDetails.of(gameRepository.save(new PersistentGame(playersSize)));
 	}
 
 	@Override
@@ -66,7 +87,7 @@ public class GameServiceImpl implements GameService {
 	public void suggestCharacter(String id, String player, CharacterSuggestion suggestion) {
 		this.gameRepository.findById(id)
 				.ifPresentOrElse(
-						game -> game.makeTurn(new Answer(player, suggestion.getCharacter(), suggestion.getName())),
+						game -> game.makeTurn(new Answer(player, suggestion.getCharacter())),
 						() -> {
 							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
 						}

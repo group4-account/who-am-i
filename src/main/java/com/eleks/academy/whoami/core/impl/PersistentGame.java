@@ -16,7 +16,7 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 public class PersistentGame implements Game, SynchronousGame {
-
+    private int maxPlayers;
     private final Lock turnLock = new ReentrantLock();
     private final String id;
     private final Queue<GameState> turns = new LinkedBlockingQueue<>();
@@ -34,6 +34,14 @@ public class PersistentGame implements Game, SynchronousGame {
         this.turns.add(new WaitingForPlayers(maxPlayers));
         this.makeTurn(new Answer(hostPlayer));
 
+    }
+    public PersistentGame(Integer maxPlayers) {
+        this.id = String.format("%d-%d",
+                Instant.now().toEpochMilli(),
+                Double.valueOf(Math.random() * 999).intValue());
+
+        this.maxPlayers = maxPlayers;
+        this.turns.add(new WaitingForPlayers(this.maxPlayers));
     }
 
     @Override
@@ -59,7 +67,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void askQuestion(String player, String message) {
-        this.makeTurn(new Answer(player, message, null));
+        this.makeTurn(new Answer(player, message));
 
     }
 

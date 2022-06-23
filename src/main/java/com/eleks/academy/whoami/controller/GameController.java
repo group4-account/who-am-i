@@ -32,12 +32,15 @@ public class GameController {
 	public List<GameLight> findAvailableGames(@RequestHeader(PLAYER) String player) {
 		return this.gameService.findAvailableGames(player);
 	}
-
-	@PostMapping
-	@ResponseStatus(HttpStatus.CREATED)
 	public GameDetails createGame(@RequestHeader(PLAYER) String player,
 								  @Valid @RequestBody NewGameRequest gameRequest) {
 		return this.gameService.createGame(player, gameRequest);
+	}
+
+	@PostMapping
+	@ResponseStatus(HttpStatus.CREATED)
+	public Optional<GameDetails> findQuickGame(@RequestHeader(PLAYER) String player) {
+		return gameService.findAvailableQuickGame(player);
 	}
 
 	@GetMapping("/{id}")

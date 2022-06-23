@@ -92,8 +92,7 @@ class GameControllerTest {
 								.contentType(MediaType.APPLICATION_JSON)
 								.content("""
 										{
-										    "character": "char",
-										    "name": "Genry"
+										    "character": "char"
 										}"""))
 				.andExpect(status().isOk());
 		verify(gameService, times(1)).suggestCharacter(eq("1234"), eq("player"), any(CharacterSuggestion.class));
@@ -101,22 +100,21 @@ class GameControllerTest {
 	@Test
 	void failValidationSuggestCharacter() throws Exception {
 		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
-				eq(new CharacterSuggestion("Batman", "Edgard")));
+				eq(new CharacterSuggestion("Batman")));
 		this.mockMvc.perform(
 						MockMvcRequestBuilders.post("/games/1234/characters")
 								.header("X-Player", "player")
 								.contentType(APPLICATION_JSON)
 								.content("""
                                         {
-                                            "character": "a",
-                                            "name": "name
+                                            "character": "a"
                                         }"""))
 				.andExpect(status().isBadRequest());
 	}
 	@Test
 	void failValidationName() throws Exception {
 		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
-				eq(new CharacterSuggestion("Batman", "Valentine")));
+				eq(new CharacterSuggestion("Batman")));
 		this.mockMvc.perform(
 						MockMvcRequestBuilders.post("/games/1234/characters")
 								.header("X-Player", "p")
