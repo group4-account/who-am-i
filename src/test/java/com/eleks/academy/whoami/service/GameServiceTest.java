@@ -123,7 +123,7 @@ class GameServiceTest {
         assertNotEquals(char3,playerWithStateMap.get(player2).getPlayer().getCharacter());
 
         System.out.println(this.gameRepository.findById(gameId).get().getStatus());
-
+//
     }
 
     @Test
