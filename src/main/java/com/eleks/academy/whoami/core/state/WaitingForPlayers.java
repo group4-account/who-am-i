@@ -33,7 +33,8 @@ public final class WaitingForPlayers extends AbstractGameState {
 
 	@Override
 	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return Optional.ofNullable(this.players.get(player).getPlayer());
+			return Optional.ofNullable(this.players.get(player))
+					.map(PlayerWithState::getPlayer);
 	}
 
 	@Override

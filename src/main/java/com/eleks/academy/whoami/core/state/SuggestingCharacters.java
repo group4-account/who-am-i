@@ -50,13 +50,14 @@ public final class SuggestingCharacters extends AbstractGameState {
 		return Optional.of(this)
 				.filter(SuggestingCharacters::finished)
 				.map(SuggestingCharacters::assignCharacters)
-				.map(then -> new ProcessingQuestion(playersName.get(0), this.players))
+				.map(then -> new ProcessingQuestion(playersName.get(getMaxPlayers() - 1), this.players))
 				.orElseThrow(() -> new GameException("Cannot start game"));
 	}
 
 	@Override
 	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return Optional.ofNullable(this.players.get(player).getPlayer());
+		return Optional.ofNullable(this.players.get(player))
+				.map(PlayerWithState::getPlayer);
 	}
 
 	@Override
