@@ -6,26 +6,25 @@ import lombok.Data;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 @Data
 public class PersistentPlayer implements Player, SynchronousPlayer {
 
-	private String name;
+	private final String id;
 	private String character;
-
+	private String name;
 
 	private Queue<String> questionQueue;
-	private volatile CompletableFuture<String> question;
-	private volatile CompletableFuture<String> currentAnswer;
-	private volatile CompletableFuture<Boolean> readyForAnswerFuture;
+	private volatile String question;
+	private volatile String currentAnswer;
+	private volatile Boolean readyForAnswerFuture = true;
 
-	public PersistentPlayer(String name) {
-		this.name = Objects.requireNonNull(name);
+	public PersistentPlayer(String id) {
+		this.id = Objects.requireNonNull(id);
 	}
 
 	@Override
-	public Future<String> getQuestion() {
+	public String getQuestion() {
 		return question;
 	}
 
@@ -55,4 +54,7 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	}
 
 
+	public void setId(String player) {
+
+	}
 }

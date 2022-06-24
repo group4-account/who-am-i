@@ -24,15 +24,15 @@ public class RandomPlayer implements Player {
 	}
 
 	@Override
-	public String getName() {
+	public String getId() {
 		return this.name;
 	}
 
 	@Override
-	public Future<String> getQuestion() {
+	public String getQuestion() {
 		String question = availableQuestions.remove(0);
 		System.out.println("Player: " + name + ". Asks: " + question);
-		return CompletableFuture.completedFuture(question);
+		return question;
 	}
 
 	@Override

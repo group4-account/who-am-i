@@ -2,7 +2,6 @@ package com.eleks.academy.whoami.service;
 
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.response.GameDetails;
@@ -35,7 +34,7 @@ class GameServiceTest {
 
     @BeforeEach
     public void setMaxPlayers() {
-        gameRequest.setMaxPlayers(3);
+        gameRequest.setMaxPlayers(4);
         gameId = gameService.createGame("host", gameRequest).getId();
     }
 
@@ -54,7 +53,7 @@ class GameServiceTest {
         assertThat(byIdAndPlayer).isNotEmpty();
         Optional<SynchronousPlayer> synchronousPlayer =
                 byIdAndPlayer.map(GameDetails::getPlayers).map(a -> a.get(1)).map(PlayerWithState::getPlayer);
-        assertEquals(synchronousPlayer.get().getName(), player);
+        assertEquals(synchronousPlayer.get().getId(), player);
         assertNotNull(byIdAndPlayer.map(GameDetails::getId));
         assertNotNull(byIdAndPlayer.map(GameDetails::getStatus));
         assertNotNull(byIdAndPlayer.map(GameDetails::getPlayers));
@@ -66,11 +65,9 @@ class GameServiceTest {
     void testSetStateInSuggestCharacters() {
         final String player = "Player-1";
         final String player1 = "Player-2";
-        final String newPlayer = "Anton";
-        final String newPlayer1 = "Anton-1";
         final PlayerState previousState = PlayerState.NOT_READY;
         final PlayerState updateState = PlayerState.READY;
-        CharacterSuggestion character = new CharacterSuggestion("char");
+        CharacterSuggestion character = new CharacterSuggestion("char", null);
         gameService.enrollToGame(gameId, player);
         gameService.enrollToGame(gameId, player1);
         PlayerState playerState = this.gameRepository.findById(gameId)
@@ -79,7 +76,7 @@ class GameServiceTest {
         assertEquals(playerState, previousState);
         gameService.suggestCharacter(gameId, player, character);
         playerState = this.gameRepository.findById(gameId)
-                .filter(game -> game.findPlayer(newPlayer).isPresent())
+                .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().get(1).getState();
         assertEquals(updateState, playerState);
 
@@ -90,16 +87,19 @@ class GameServiceTest {
         final String player = "Player-1";
         final String player1 = "Player-2";
         final String player2 = "host";
+        final String player3 = "host1";
         final String char1 = "char";
         final String char2 = "char1";
         final String char3 = "char2";
+        final String char4 = "char3";
         final PlayerState previousState = PlayerState.NOT_READY;
         final PlayerState updateState = PlayerState.READY;
-        CharacterSuggestion character = new CharacterSuggestion(char1);
-        CharacterSuggestion character1 = new CharacterSuggestion(char2);
-        CharacterSuggestion character2 = new CharacterSuggestion(char3);
+        CharacterSuggestion character = new CharacterSuggestion(char1, null);
+        CharacterSuggestion character1 = new CharacterSuggestion(char2, null);
+        CharacterSuggestion character2 = new CharacterSuggestion(char3, null);
         gameService.enrollToGame(gameId, player);
         gameService.enrollToGame(gameId, player1);
+        gameService.enrollToGame(gameId, player2);
         PlayerState playerState = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().get(0).getState();
@@ -116,16 +116,53 @@ class GameServiceTest {
         Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().stream()
-                .collect(Collectors.toMap(a-> a.getPlayer().getName(), Function.identity()));
+                .collect(Collectors.toMap(a-> a.getPlayer().getId(), Function.identity()));
         assertEquals(updateState, playerState);
         assertNotEquals(char1,playerWithStateMap.get(player).getPlayer().getCharacter());
         assertNotEquals(char2,playerWithStateMap.get(player1).getPlayer().getCharacter());
         assertNotEquals(char3,playerWithStateMap.get(player2).getPlayer().getCharacter());
 
         System.out.println(this.gameRepository.findById(gameId).get().getStatus());
-//
-    }
 
+    }
+    @Test
+    @SneakyThrows
+    void testQuestionAndAnswer() {
+        final String player = "Player-1";
+        final String player1 = "Player-2";
+        final String player2 = "host";
+        final String player3 = "host1";
+        final String char1 = "char";
+        final String char2 = "char1";
+        final String char3 = "char2";
+        final String char4 = "char3";
+        final PlayerState previousState = PlayerState.NOT_READY;
+        final PlayerState updateState = PlayerState.READY;
+        CharacterSuggestion character = new CharacterSuggestion(char1, null);
+        CharacterSuggestion character1 = new CharacterSuggestion(char2, null);
+        CharacterSuggestion character2 = new CharacterSuggestion(char3, null);
+        CharacterSuggestion character3 = new CharacterSuggestion(char4, null);
+        gameService.enrollToGame(gameId, player);
+        gameService.enrollToGame(gameId, player1);
+        gameService.enrollToGame(gameId, player3);
+        PlayerState playerState = this.gameRepository.findById(gameId)
+                .filter(game -> game.findPlayer(player).isPresent())
+                .map(GameDetails::of).get().getPlayers().get(0).getState();
+        assertEquals(playerState, previousState);
+        gameService.suggestCharacter(gameId, player, character);
+        gameService.suggestCharacter(gameId, player1, character1);
+        gameService.suggestCharacter(gameId, player2, character2);
+        gameService.suggestCharacter(gameId, player3, character3);
+
+        gameService.askQuestion(gameId, player3, new CharacterSuggestion("Am i a human?", null));
+        Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
+                .filter(game -> game.findPlayer(player).isPresent())
+                .map(GameDetails::of).get().getPlayers().stream()
+                .collect(Collectors.toMap(a-> a.getPlayer().getId(), Function.identity()));
+      assertTrue(playerWithStateMap.get(player3).getPlayer().getReadyForAnswerFuture());
+      assertNotNull(playerWithStateMap.get(player3).getPlayer().getQuestion());
+
+    }
     @Test
     void createGame() {
         String waitingForPlayersStatus = "com.eleks.academy.whoami.core.state.WaitingForPlayers";
@@ -150,7 +187,6 @@ class GameServiceTest {
         gameService.enrollToGame(gameId, "sas");
         game.ifPresent(a -> id1.set(a.getPlayersInGame().size()));
         assertThat(id1.get()).isEqualTo(3);
-
 
     }
 }

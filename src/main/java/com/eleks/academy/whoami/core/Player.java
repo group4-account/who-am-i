@@ -4,10 +4,10 @@ import java.util.concurrent.Future;
 
 public interface Player {
 
-	String getName();
+	String getId();
 
 
-	Future<String> getQuestion();
+	String getQuestion();
 
 	Future<String> answerQuestion(String question, String character);
 

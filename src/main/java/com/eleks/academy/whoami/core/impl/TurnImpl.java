@@ -22,7 +22,7 @@ public class TurnImpl implements Turn {
 	@Override
 	public List<Player> getOtherPlayers() {
 		return this.players.stream()
-				.filter(player -> !player.getName().equals(this.getGuesser().getName()))
+				.filter(player -> !player.getId().equals(this.getGuesser().getId()))
 				.toList();
 	}
 	

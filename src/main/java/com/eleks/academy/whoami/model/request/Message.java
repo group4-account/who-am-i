@@ -13,6 +13,6 @@ import javax.validation.constraints.Size;
 public class Message {
 	@Size(max = 256, message = "message must be less than 256 characters")
 	@NotBlank
-	private String message;
+	private QuestionAnswer message;
 
 }

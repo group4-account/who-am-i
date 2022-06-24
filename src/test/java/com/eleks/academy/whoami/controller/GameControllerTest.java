@@ -100,7 +100,7 @@ class GameControllerTest {
 	@Test
 	void failValidationSuggestCharacter() throws Exception {
 		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
-				eq(new CharacterSuggestion("Batman")));
+				eq(new CharacterSuggestion("Batman", null)));
 		this.mockMvc.perform(
 						MockMvcRequestBuilders.post("/games/1234/characters")
 								.header("X-Player", "player")
@@ -114,7 +114,7 @@ class GameControllerTest {
 	@Test
 	void failValidationName() throws Exception {
 		doNothing().when(gameService).suggestCharacter(eq("1234"), eq("player"),
-				eq(new CharacterSuggestion("Batman")));
+				eq(new CharacterSuggestion("Batman", null)));
 		this.mockMvc.perform(
 						MockMvcRequestBuilders.post("/games/1234/characters")
 								.header("X-Player", "p")

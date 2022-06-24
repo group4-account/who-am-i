@@ -67,7 +67,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void askQuestion(String player, String message) {
-        this.makeTurn(new Answer(player, message));
+        this.makeTurn(new Answer(player, message, null));
 
     }
 

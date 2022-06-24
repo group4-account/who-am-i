@@ -3,9 +3,11 @@ package com.eleks.academy.whoami.service.impl;
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.impl.Answer;
+import com.eleks.academy.whoami.core.impl.AnswerQuestion;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
+import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
@@ -25,7 +27,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
-	private int playersSize = 4;
 	private final GameRepository gameRepository;
 
 	@Override
@@ -52,6 +53,7 @@ public class GameServiceImpl implements GameService {
 	}
 
 	private GameDetails createQuickGame() {
+		int playersSize = 4;
 		return GameDetails.of(gameRepository.save(new PersistentGame(playersSize)));
 	}
 
@@ -87,7 +89,7 @@ public class GameServiceImpl implements GameService {
 	public void suggestCharacter(String id, String player, CharacterSuggestion suggestion) {
 		this.gameRepository.findById(id)
 				.ifPresentOrElse(
-						game -> game.makeTurn(new Answer(player, suggestion.getCharacter())),
+						game -> game.makeTurn(new Answer(player, suggestion.getCharacter(), suggestion.getName())),
 						() -> {
 							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
 						}
@@ -103,9 +105,9 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void askQuestion(String gameId, String player, String message) {
+	public void askQuestion(String gameId, String player, CharacterSuggestion message) {
 		this.gameRepository.findById(gameId)
-				.ifPresent(game -> game.askQuestion(player, message));
+				.ifPresent(game -> game.makeTurn(new Answer(player, message.getCharacter(), null)));
 	}
 
 	@Override
@@ -114,12 +116,12 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void submitGuess(String id, String player, String guess) {
+	public void submitGuess(String id, String player, QuestionAnswer guess) {
 
 	}
 
 	@Override
-	public void answerQuestion(String id, String player, String answer) {
+	public void answerQuestion(String id, String player, QuestionAnswer answer) {
 
 	}
 	@Override

@@ -15,5 +15,7 @@ public class CharacterSuggestion {
 	@NotBlank
 	@Size(min = 2, max = 50, message = "Character size must be between 2 and 50 characters")
 	private String character;
-
+	@NotBlank
+	@Size(min = 2, max = 50, message = "Name size must be between 2 and 50 characters")
+	private String name;
 }

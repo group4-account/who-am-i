@@ -2,11 +2,11 @@ package com.eleks.academy.whoami.core;
 
 public interface SynchronousPlayer {
 
-	String getName();
+	String getId();
 
 	String getCharacter();
 
 	void setCharacter(String character);
 
-	void setName(String player);
+	void setId(String player);
 }
