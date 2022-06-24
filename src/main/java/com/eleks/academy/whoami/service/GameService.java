@@ -38,4 +38,6 @@ public interface GameService {
 
 	int getReadyPlayersCount(String id, String player);
 
+	void leaveGame(String gameId, String player);
+
 }

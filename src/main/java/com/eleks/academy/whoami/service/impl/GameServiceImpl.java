@@ -2,6 +2,7 @@ package com.eleks.academy.whoami.service.impl;
 
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
@@ -20,6 +21,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Optional;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -137,6 +139,20 @@ public class GameServiceImpl implements GameService {
 						.count())
 				.orElse(0);
 
+	}
+
+	@Override
+	public void leaveGame(String gameId, String playerId)
+	{
+		SynchronousGame game = this.gameRepository.findById(gameId)
+				.orElseThrow(
+						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
+		var gamePlayers = game.getPlayersInGame();
+		gamePlayers.stream()
+				.filter(playerWithState -> playerWithState.getPlayer().equals(playerId))
+				.collect(Collectors.toList())
+				.forEach(gamePlayers::remove);
+		game.removeFromGame(gameId, playerId);
 	}
 
 }

@@ -45,7 +45,6 @@ public final class WaitingForPlayers extends AbstractGameState {
 	public GameState makeTurn(Answer answer) {
 		Map<String, PlayerWithState> nextPlayers = new HashMap<>(this.players);
 		if (nextPlayers.containsKey(answer.getPlayer()) || maxPlayers == this.getPlayersInGame()) {
-//			new GameException("Cannot enroll to the game");
 		} else {
 			PersistentPlayer persistentPlayer = new PersistentPlayer(answer.getPlayer());
 			nextPlayers.put(answer.getPlayer(),
@@ -55,6 +54,19 @@ public final class WaitingForPlayers extends AbstractGameState {
 			return new SuggestingCharacters(nextPlayers);
 		} else {
 			return new WaitingForPlayers(getMaxPlayers(), nextPlayers);
+		}
+	}
+
+	@Override
+	public GameState leaveGame(String player) {
+		Map<String, PlayerWithState> players = new HashMap<>(this.players);
+		if (findPlayer(player).isPresent()) {
+			players.remove(player);
+		}
+		if (players.size() == getMaxPlayers()) {
+			return new SuggestingCharacters(players);
+		} else {
+			return new WaitingForPlayers(getMaxPlayers(), players);
 		}
 	}
 

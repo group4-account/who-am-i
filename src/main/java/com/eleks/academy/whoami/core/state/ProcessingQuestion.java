@@ -6,10 +6,7 @@ import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 // TODO: Implement makeTurn(...) and next() methods, pass a turn to next player
 public final class ProcessingQuestion extends AbstractGameState {
@@ -53,6 +50,19 @@ public final class ProcessingQuestion extends AbstractGameState {
     @Override
     public List<PlayerWithState> getPlayers() {
         return null;
+    }
+
+    @Override
+    public GameState leaveGame(String player) {
+        Map<String, PlayerWithState> players = new HashMap<>(this.players);
+        if (findPlayer(player).isPresent()) {
+            players.remove(player);
+        }
+        if(getCurrentTurn().equals(player))
+        {
+            return next();
+        }
+        else return this;
     }
 
 }
