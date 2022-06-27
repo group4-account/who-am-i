@@ -31,5 +31,7 @@ public interface SynchronousGame {
 
 	SynchronousGame start();
 
+	Optional<GameState> getCurrentTurnInfo();
+
 	void removeFromGame(String gameId, String player);
 }
