@@ -153,6 +153,10 @@ public class GameServiceImpl implements GameService {
 				.collect(Collectors.toList())
 				.forEach(gamePlayers::remove);
 		game.removeFromGame(gameId, playerId);
+		if (game.getPlayersInGame().size() == 0){
+			this.gameRepository.remove(game);
+		}
+
 	}
 
 }

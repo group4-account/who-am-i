@@ -141,8 +141,7 @@ public class PersistentGame implements Game, SynchronousGame {
 	@Override
 	public void removeFromGame(String gameId, String player) {
 		Optional<SynchronousPlayer> synchronousPlayer = findPlayer(player);
-		if(synchronousPlayer.isPresent() && playerWithStateList.contains(synchronousPlayer)){
-			playerWithStateList.remove(synchronousPlayer);
+		if(synchronousPlayer!=null){
 			this.turnLock.lock();
 
 			try {

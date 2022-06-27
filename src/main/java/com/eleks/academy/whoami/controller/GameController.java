@@ -120,7 +120,7 @@ public class GameController {
 	}
 
 	@DeleteMapping("/{id}/leave")
-	public void leaveRoom(@PathVariable("id") String id,
+	public void leaveGame(@PathVariable("id") String id,
 						  @RequestHeader(PLAYER) String player)
 	{
 		this.gameService.leaveGame(id, player);

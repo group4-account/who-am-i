@@ -48,6 +48,11 @@ public class GameInMemoryRepository implements GameRepository {
 	}
 
 	@Override
+	public void remove(SynchronousGame game) {
+		this.games.remove(game.getId(), game);
+	}
+
+	@Override
 	public Optional<SynchronousGame> findById(String id) {
 		return Optional.ofNullable(this.games.get(id));
 	}
