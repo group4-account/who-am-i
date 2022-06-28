@@ -24,7 +24,7 @@ public class RandomPlayer implements Player {
 	}
 
 	@Override
-	public String getName() {
+	public String getId() {
 		return this.name;
 	}
 

@@ -87,11 +87,12 @@ public class GameServiceImpl implements GameService {
 	public void suggestCharacter(String id, String player, CharacterSuggestion suggestion) {
 		this.gameRepository.findById(id)
 				.ifPresentOrElse(
-						game -> game.makeTurn(new Answer(player, suggestion.getCharacter())),
+						game -> game.makeTurn(new Answer(player, suggestion.getCharacter(), suggestion.getName())),
 						() -> {
 							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
 						}
 				);
+
 	}
 
 	@Override

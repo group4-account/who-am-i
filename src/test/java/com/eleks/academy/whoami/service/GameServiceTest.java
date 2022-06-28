@@ -49,7 +49,7 @@ class GameServiceTest {
         assertThat(byIdAndPlayer).isNotEmpty();
         Optional<SynchronousPlayer> synchronousPlayer =
                 byIdAndPlayer.map(GameDetails::getPlayers).map(a -> a.get(0)).map(PlayerWithState::getPlayer);
-        assertEquals(synchronousPlayer.get().getName(), player);
+        assertEquals(synchronousPlayer.get().getId(), player);
         assertNotNull(byIdAndPlayer.map(GameDetails::getId));
         assertNotNull(byIdAndPlayer.map(GameDetails::getStatus));
         assertNotNull(byIdAndPlayer.map(GameDetails::getPlayers));
@@ -61,7 +61,7 @@ class GameServiceTest {
         final String player = "Anton";
         final PlayerState previousState = PlayerState.NOT_READY;
         final PlayerState updateState = PlayerState.READY;
-        CharacterSuggestion character = new CharacterSuggestion("char");
+        CharacterSuggestion character = new CharacterSuggestion("char", null);
         gameService.enrollToGame(gameId, player);
         gameService.enrollToGame(gameId, player+"1");
         gameService.enrollToGame(gameId, player+"2");

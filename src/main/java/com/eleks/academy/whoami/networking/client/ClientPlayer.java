@@ -24,7 +24,7 @@ public class ClientPlayer implements Player, AutoCloseable {
 	}
 
 	@Override
-	public String getName() {
+	public String getId() {
 		// TODO: save name for future
 		try {
 			return executor.submit(this::askName).get();

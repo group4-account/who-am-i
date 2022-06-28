@@ -4,7 +4,7 @@ import java.util.concurrent.Future;
 
 public interface Player {
 
-	String getName();
+	String getId();
 
 	Future<String> suggestCharacter();
 

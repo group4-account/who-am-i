@@ -1,6 +1,5 @@
 package com.eleks.academy.whoami.core.state;
 
-import com.eleks.academy.whoami.core.Player;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
@@ -102,10 +101,15 @@ public final class SuggestingCharacters extends AbstractGameState {
 		try {
 
 			this.players.values().stream()
-					.filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getName(),
-							players.get(answer.getPlayer()).getPlayer().getName()))
+					.filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getId(),
+							players.get(answer.getPlayer()).getPlayer().getId()))
 					.findFirst()
 					.ifPresent(a -> a.setState(PlayerState.READY));
+			this.players.values().stream()
+					.filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getId(),
+							players.get(answer.getPlayer()).getPlayer().getId()))
+					.findFirst()
+					.ifPresent(a -> a.getPlayer().setId(answer.getSecondMessage()));
 			if(players.values().stream().filter(playerWithState -> playerWithState.getState()
 					.equals(PlayerState.READY)).count() >= 4) {
 				this.suggestCharacter(answer.getPlayer(), answer.getMessage());
@@ -117,7 +121,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 					.map(then -> this.next())
 					.orElseGet(() -> this.suggestCharacter(answer.getPlayer(), answer.getMessage()));
 		} finally {
-		this.lock.unlock();
+			this.lock.unlock();
 		}
 	}
 
