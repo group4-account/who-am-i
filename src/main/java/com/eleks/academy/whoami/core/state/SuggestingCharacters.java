@@ -109,7 +109,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 					.filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getId(),
 							players.get(answer.getPlayer()).getPlayer().getId()))
 					.findFirst()
-					.ifPresent(a -> a.getPlayer().setId(answer.getSecondMessage()));
+					.ifPresent(a -> a.getPlayer().setName(answer.getSecondMessage()));
 			if(players.values().stream().filter(playerWithState -> playerWithState.getState()
 					.equals(PlayerState.READY)).count() >= 4) {
 				this.suggestCharacter(answer.getPlayer(), answer.getMessage());

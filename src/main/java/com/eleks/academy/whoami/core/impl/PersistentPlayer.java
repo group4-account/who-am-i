@@ -61,7 +61,7 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 
 	}
 
-	public void setId(String player) {
-
+	public void setName(String name) {
+		this.name = name;
 	}
 }
