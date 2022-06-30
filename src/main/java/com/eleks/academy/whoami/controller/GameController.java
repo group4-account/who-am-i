@@ -21,6 +21,7 @@ import java.util.Optional;
 import java.util.function.Predicate;
 
 import static com.eleks.academy.whoami.utils.StringUtils.Headers.PLAYER;
+import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 
 @RestController
 @RequestMapping("/games")
@@ -106,7 +107,7 @@ public class GameController {
 		this.gameService.answerQuestion(id, player, QuestionAnswer.valueOf(message.getMessage()));
 
 	}
-	@DeleteMapping("/{id}/leaveGame")
+	@RequestMapping(value = "/{id}/leaveGame", method=DELETE)
 	public void leaveGame(@PathVariable("id") String id,
 							 @RequestHeader(PLAYER) String player) {
 		this.gameService.leaveGame(id, player);
