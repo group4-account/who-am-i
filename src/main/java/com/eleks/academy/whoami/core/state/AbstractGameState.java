@@ -2,11 +2,8 @@ package com.eleks.academy.whoami.core.state;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-
-import java.util.List;
 
 @Getter
 @RequiredArgsConstructor
@@ -35,4 +32,5 @@ public abstract sealed class AbstractGameState implements GameState
 	public GameState makeTurn(Answer answer) {
 		return null;
 	}
+	public GameState leaveGame(String player) {return null;}
 }

@@ -22,6 +22,7 @@ public interface SynchronousGame {
 	boolean isAvailable();
 
 	String getTurn();
+
 	void makeTurn(Answer player);
 
 	void askQuestion(String player, String message);
@@ -31,4 +32,6 @@ public interface SynchronousGame {
 	SynchronousGame start();
 
 	Optional<GameState> getCurrentTurnInfo();
+
+	void removeFromGame(String gameId, String player);
 }

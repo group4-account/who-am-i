@@ -201,4 +201,13 @@ public final class SuggestingCharacters extends AbstractGameState {
         return null;
     }
 
+	@Override
+	public GameState leaveGame(String player) {
+		Map<String, PlayerWithState> players = new HashMap<>(this.players);
+		if (findPlayer(player).isPresent()) {
+			players.remove(player);
+		}
+		return new SuggestingCharacters(players);
+	}
+
 }

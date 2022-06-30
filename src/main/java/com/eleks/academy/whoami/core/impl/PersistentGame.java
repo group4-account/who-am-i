@@ -20,6 +20,7 @@ public class PersistentGame implements Game, SynchronousGame {
 	private final Lock turnLock = new ReentrantLock();
 	private final String id;
 	private int maxPlayers;
+	private List<PlayerWithState> playerWithStateList = new ArrayList<>();
 	private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 	private final Queue<PlayerState> playerStates = new LinkedBlockingQueue<>();
 
@@ -139,6 +140,23 @@ public class PersistentGame implements Game, SynchronousGame {
 
 	@Override
 	public void play() {
+
+	}
+
+	@Override
+	public void removeFromGame(String gameId, String player) {
+		Optional<SynchronousPlayer> synchronousPlayer = findPlayer(player);
+		if(synchronousPlayer!=null){
+			this.turnLock.lock();
+
+			try {
+				Optional.ofNullable(this.turns.poll())
+						.map(gameState -> gameState.leaveGame(player))
+						.ifPresent(this.turns::add);
+			} finally {
+				this.turnLock.unlock();
+			}
+		}
 
 	}
 

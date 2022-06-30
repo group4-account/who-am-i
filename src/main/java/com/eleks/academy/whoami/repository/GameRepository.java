@@ -14,6 +14,8 @@ public interface GameRepository {
 
 	SynchronousGame save(SynchronousGame game);
 
+	void remove(SynchronousGame game);
+
 	Optional<SynchronousGame> findById(String id);
 
     int getAllPlayersCount();
