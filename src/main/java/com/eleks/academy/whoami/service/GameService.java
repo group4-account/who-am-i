@@ -2,6 +2,7 @@ package com.eleks.academy.whoami.service;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
+import com.eleks.academy.whoami.model.request.Message;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
@@ -25,7 +26,7 @@ public interface GameService {
 
 	Optional<GameDetails> startGame(String id, String player);
 
-	void askQuestion(String gameId, String player, CharacterSuggestion message);
+	void askQuestion(String gameId, String player, String message);
 
 	Optional<TurnDetails> findTurnInfo(String id, String player);
 

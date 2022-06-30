@@ -5,6 +5,7 @@ import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.Message;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
+import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.TurnDetails;
@@ -89,23 +90,23 @@ public class GameController {
 	@PostMapping("/{id}/questions")
 	public void askQuestion(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player,
-							@RequestBody CharacterSuggestion message) {
-		this.gameService.askQuestion(id, player, message);
+							@RequestBody Message message) {
+		this.gameService.askQuestion(id, player, message.getMessage());
 	}
 
 	@PostMapping("/{id}/guess")
 	public void submitGuess(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player, @RequestBody Message message) {
-		this.gameService.submitGuess(id, player, message.getMessage());
+		this.gameService.submitGuess(id, player, QuestionAnswer.valueOf(message.getMessage()));
 	}
 
 	@PostMapping("/{id}/answer")
 	public void answerQuestion(@PathVariable("id") String id,
 							   @RequestHeader(PLAYER) String player, @RequestBody Message message) {
-		this.gameService.answerQuestion(id, player, message.getMessage());
+		this.gameService.answerQuestion(id, player, QuestionAnswer.valueOf(message.getMessage()));
 
 	}
-	@PostMapping("/{id}/leaveGame")
+	@DeleteMapping("/{id}/leaveGame")
 	public void leaveGame(@PathVariable("id") String id,
 							 @RequestHeader(PLAYER) String player) {
 		this.gameService.leaveGame(id, player);

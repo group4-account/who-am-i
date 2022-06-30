@@ -62,7 +62,7 @@ class GameServiceTest {
 
     @Test
     @SneakyThrows
-    void testSetStateInSuggestCharacters() {
+    void setStateInSuggestCharacters() {
         final String player = "Player-1";
         final String player1 = "Player-2";
         final PlayerState previousState = PlayerState.NOT_READY;
@@ -83,20 +83,18 @@ class GameServiceTest {
     }
     @Test
     @SneakyThrows
-    void testAssignCharacter() {
+    void assignCharacter() {
         final String player = "Player-1";
         final String player1 = "Player-2";
-        final String player2 = "host";
-        final String player3 = "host1";
+        final String player2 = "Player-3";
         final String char1 = "char";
         final String char2 = "char1";
         final String char3 = "char2";
-        final String char4 = "char3";
         final PlayerState previousState = PlayerState.NOT_READY;
         final PlayerState updateState = PlayerState.READY;
-        CharacterSuggestion character = new CharacterSuggestion(char1, null);
-        CharacterSuggestion character1 = new CharacterSuggestion(char2, null);
-        CharacterSuggestion character2 = new CharacterSuggestion(char3, null);
+        CharacterSuggestion character = new CharacterSuggestion(char1, "John");
+        CharacterSuggestion character1 = new CharacterSuggestion(char2, "Duke");
+        CharacterSuggestion character2 = new CharacterSuggestion(char3, "Nick");
         gameService.enrollToGame(gameId, player);
         gameService.enrollToGame(gameId, player1);
         gameService.enrollToGame(gameId, player2);
@@ -110,7 +108,7 @@ class GameServiceTest {
         playerState = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().get(2).getState();
-        System.out.println(gameService.startGame(gameId, player).get()
+        System.out.println(gameService.findByIdAndPlayer(gameId, player).get()
                 .getPlayers().stream().map(PlayerWithState::getPlayer).collect(Collectors.toList()));
         System.out.println();
         Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
@@ -138,10 +136,10 @@ class GameServiceTest {
         final String char4 = "char3";
         final PlayerState previousState = PlayerState.NOT_READY;
         final PlayerState updateState = PlayerState.READY;
-        CharacterSuggestion character = new CharacterSuggestion(char1, null);
-        CharacterSuggestion character1 = new CharacterSuggestion(char2, null);
-        CharacterSuggestion character2 = new CharacterSuggestion(char3, null);
-        CharacterSuggestion character3 = new CharacterSuggestion(char4, null);
+        CharacterSuggestion character = new CharacterSuggestion(char1, player);
+        CharacterSuggestion character1 = new CharacterSuggestion(char2, player1);
+        CharacterSuggestion character2 = new CharacterSuggestion(char3, player2);
+        CharacterSuggestion character3 = new CharacterSuggestion(char4, player3);
         gameService.enrollToGame(gameId, player);
         gameService.enrollToGame(gameId, player1);
         gameService.enrollToGame(gameId, player3);
@@ -154,12 +152,11 @@ class GameServiceTest {
         gameService.suggestCharacter(gameId, player2, character2);
         gameService.suggestCharacter(gameId, player3, character3);
 
-        gameService.askQuestion(gameId, player3, new CharacterSuggestion("Am i a human?", null));
+        gameService.askQuestion(gameId, player3, "Am i a human?");
         Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().stream()
                 .collect(Collectors.toMap(a-> a.getPlayer().getId(), Function.identity()));
-      assertTrue(playerWithStateMap.get(player3).getPlayer().getReadyForAnswerFuture());
       assertNotNull(playerWithStateMap.get(player3).getPlayer().getQuestion());
 
     }

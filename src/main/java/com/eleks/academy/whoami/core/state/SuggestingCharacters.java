@@ -126,6 +126,7 @@ public final class SuggestingCharacters extends AbstractGameState {
         } finally {
             this.lock.unlock();
         }
+
     }
 
     /**

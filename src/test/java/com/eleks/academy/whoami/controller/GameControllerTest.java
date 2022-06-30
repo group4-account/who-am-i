@@ -107,7 +107,8 @@ class GameControllerTest {
 								.contentType(APPLICATION_JSON)
 								.content("""
                                         {
-                                            "character": "a"
+                                            "character": "a",
+                                            "name": "name"
                                         }"""))
 				.andExpect(status().isBadRequest());
 	}

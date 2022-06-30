@@ -6,6 +6,7 @@ import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.AnswerQuestion;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
+import com.eleks.academy.whoami.model.request.Message;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
@@ -105,9 +106,9 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void askQuestion(String gameId, String player, CharacterSuggestion message) {
+	public void askQuestion(String gameId, String player, String message) {
 		this.gameRepository.findById(gameId)
-				.ifPresent(game -> game.makeTurn(new Answer(player, message.getCharacter(), null)));
+				.ifPresent(game -> game.makeTurn(new Answer(player, message, null)));
 	}
 
 	@Override

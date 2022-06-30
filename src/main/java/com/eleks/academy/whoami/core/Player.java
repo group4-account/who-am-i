@@ -7,9 +7,9 @@ public interface Player {
 	String getId();
 
 
-	String getQuestion();
+	Future<String> getQuestion();
 
-	Future<String> answerQuestion(String question, String character);
+	Future<String> answerQuestion();
 
 	Future<String> getGuess();
 
