@@ -3,6 +3,7 @@ package com.eleks.academy.whoami.core.impl;
 import com.eleks.academy.whoami.core.Game;
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.state.GameFinished;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.core.state.WaitingForPlayers;
@@ -66,8 +67,9 @@ public class PersistentGame implements Game, SynchronousGame {
 
 
     @Override
-    public void askQuestion(String player, String message) {
-        this.makeTurn(new Answer(player, message, null));
+    public void askQuestion(String id, String message) {
+        this.findPlayer(id).ifPresentOrElse(player -> player.setQuestion(message),
+                () -> new GameException("Not your turn!"));
 
     }
 

@@ -66,8 +66,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public GameState makeTurn(Answer answer) {
 		PlayerWithState currentPlayer = players.get(this.currentPlayer);
 		try {
-			players.get(this.currentPlayer).getPlayer().getQuestion().get(20, TimeUnit.SECONDS);
-		} catch (InterruptedException | ExecutionException | TimeoutException e) {
+			try {
+				players.get(this.currentPlayer).getPlayer().getQuestion().get(20, TimeUnit.SECONDS);
+			} catch (TimeoutException e) {
+				e.printStackTrace();
+			}
+		} catch (InterruptedException | ExecutionException  e) {
 			e.printStackTrace();
 		}
 

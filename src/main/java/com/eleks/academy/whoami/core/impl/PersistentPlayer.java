@@ -6,10 +6,8 @@ import lombok.Data;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+
 @Data
 public class PersistentPlayer implements Player, SynchronousPlayer {
 
@@ -18,7 +16,7 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	private String name;
 
 	private Queue<String> questionQueue;
-	private volatile Future<String> question;
+	private volatile CompletableFuture<String> question = new CompletableFuture<>();
 	private volatile CompletableFuture<String> currentAnswer;
 	private volatile CompletableFuture<Boolean> readyForAnswerFuture;
 //	private final ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -31,11 +29,10 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	public Future<String> getQuestion() {
 		return question;
 	}
-	private void askQuestion(String question) {
 
-	}
-	private void setQuestion(String question) {
-
+	@Override
+	public void setQuestion(String question) {
+		this.question = CompletableFuture.completedFuture(question);
 	}
 	public Future<String> answerQuestion(String question, String character) {
 		return null;

@@ -140,19 +140,32 @@ class GameServiceTest {
         CharacterSuggestion character1 = new CharacterSuggestion(char2, player1);
         CharacterSuggestion character2 = new CharacterSuggestion(char3, player2);
         CharacterSuggestion character3 = new CharacterSuggestion(char4, player3);
-        gameService.enrollToGame(gameId, player);
-        gameService.enrollToGame(gameId, player1);
-        gameService.enrollToGame(gameId, player3);
-        PlayerState playerState = this.gameRepository.findById(gameId)
-                .filter(game -> game.findPlayer(player).isPresent())
-                .map(GameDetails::of).get().getPlayers().get(0).getState();
-        assertEquals(playerState, previousState);
-        gameService.suggestCharacter(gameId, player, character);
-        gameService.suggestCharacter(gameId, player1, character1);
-        gameService.suggestCharacter(gameId, player2, character2);
-        gameService.suggestCharacter(gameId, player3, character3);
 
-        gameService.askQuestion(gameId, player3, "Am i a human?");
+        Runnable task1 = () -> {
+            gameService.enrollToGame(gameId, player);
+            gameService.enrollToGame(gameId, player1);
+            gameService.enrollToGame(gameId, player3);
+            PlayerState playerState = this.gameRepository.findById(gameId)
+                    .filter(game -> game.findPlayer(player).isPresent())
+                    .map(GameDetails::of).get().getPlayers().get(0).getState();
+            assertEquals(playerState, previousState);
+            gameService.suggestCharacter(gameId, player, character);
+            gameService.suggestCharacter(gameId, player1, character1);
+            gameService.suggestCharacter(gameId, player2, character2);
+            gameService.suggestCharacter(gameId, player3, character3);; };
+
+        Thread thread1 = new Thread(task1);
+         thread1.start();
+        Thread.sleep(1000);
+        Runnable task2 = () -> {
+            gameService.askQuestion(gameId, player3, "Am i a human?");
+        };
+
+
+        Thread thread = new Thread(task2);
+        thread.start();
+        thread.join();
+        thread1.join();
         Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().stream()

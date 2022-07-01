@@ -108,7 +108,7 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void askQuestion(String gameId, String player, String message) {
 		this.gameRepository.findById(gameId)
-				.ifPresent(game -> game.makeTurn(new Answer(player, message, null)));
+				.ifPresent(game -> game.askQuestion(player, message));
 	}
 
 	@Override

@@ -9,4 +9,5 @@ public interface SynchronousPlayer {
 	void setCharacter(String character);
 
 	void setId(String player);
+	void setQuestion(String question);
 }
