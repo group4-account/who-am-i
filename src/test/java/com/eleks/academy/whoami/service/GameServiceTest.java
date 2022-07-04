@@ -152,25 +152,30 @@ class GameServiceTest {
             gameService.suggestCharacter(gameId, player, character);
             gameService.suggestCharacter(gameId, player1, character1);
             gameService.suggestCharacter(gameId, player2, character2);
-            gameService.suggestCharacter(gameId, player3, character3);; };
+            gameService.suggestCharacter(gameId, player3, character3);
+        };
 
         Thread thread1 = new Thread(task1);
          thread1.start();
-        Thread.sleep(1000);
+
         Runnable task2 = () -> {
-            gameService.askQuestion(gameId, player3, "Am i a human?");
+            try {
+                Thread.sleep(2000);
+                gameService.askQuestion(gameId, player3, "Am i a human?");
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
         };
 
 
         Thread thread = new Thread(task2);
         thread.start();
-        thread.join();
-        thread1.join();
+        Thread.sleep(3000);
         Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().stream()
                 .collect(Collectors.toMap(a-> a.getPlayer().getId(), Function.identity()));
-      assertNotNull(playerWithStateMap.get(player3).getPlayer().getQuestion());
+      assertNotNull(playerWithStateMap.get(player3).getPlayer().getFirstQuestion());
 
     }
     @Test

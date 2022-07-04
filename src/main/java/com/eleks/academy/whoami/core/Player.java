@@ -7,7 +7,7 @@ public interface Player {
 	String getId();
 
 
-	Future<String> getQuestion();
+	Future<String> getFirstQuestion();
 
 	Future<String> answerQuestion();
 

@@ -67,9 +67,13 @@ public final class ProcessingQuestion extends AbstractGameState {
 		PlayerWithState currentPlayer = players.get(this.currentPlayer);
 		try {
 			try {
-				players.get(this.currentPlayer).getPlayer().getQuestion().get(20, TimeUnit.SECONDS);
+				players.get(this.currentPlayer).getPlayer().getFirstQuestion().get(20, TimeUnit.SECONDS);
 			} catch (TimeoutException e) {
-				e.printStackTrace();
+				int currentPlayerIndex = 0;
+				List<String> collect = new ArrayList<>(this.players.keySet());
+				currentPlayerIndex = collect.indexOf(currentPlayer.getPlayer().getName());
+				currentPlayerIndex = currentPlayerIndex + 1 >= this.players.size() ? 0 : currentPlayerIndex + 1;
+				return new ProcessingQuestion(collect.get(currentPlayerIndex), players);
 			}
 		} catch (InterruptedException | ExecutionException  e) {
 			e.printStackTrace();

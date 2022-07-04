@@ -5,6 +5,7 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import lombok.Data;
 
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.*;
 
@@ -26,14 +27,22 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	}
 
 	@Override
-	public Future<String> getQuestion() {
+	public Future<String> getFirstQuestion() {
+
+		while(!question.isDone()) {
+		throw new ArithmeticException();
+		}
+			// waiting
+
 		return question;
 	}
 
 	@Override
 	public void setQuestion(String question) {
-		this.question = CompletableFuture.completedFuture(question);
+		this.question = CompletableFuture.completedFuture(question)
+				.thenApply(playerQuestion -> playerQuestion + "?");
 	}
+
 	public Future<String> answerQuestion(String question, String character) {
 		return null;
 	}
