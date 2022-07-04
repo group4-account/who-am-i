@@ -28,12 +28,6 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 
 	@Override
 	public Future<String> getFirstQuestion() {
-
-		while(!question.isDone()) {
-		throw new ArithmeticException();
-		}
-			// waiting
-
 		return question;
 	}
 
