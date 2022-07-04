@@ -36,7 +36,7 @@ public final class ProcessingQuestion extends AbstractGameState {
         players.values().stream()
                 .filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
                 .forEach(player -> player.getPlayer().setReadyForAnswerFuture(CompletableFuture.completedFuture(false)));
-        this.makeTurn(new Answer(null));
+      //  this.makeTurn(new Answer(null));
     }
 
     @Override
