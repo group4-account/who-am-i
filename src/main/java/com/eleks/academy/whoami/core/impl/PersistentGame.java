@@ -8,18 +8,18 @@ import com.eleks.academy.whoami.core.state.WaitingForPlayers;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
 public class PersistentGame implements Game, SynchronousGame {
-
+    private int maxPlayers;
     private final Lock turnLock = new ReentrantLock();
     private final String id;
-    private List<PlayerWithState> playerWithStateList = new ArrayList<>();
-    private Map<String, PersistentPlayer> players;
     private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 
     /**
@@ -33,6 +33,16 @@ public class PersistentGame implements Game, SynchronousGame {
                 Instant.now().toEpochMilli(),
                 Double.valueOf(Math.random() * 999).intValue());
         this.turns.add(new WaitingForPlayers(maxPlayers));
+        this.makeTurn(new Answer(hostPlayer));
+
+    }
+    public PersistentGame(Integer maxPlayers) {
+        this.id = String.format("%d-%d",
+                Instant.now().toEpochMilli(),
+                Double.valueOf(Math.random() * 999).intValue());
+
+        this.maxPlayers = maxPlayers;
+        this.turns.add(new WaitingForPlayers(this.maxPlayers));
     }
 
     @Override
@@ -45,50 +55,54 @@ public class PersistentGame implements Game, SynchronousGame {
         return this.id;
     }
 
-	@Override
-	public SynchronousPlayer enrollToGame(String player) {
-		if (turns.isEmpty()){
-			turns.add(new WaitingForPlayers(4));
+    @Override
+    public SynchronousPlayer enrollToGame(String player) {
+        throw new UnsupportedOperationException();
+    }
+
+    @Override
+    public String getTurn() {
+        return this.applyIfPresent(this.turns.peek(), GameState::getCurrentTurn);
+    }
+
+
+    @Override
+    public void askQuestion(String id, String message) {
+        this.findPlayer(this.getTurn()).ifPresent(player -> player.setQuestion(message));
+    }
+
+    @Override
+    public void answerQuestion(String id, String answer) {
+        this.findPlayer(id).ifPresent(player -> player.setAnswerQuestion(answer));
+    }
+
+    @Override
+    public SynchronousGame start() {
+		this.turnLock.lock();
+		try {
+			Optional.ofNullable(this.turns.poll())
+					.map(GameState::next)
+					.ifPresent(this.turns::add);
+		} finally {
+			this.turnLock.unlock();
 		}
-		var turn = turns.peek();
-		var toReturn = ((WaitingForPlayers)turn).addPlayer(player);
-		return toReturn;
-	}
+        return this;
+    }
 
-	@Override
-	public String getTurn() {
-		return this.applyIfPresent(this.turns.peek(), GameState::getCurrentTurn);
-	}
+    @Override
+    public boolean isAvailable() {
+        return this.turns.peek() instanceof WaitingForPlayers;
+    }
 
-	@Override
-	public void askQuestion(String player, String message) {
+    @Override
+    public String getStatus() {
+        return this.applyIfPresent(this.turns.peek(), GameState::getStatus);
+    }
 
-	}
-
-	@Override
-	public void answerQuestion(String player, Answer answer) {
-		// TODO: Implement method
-	}
-
-	@Override
-	public SynchronousGame start() {
-		return null;
-	}
-
-	@Override
-	public boolean isAvailable() {
-		return this.turns.peek() instanceof WaitingForPlayers;
-	}
-
-	@Override
-	public String getStatus() {
-		return this.applyIfPresent(this.turns.peek(), GameState::getStatus);
-	}
-
-	@Override
-	public List<PlayerWithState> getPlayersInGame() {
+    @Override
+    public List<PlayerWithState> getPlayersInGame() {
         return this.applyIfPresent(this.turns.peek(), GameState::getPlayersWithState);
-	}
+    }
 
     @Override
     public boolean isFinished() {
@@ -107,6 +121,28 @@ public class PersistentGame implements Game, SynchronousGame {
         } finally {
             this.turnLock.unlock();
         }
+    }
+
+    @Override
+    public Optional<GameState> getCurrentTurnInfo() {
+        return Optional.ofNullable(this.turns.peek());
+    }
+
+    @Override
+    public void removeFromGame(String gameId, String player) {
+        Optional<SynchronousPlayer> synchronousPlayer = findPlayer(player);
+        if (synchronousPlayer.isPresent()) {
+            this.turnLock.lock();
+
+            try {
+                Optional.ofNullable(this.turns.poll())
+                        .map(gameState -> gameState.leaveGame(player))
+                        .ifPresent(this.turns::add);
+            } finally {
+                this.turnLock.unlock();
+            }
+        }
+
     }
 
     @Override
