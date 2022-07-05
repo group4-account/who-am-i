@@ -2,7 +2,6 @@ package com.eleks.academy.whoami.networking.server;
 
 import com.eleks.academy.whoami.core.Game;
 import com.eleks.academy.whoami.core.Player;
-import com.eleks.academy.whoami.networking.client.ClientPlayer;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -75,8 +74,6 @@ public class ServerImpl implements Server {
         System.out.println("Server starts");
         System.out.println("Waiting for a client connect....");
         for (int i = 0; i < players; i++) {
-            ClientPlayer clientPlayer = new ClientPlayer(serverSocket.accept());
-            clientPlayers.add(clientPlayer);
         }
         System.out.printf("Got %d players. Starting a game.%n", players);
     }

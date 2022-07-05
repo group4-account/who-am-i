@@ -90,9 +90,10 @@ class GameControllerTest {
 						MockMvcRequestBuilders.post("/games/1234/characters")
 								.header("X-Player", "player")
 								.contentType(MediaType.APPLICATION_JSON)
-								.content("{\n" +
-										"    \"character\": \" char\"\n" +
-										"}"))
+								.content("""
+										{
+										    "character": "char"
+										}"""))
 				.andExpect(status().isOk());
 		verify(gameService, times(1)).suggestCharacter(eq("1234"), eq("player"), any(CharacterSuggestion.class));
 	}
@@ -106,7 +107,8 @@ class GameControllerTest {
 								.contentType(APPLICATION_JSON)
 								.content("""
                                         {
-                                            "character": "a"
+                                            "character": "a",
+                                            "name": "name"
                                         }"""))
 				.andExpect(status().isBadRequest());
 	}

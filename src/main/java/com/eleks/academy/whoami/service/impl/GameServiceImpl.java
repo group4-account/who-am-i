@@ -8,6 +8,7 @@ import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
+import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.PlayerState;
@@ -20,16 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.List;
-import java.util.Optional;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
-	private int playersSize = 4;
-	private final String suggestingCharactersStatus = "com.eleks.academy.whoami.core.state.SuggestingCharacters";
 	private final GameRepository gameRepository;
 
 	@Override
@@ -55,10 +51,25 @@ public class GameServiceImpl implements GameService {
 		return gameRepository.findById(gameFromRepository).map(GameDetails::of);
 	}
 
-	private GameDetails createQuickGame() {
-		return GameDetails.of(gameRepository.save(new PersistentGame(playersSize)));
+	@Override
+	public int getAllPlayersCount() {
+		return this.gameRepository.getAllPlayersCount();
 	}
 
+	@Override
+	public int getReadyPlayersCount(String id, String player) {
+		return this.gameRepository.findById(id)
+				.map(currentGame -> (int) currentGame.getPlayersInGame()
+						.stream()
+						.filter(p -> p.getState().equals(PlayerState.READY))
+						.count())
+				.orElse(0);
+	}
+
+	private GameDetails createQuickGame() {
+		int playersSize = 4;
+		return GameDetails.of(gameRepository.save(new PersistentGame(playersSize)));
+	}
 
 	@Override
 	public GameDetails createGame(String player, NewGameRequest gameRequest) {
@@ -132,29 +143,14 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void submitGuess(String id, String player, String guess) {
+	public void submitGuess(String id, String player, QuestionAnswer guess) {
 
 	}
 
 	@Override
-	public void answerQuestion(String id, String player, String answer) {
-
-	}
-
-	@Override
-	public int getAllPlayersCount() {
-		return this.gameRepository.getAllPlayersCount();
-
-	}
-	@Override
-	public int getReadyPlayersCount(String id, String player) {
-		return this.gameRepository.findById(id)
-				.map(currentGame -> (int) currentGame.getPlayersInGame()
-						.stream()
-						.filter(p -> p.getState().equals(PlayerState.READY))
-						.count())
-				.orElse(0);
-
+	public void answerQuestion(String gameId, String player, String answer) {
+		this.gameRepository.findById(gameId)
+				.ifPresent(game -> game.answerQuestion(player, answer));
 	}
 
 	@Override
@@ -174,5 +170,4 @@ public class GameServiceImpl implements GameService {
 		}
 
 	}
-
 }

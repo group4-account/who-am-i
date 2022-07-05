@@ -27,11 +27,11 @@ public interface SynchronousGame {
 
 	void askQuestion(String player, String message);
 
-	void answerQuestion(String player, Answer answer);
+	void answerQuestion(String player, String answer);
 
 	SynchronousGame start();
 
 	Optional<GameState> getCurrentTurnInfo();
 
-	void removeFromGame(String gameId, String player);
+	void removeFromGame(String gameId, String playerId);
 }

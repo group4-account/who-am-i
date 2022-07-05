@@ -6,11 +6,10 @@ public interface Player {
 
 	String getId();
 
-	Future<String> suggestCharacter();
 
-	Future<String> getQuestion();
+	Future<String> getFirstQuestion();
 
-	Future<String> answerQuestion(String question, String character);
+	Future<String> answerQuestion();
 
 	Future<String> getGuess();
 

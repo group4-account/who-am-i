@@ -30,7 +30,7 @@ public class GameInMemoryRepository implements GameRepository {
 
 	@Override
 	public Map<String, SynchronousGame> findAvailableQuickGames() {
-		return filterByValue(games, SynchronousGame::isAvailable);
+		return filterByValue(games, availableStatus -> availableStatus.isAvailable());
 	}
 
 	private static <K, V> Map<K, V> filterByValue(Map<K, V> map, Predicate<V> predicate) {
@@ -48,20 +48,19 @@ public class GameInMemoryRepository implements GameRepository {
 	}
 
 	@Override
-	public void remove(SynchronousGame game) {
-		this.games.remove(game.getId(), game);
-	}
-
-	@Override
 	public Optional<SynchronousGame> findById(String id) {
 		return Optional.ofNullable(this.games.get(id));
 	}
-
 	@Override
 	public int getAllPlayersCount() {
 		return games.values()
 				.stream()
-				.map(game -> game.getPlayersInGame().size()).mapToInt(Integer::intValue).sum();
+				.map(game -> game.getPlayersInGame().size())
+				.collect(Collectors.summingInt(Integer::intValue));
 	}
 
+	@Override
+	public void remove(SynchronousGame game) {
+		this.games.remove(game.getId(), game);
+	}
 }

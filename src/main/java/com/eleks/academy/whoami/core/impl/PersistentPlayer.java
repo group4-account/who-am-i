@@ -6,8 +6,8 @@ import lombok.Data;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.Future;
+import java.util.concurrent.*;
+
 @Data
 public class PersistentPlayer implements Player, SynchronousPlayer {
 
@@ -16,29 +16,39 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	private String name;
 
 	private Queue<String> questionQueue;
-	private volatile CompletableFuture<String> question;
-	private volatile CompletableFuture<String> currentAnswer;
+	private volatile CompletableFuture<String> question = new CompletableFuture<>();
+	private volatile CompletableFuture<String> currentAnswer = new CompletableFuture<>();
 	private volatile CompletableFuture<Boolean> readyForAnswerFuture;
+//	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	public PersistentPlayer(String id) {
 		this.id = Objects.requireNonNull(id);
 	}
 
-
-
 	@Override
-	public Future<String> suggestCharacter() {
-		throw new UnsupportedOperationException();
+	public Future<String> getFirstQuestion() {
+		return question;
 	}
 
 	@Override
-	public Future<String> getQuestion() {
-		return null;
+	public Future<String> setQuestion(String question) {
+		this.question.complete(question);
+		return this.question;
 	}
-
 	@Override
-	public Future<String> answerQuestion(String question, String character) {
-		return null;
+	public Future<String> inCompleteFuture() {
+		question = this.question.newIncompleteFuture();
+		currentAnswer = this.currentAnswer.newIncompleteFuture();
+		return this.currentAnswer;
+	}
+	@Override
+	public Future<String> answerQuestion() {
+		return currentAnswer;
+	}
+	@Override
+	public Future<String> setAnswerQuestion(String answer) {
+		this.currentAnswer.complete(answer);
+		return this.currentAnswer;
 	}
 
 	@Override
@@ -61,7 +71,5 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 
 	}
 
-	public void setName(String name) {
-		this.name = name;
-	}
+
 }
