@@ -29,4 +29,7 @@ public abstract sealed class AbstractGameState implements GameState
 	public GameState makeTurn(Answer answer) {
 		return null;
 	}
+	public GameState leaveGame(Answer answer) {
+		return null;
+	}
 }

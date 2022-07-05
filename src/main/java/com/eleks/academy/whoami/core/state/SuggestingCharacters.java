@@ -63,6 +63,11 @@ public final class SuggestingCharacters extends AbstractGameState {
 
     }
 
+    @Override
+    public SynchronousPlayer enrollToGame(String player) {
+        return super.enrollToGame(player);
+    }
+
 
     // TODO: Consider extracting into {@link GameState}
     private Boolean finished() {
@@ -76,12 +81,6 @@ public final class SuggestingCharacters extends AbstractGameState {
                 && enoughCharacters;
     }
 
-    @Override
-    public GameState makeLeave(Answer answer) {
-        this.players.remove(answer.getPlayer());
-        this.suggestedCharacters.remove(answer.getPlayer());
-        throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Game is disbanded you are looser");
-    }
 
     private GameState suggestCharacter(String player, String character) {
         List<GameCharacter> characters = this.suggestedCharacters.get(player);
@@ -127,6 +126,15 @@ public final class SuggestingCharacters extends AbstractGameState {
             this.lock.unlock();
         }
 
+    }
+
+    @Override
+    public GameState leaveGame(String player) {
+        Map<String, PlayerWithState> players = new HashMap<>(this.players);
+        if (findPlayer(player).isPresent()) {
+            players.remove(player);
+        }
+        return new SuggestingCharacters(players);
     }
 
     /**

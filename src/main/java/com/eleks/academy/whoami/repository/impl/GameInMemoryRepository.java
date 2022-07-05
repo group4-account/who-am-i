@@ -58,4 +58,9 @@ public class GameInMemoryRepository implements GameRepository {
 				.map(game -> game.getPlayersInGame().size())
 				.collect(Collectors.summingInt(Integer::intValue));
 	}
+
+	@Override
+	public void remove(SynchronousGame game) {
+		this.games.remove(game.getId(), game);
+	}
 }

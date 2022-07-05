@@ -23,10 +23,6 @@ public final class GameFinished extends AbstractGameState {
 		return Optional.empty();
 	}
 
-	@Override
-	public GameState makeLeave(Answer answer) {
-		return null;
-	}
 
 	@Override
 	public List<PlayerWithState> getPlayersWithState() {
@@ -34,7 +30,17 @@ public final class GameFinished extends AbstractGameState {
 	}
 
 	@Override
+	public SynchronousPlayer enrollToGame(String player) {
+		return super.enrollToGame(player);
+	}
+
+	@Override
 	public GameState makeTurn(Answer player) {
+		return null;
+	}
+
+	@Override
+	public GameState leaveGame(String player) {
 		return null;
 	}
 }

@@ -100,11 +100,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 				throw new RuntimeException(e);
 			}
 		});
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
 		long noAnswers = this.players.values().stream()
 				.filter(player -> Objects.equals(player.getState(), ANSWERING))
 				.filter(playerWithState -> Objects.equals(playerWithState.getAnswer(), NO))
@@ -123,7 +118,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 
 	@Override
-	public GameState makeLeave(Answer answer) {
+	public GameState leaveGame(String answer) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
 		if (isAskingPlayer(answer)) {
 			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList)), players);
@@ -133,8 +128,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 		}
 	}
 
-	private boolean isAskingPlayer(Answer answer) {
-		return Objects.equals(answer.getPlayer(),
+	private boolean isAskingPlayer(String answer) {
+		return Objects.equals(answer,
 				this.players.values()
 						.stream()
 						.filter(player -> Objects.equals(player.getState(), ASKING))

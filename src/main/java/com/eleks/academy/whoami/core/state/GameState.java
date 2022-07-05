@@ -50,5 +50,5 @@ public sealed interface GameState permits AbstractGameState {
 
     GameState makeTurn(Answer player);
 
-	GameState makeLeave(Answer answer);
+	GameState leaveGame(String player);
 }

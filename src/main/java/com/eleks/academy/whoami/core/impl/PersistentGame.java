@@ -3,14 +3,14 @@ package com.eleks.academy.whoami.core.impl;
 import com.eleks.academy.whoami.core.Game;
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
-import com.eleks.academy.whoami.core.exception.GameException;
-import com.eleks.academy.whoami.core.state.GameFinished;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.core.state.WaitingForPlayers;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
-import java.util.*;
+import java.util.List;
+import java.util.Optional;
+import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -122,22 +122,27 @@ public class PersistentGame implements Game, SynchronousGame {
             this.turnLock.unlock();
         }
     }
-    @Override
-    public void makeLeave(Answer answer) {
-        this.turnLock.lock();
-
-        try {
-            Optional.ofNullable(this.turns.poll())
-                    .map(gameState -> gameState.makeLeave(answer))
-                    .ifPresent(this.turns::add);
-        } finally {
-            this.turnLock.unlock();
-        }
-    }
 
     @Override
     public Optional<GameState> getCurrentTurnInfo() {
         return Optional.ofNullable(this.turns.peek());
+    }
+
+    @Override
+    public void removeFromGame(String gameId, String player) {
+        Optional<SynchronousPlayer> synchronousPlayer = findPlayer(player);
+        if (synchronousPlayer.isPresent()) {
+            this.turnLock.lock();
+
+            try {
+                Optional.ofNullable(this.turns.poll())
+                        .map(gameState -> gameState.leaveGame(player))
+                        .ifPresent(this.turns::add);
+            } finally {
+                this.turnLock.unlock();
+            }
+        }
+
     }
 
     @Override

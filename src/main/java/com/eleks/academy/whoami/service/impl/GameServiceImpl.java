@@ -2,6 +2,7 @@ package com.eleks.academy.whoami.service.impl;
 
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.state.GameState;
@@ -20,6 +21,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -150,15 +152,22 @@ public class GameServiceImpl implements GameService {
 		this.gameRepository.findById(gameId)
 				.ifPresent(game -> game.answerQuestion(player, answer));
 	}
+
 	@Override
-	public void leaveGame(String id, String player) {
-		this.gameRepository.findById(id)
-				.ifPresentOrElse(
-						game -> game.makeLeave(new Answer(player)),
-						() -> {
-							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot enroll to a game");
-						}
-				);
+	public void leaveGame(String gameId, String playerId)
+	{
+		SynchronousGame game = this.gameRepository.findById(gameId)
+				.orElseThrow(
+						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
+		var gamePlayers = game.getPlayersInGame();
+		gamePlayers.stream()
+				.filter(playerWithState -> playerWithState.getPlayer().equals(playerId))
+				.collect(Collectors.toList())
+				.forEach(gamePlayers::remove);
+		game.removeFromGame(gameId, playerId);
+		if (game.getPlayersInGame().size() == 0){
+			this.gameRepository.remove(game);
+		}
 
 	}
 }

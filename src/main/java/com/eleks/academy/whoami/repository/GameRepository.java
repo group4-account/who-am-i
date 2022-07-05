@@ -17,4 +17,6 @@ public interface GameRepository {
 	Map<String, SynchronousGame> findAvailableQuickGames();
 
 	int getAllPlayersCount();
+
+	void remove(SynchronousGame game);
 }
