@@ -32,7 +32,7 @@ public interface GameService {
 
 	void submitGuess(String id, String player, QuestionAnswer guess);
 
-	void answerQuestion(String id, String player, QuestionAnswer answer);
+	void answerQuestion(String id, String player, String answer);
 
 	void leaveGame(String id, String player);
 

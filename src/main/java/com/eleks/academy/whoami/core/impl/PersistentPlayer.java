@@ -5,7 +5,6 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import lombok.Data;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.*;
 
@@ -18,7 +17,7 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 
 	private Queue<String> questionQueue;
 	private volatile CompletableFuture<String> question = new CompletableFuture<>();
-	private volatile CompletableFuture<String> currentAnswer;
+	private volatile CompletableFuture<String> currentAnswer = new CompletableFuture<>();
 	private volatile CompletableFuture<Boolean> readyForAnswerFuture;
 //	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
@@ -32,18 +31,24 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	}
 
 	@Override
-	public void setQuestion(String question) {
-		this.question = CompletableFuture.completedFuture(question)
-				.thenApply(playerQuestion -> playerQuestion + "?");
+	public Future<String> setQuestion(String question) {
+		this.question.complete(question);
+		return this.question;
 	}
-
-	public Future<String> answerQuestion(String question, String character) {
-		return null;
+	@Override
+	public Future<String> inCompleteFuture() {
+		question = this.question.newIncompleteFuture();
+		currentAnswer = this.currentAnswer.newIncompleteFuture();
+		return this.currentAnswer;
 	}
-
 	@Override
 	public Future<String> answerQuestion() {
-		return null;
+		return currentAnswer;
+	}
+	@Override
+	public Future<String> setAnswerQuestion(String answer) {
+		this.currentAnswer.complete(answer);
+		return this.currentAnswer;
 	}
 
 	@Override
@@ -67,7 +72,4 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	}
 
 
-	public void setId(String player) {
-
-	}
 }

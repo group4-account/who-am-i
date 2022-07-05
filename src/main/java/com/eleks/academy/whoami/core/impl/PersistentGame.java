@@ -72,8 +72,8 @@ public class PersistentGame implements Game, SynchronousGame {
     }
 
     @Override
-    public void answerQuestion(String player, Answer answer) {
-        // TODO: Implement method
+    public void answerQuestion(String id, String answer) {
+        this.findPlayer(id).ifPresent(player -> player.setAnswerQuestion(answer));
     }
 
     @Override

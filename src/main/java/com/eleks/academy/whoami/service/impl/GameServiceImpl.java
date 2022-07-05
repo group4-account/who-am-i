@@ -3,15 +3,12 @@ package com.eleks.academy.whoami.service.impl;
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.AnswerQuestion;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
-import com.eleks.academy.whoami.model.request.Message;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
-import com.eleks.academy.whoami.model.response.PlayerWithState;
 import com.eleks.academy.whoami.model.response.TurnDetails;
 import com.eleks.academy.whoami.repository.GameRepository;
 import com.eleks.academy.whoami.service.GameService;
@@ -23,7 +20,6 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -122,8 +118,9 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void answerQuestion(String id, String player, QuestionAnswer answer) {
-
+	public void answerQuestion(String gameId, String player, String answer) {
+		this.gameRepository.findById(gameId)
+				.ifPresent(game -> game.answerQuestion(player, answer));
 	}
 	@Override
 	public void leaveGame(String id, String player) {

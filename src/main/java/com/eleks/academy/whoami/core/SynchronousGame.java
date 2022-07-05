@@ -22,11 +22,12 @@ public interface SynchronousGame {
 	boolean isAvailable();
 
 	String getTurn();
+
 	void makeTurn(Answer player);
 
 	void askQuestion(String player, String message);
 
-	void answerQuestion(String player, Answer answer);
+	void answerQuestion(String player, String answer);
 
 	SynchronousGame start();
 

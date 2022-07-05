@@ -11,7 +11,7 @@ import lombok.RequiredArgsConstructor;
 @Getter
 @AllArgsConstructor
 @RequiredArgsConstructor
-public sealed class Answer permits StartGameAnswer, AnswerQuestion {
+public sealed class Answer permits StartGameAnswer {
 	private final String player;
 	private String message;
 	private String secondMessage;
