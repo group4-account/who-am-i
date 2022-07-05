@@ -9,6 +9,8 @@ import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
 
+import static com.eleks.academy.whoami.model.response.PlayerState.*;
+
 public final class WaitingForPlayers extends AbstractGameState {
 
     private final Map<String, PlayerWithState> players;
@@ -55,7 +57,7 @@ public final class WaitingForPlayers extends AbstractGameState {
         } else {
             PersistentPlayer persistentPlayer = new PersistentPlayer(answer.getPlayer());
             nextPlayers.put(answer.getPlayer(),
-                    new PlayerWithState(persistentPlayer, null, PlayerState.NOT_READY));
+                    new PlayerWithState(persistentPlayer, null, NOT_READY));
         }
         if (nextPlayers.size() == getMaxPlayers()) {
             return new SuggestingCharacters(nextPlayers);

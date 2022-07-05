@@ -5,12 +5,13 @@ import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public final class GameFinished extends AbstractGameState {
 
-	public GameFinished(int playersInGame, int maxPlayers) {
-		super(playersInGame, maxPlayers);
+	public GameFinished(Map<String, PlayerWithState> players) {
+		super(players.size(), players.size());
 	}
 
 	@Override

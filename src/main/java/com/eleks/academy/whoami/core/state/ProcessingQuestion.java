@@ -12,16 +12,20 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Stream;
 
-import static com.eleks.academy.whoami.model.request.QuestionAnswer.*;
+import static com.eleks.academy.whoami.model.request.QuestionAnswer.NO;
+import static com.eleks.academy.whoami.model.request.QuestionAnswer.NOT_SURE;
 import static com.eleks.academy.whoami.model.response.PlayerState.ANSWERING;
 import static com.eleks.academy.whoami.model.response.PlayerState.ASKING;
+import static java.lang.Boolean.FALSE;
+import static java.lang.Boolean.TRUE;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.concurrent.TimeUnit.SECONDS;
+import static java.util.stream.Collectors.partitioningBy;
 
-// TODO: Implement makeTurn(...) and next() methods, pass a turn to next player
 public final class ProcessingQuestion extends AbstractGameState {
 
 	private final Map<String, PlayerWithState> players;
@@ -60,7 +64,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return this.players.values().stream()
 				.filter(player -> Objects.equals(player.getState(), ASKING))
 				.findFirst()
-				.map(a -> a.getPlayer().getId())
+				.map(playerWithState -> playerWithState.getPlayer().getId())
 				.orElseThrow();
 	}
 
@@ -90,25 +94,21 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.filter(playerWithState -> Objects.equals(playerWithState.getState(), ANSWERING))
 				.parallel()
 				.forEach(player1 -> {
-			try {
-				try {
-					player1.setAnswer(QuestionAnswer.valueOf(player1.getPlayer().answerQuestion().get(20, SECONDS)));
-				} catch (TimeoutException e) {
-					player1.setAnswer(NOT_SURE);
-				}
-			} catch (InterruptedException | ExecutionException e) {
-				throw new RuntimeException(e);
-			}
-		});
-		long noAnswers = this.players.values().stream()
+					try {
+						try {
+							player1.setAnswer(QuestionAnswer.valueOf(
+									player1.getPlayer().answerQuestion().get(20, SECONDS)));
+						} catch (TimeoutException e) {
+							player1.setAnswer(NOT_SURE);
+						}
+					} catch (InterruptedException | ExecutionException e) {
+						throw new RuntimeException(e);
+					}
+				});
+		Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
 				.filter(player -> Objects.equals(player.getState(), ANSWERING))
-				.filter(playerWithState -> Objects.equals(playerWithState.getAnswer(), NO))
-				.count();
-		long yesAnswers = this.players.values().stream()
-				.filter(player -> Objects.equals(player.getState(), ANSWERING))
-				.filter(playerWithState -> Objects.equals(playerWithState.getAnswer(), YES))
-				.count();
-		if (yesAnswers < noAnswers) {
+				.collect(partitioningBy(playerWithState -> Objects.equals(playerWithState.getAnswer(), NO)));
+		if (booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size()) {
 			List<String> collect = new ArrayList<>(this.players.keySet());
 			return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect)), players);
 		} else {
@@ -140,10 +140,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	private int findCurrentPlayerIndex(List<String> playersList) {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
-		int currentPlayerIndex;
-		currentPlayerIndex = playersList.indexOf(currentPlayer.getPlayer().getName());
-		return currentPlayerIndex + 1 >= this.players.size() ? 0 : currentPlayerIndex + 1;
+		return Stream.of(playersList.indexOf(currentPlayer.getPlayer().getId()))
+				.map(playerIndex -> playerIndex + 1 >= this.players.size() ? 0 : playerIndex + 1)
+				.findFirst()
+				.orElseThrow();
 	}
+
 	private void resetToDefault() {
 		players.values().forEach(playerWithState -> {
 			playerWithState.setAnswer(null);

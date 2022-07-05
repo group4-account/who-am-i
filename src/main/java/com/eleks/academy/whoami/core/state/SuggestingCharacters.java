@@ -7,8 +7,6 @@ import com.eleks.academy.whoami.core.impl.GameCharacter;
 import com.eleks.academy.whoami.core.impl.StartGameAnswer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
-import org.springframework.http.HttpStatus;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
 import java.util.concurrent.locks.Lock;
@@ -17,6 +15,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.util.stream.Collectors.toList;
 
 public final class SuggestingCharacters extends AbstractGameState {
@@ -101,19 +100,18 @@ public final class SuggestingCharacters extends AbstractGameState {
     public GameState makeTurn(Answer answer) {
         this.lock.lock();
         try {
-
             this.players.values().stream()
                     .filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getId(),
                             players.get(answer.getPlayer()).getPlayer().getId()))
                     .findFirst()
-                    .ifPresent(a -> a.setState(PlayerState.READY));
+                    .ifPresent(a -> a.setState(READY));
             this.players.values().stream()
                     .filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getId(),
                             players.get(answer.getPlayer()).getPlayer().getId()))
                     .findFirst()
                     .ifPresent(a -> a.getPlayer().setName(answer.getSecondMessage()));
             if(players.values().stream().filter(playerWithState -> playerWithState.getState()
-                    .equals(PlayerState.READY)).count() >= 4) {
+                    .equals(READY)).count() >= 4) {
                 this.suggestCharacter(answer.getPlayer(), answer.getMessage());
                 return this.next();
             }
@@ -134,7 +132,8 @@ public final class SuggestingCharacters extends AbstractGameState {
         if (findPlayer(player).isPresent()) {
             players.remove(player);
         }
-        return new SuggestingCharacters(players);
+        this.players.values().forEach(playerWithState -> playerWithState.setState(FINISHED));
+        return new GameFinished(players);
     }
 
     /**
