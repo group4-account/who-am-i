@@ -37,4 +37,8 @@ public interface GameService {
 	void leaveGame(String id, String player);
 
 	Optional<GameDetails> findAvailableQuickGame(String player);
+
+	int getAllPlayersCount();
+
+	int getReadyPlayersCount(String id, String player);
 }

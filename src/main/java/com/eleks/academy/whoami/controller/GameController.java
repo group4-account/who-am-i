@@ -79,7 +79,16 @@ public class GameController {
 				.map(ResponseEntity::ok)
 				.orElseGet(() -> ResponseEntity.notFound().build());
 	}
+	@GetMapping("/all-players-count")
+	public int getAllPlayersCount() {
+		return this.gameService.getAllPlayersCount();
+	}
 
+	@GetMapping("/{id}/ready-players-count")
+	public int getReadyPlayersCount(@PathVariable("id") String id,
+									@RequestHeader(PLAYER) String player) {
+		return this.gameService.getReadyPlayersCount(id, player);
+	}
 	@PostMapping("/{id}")
 	public ResponseEntity<GameDetails> startGame(@PathVariable("id") String id,
 												 @RequestHeader(PLAYER) String player) {

@@ -136,6 +136,11 @@ public class PersistentGame implements Game, SynchronousGame {
     }
 
     @Override
+    public Optional<GameState> getCurrentTurnInfo() {
+        return Optional.ofNullable(this.turns.peek());
+    }
+
+    @Override
     public void changeTurn() {
 
     }

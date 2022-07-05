@@ -125,18 +125,22 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@Override
 	public GameState makeLeave(Answer answer) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
-		if (Objects.equals(answer.getPlayer(),
-				this.players.values()
-						.stream()
-						.filter(player -> Objects.equals(player.getState(), ASKING))
-						.findFirst()
-						.map(playerWithState -> playerWithState.getPlayer().getId())
-						.orElse("NOT_ASKING_PLAYER"))) {
+		if (isAskingPlayer(answer)) {
 			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList)), players);
 		} else {
 			//TODO: add remove player from list
 			return this;
 		}
+	}
+
+	private boolean isAskingPlayer(Answer answer) {
+		return Objects.equals(answer.getPlayer(),
+				this.players.values()
+						.stream()
+						.filter(player -> Objects.equals(player.getState(), ASKING))
+						.findFirst()
+						.map(playerWithState -> playerWithState.getPlayer().getId())
+						.orElse("NOT_ASKING_PLAYER"));
 	}
 
 	private int findCurrentPlayerIndex(List<String> playersList) {
@@ -146,10 +150,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return currentPlayerIndex + 1 >= this.players.size() ? 0 : currentPlayerIndex + 1;
 	}
 	private void resetToDefault() {
-		players.values().forEach(playerWithState -> playerWithState.setAnswer(null));
-		players.values().forEach(playerWithState -> playerWithState.getPlayer().setQuestion(null));
-		players.values().forEach(playerWithState -> ofNullable(playerWithState.getPlayer())
-				.map(PersistentPlayer::inCompleteFuture));
+		players.values().forEach(playerWithState -> {
+			playerWithState.setAnswer(null);
+			playerWithState.getPlayer().setQuestion(null);
+			ofNullable(playerWithState.getPlayer())
+					.map(PersistentPlayer::inCompleteFuture);
+		});
 	}
 
 }

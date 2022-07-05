@@ -33,4 +33,5 @@ public interface SynchronousGame {
 
 	void makeLeave(Answer answer);
 
+	Optional<GameState> getCurrentTurnInfo();
 }
