@@ -59,7 +59,7 @@ public final class WaitingForPlayers extends AbstractGameState {
         } else {
             PersistentPlayer persistentPlayer = new PersistentPlayer(answer.getPlayer());
             nextPlayers.put(answer.getPlayer(),
-                    new PlayerWithState(persistentPlayer, null, NOT_READY));
+                    new PlayerWithState(persistentPlayer, null, null, NOT_READY));
         }
         if (nextPlayers.size() == getMaxPlayers()) {
             return new SuggestingCharacters(nextPlayers);

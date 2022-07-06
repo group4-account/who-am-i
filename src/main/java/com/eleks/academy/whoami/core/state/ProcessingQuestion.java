@@ -61,7 +61,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.filter(player -> Objects.equals(player.getState(), ASKING))
 				.findFirst()
 				.map(playerWithState -> playerWithState.getPlayer().getId())
-				.orElseThrow();
+				.orElse("No one asking at this time");
 	}
 
 	@Override
@@ -75,10 +75,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		try {
 			try {
-				currentPlayer.getPlayer().getFirstQuestion().get(20, SECONDS);
+			currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS));
 			} catch (TimeoutException e) {
-				List<String> playersList = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList)), this.players);
+				Map<String, PlayerWithState> newPlayersMap = this.players;
+				newPlayersMap.remove(currentPlayer.getPlayer().getId());
+				List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
+				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -108,7 +110,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.collect(partitioningBy(playerWithState -> Objects.equals(playerWithState.getAnswer(), NO)));
 		if (booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size()) {
 			List<String> collect = new ArrayList<>(this.players.keySet());
-			return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect)), players);
+			return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
 		} else {
 			return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players);
 		}
@@ -119,7 +121,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public GameState leaveGame(String answer) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
 		if (isAskingPlayer(answer)) {
-			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList)), players);
+			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList,
+					this.players.get(getCurrentTurn()))), players);
 		} else {
 			//TODO: add remove player from list
 			return this;
@@ -136,8 +139,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 						.orElse("NOT_ASKING_PLAYER"));
 	}
 
-	private int findCurrentPlayerIndex(List<String> playersList) {
-		PlayerWithState currentPlayer = this.players.get(getCurrentTurn());
+	private int findCurrentPlayerIndex(List<String> playersList, PlayerWithState currentPlayer) {
 		return Stream.of(playersList.indexOf(currentPlayer.getPlayer().getId()))
 				.map(playerIndex -> playerIndex + 1 >= this.players.size() ? 0 : playerIndex + 1)
 				.findFirst()
