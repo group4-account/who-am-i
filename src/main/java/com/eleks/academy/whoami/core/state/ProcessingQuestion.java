@@ -16,8 +16,7 @@ import java.util.stream.Stream;
 
 import static com.eleks.academy.whoami.model.request.QuestionAnswer.NO;
 import static com.eleks.academy.whoami.model.request.QuestionAnswer.NOT_SURE;
-import static com.eleks.academy.whoami.model.response.PlayerState.ANSWERING;
-import static com.eleks.academy.whoami.model.response.PlayerState.ASKING;
+import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Optional.ofNullable;
@@ -41,7 +40,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		players.get(currentPlayer).setState(ASKING);
 		players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
-				.forEach(player -> player.setState(ANSWERING));
+				.forEach(player -> player.setState(READY));
 		players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.getPlayer().setReadyForAnswerFuture(completedFuture(false)));
@@ -88,7 +87,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-
+		players.values().stream()
+				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
+						currentPlayer.getPlayer().getId()))
+				.forEach(player -> player.setState(ANSWERING));
 		this.players.values()
 				.stream()
 				.filter(playerWithState -> Objects.equals(playerWithState.getState(), ANSWERING))

@@ -4,7 +4,6 @@ import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.repository.GameRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
@@ -56,9 +55,8 @@ public class GameInMemoryRepository implements GameRepository {
 	public int getAllPlayersCount() {
 		return games.values()
 				.stream()
-				.map(game -> Optional.ofNullable(game.getPlayersInGame())
-						.map(List::size).orElse(0))
-				.mapToInt(Integer::intValue).sum();
+				.map(game -> game.getPlayersInGame().size())
+				.collect(Collectors.summingInt(Integer::intValue));
 	}
 
 	@Override
