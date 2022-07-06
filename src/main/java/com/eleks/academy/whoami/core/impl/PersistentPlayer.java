@@ -19,7 +19,6 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	private volatile CompletableFuture<String> question = new CompletableFuture<>();
 	private volatile CompletableFuture<String> currentAnswer = new CompletableFuture<>();
 	private volatile CompletableFuture<Boolean> readyForAnswerFuture;
-//	private final ExecutorService executor = Executors.newSingleThreadExecutor();
 
 	public PersistentPlayer(String id) {
 		this.id = Objects.requireNonNull(id);
