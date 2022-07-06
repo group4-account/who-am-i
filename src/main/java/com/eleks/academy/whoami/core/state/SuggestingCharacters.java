@@ -5,7 +5,6 @@ import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.GameCharacter;
 import com.eleks.academy.whoami.core.impl.StartGameAnswer;
-import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
@@ -15,7 +14,8 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.eleks.academy.whoami.model.response.PlayerState.*;
+import static com.eleks.academy.whoami.model.response.PlayerState.FINISHED;
+import static com.eleks.academy.whoami.model.response.PlayerState.READY;
 import static java.util.stream.Collectors.toList;
 
 public final class SuggestingCharacters extends AbstractGameState {

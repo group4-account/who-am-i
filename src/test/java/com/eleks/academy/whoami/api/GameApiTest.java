@@ -1,33 +1,23 @@
 package com.eleks.academy.whoami.api;
 
-import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
-import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
-import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
-import static org.assertj.core.api.Assertions.assertThat;
-import static java.util.Collections.singletonList;
-
-import java.io.IOException;
-import java.io.InputStream;
-
+import com.eleks.academy.whoami.handler.ApiClient;
+import com.eleks.academy.whoami.model.*;
+import com.github.tomakehurst.wiremock.client.WireMock;
+import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.springframework.http.HttpStatus;
 
-import com.eleks.academy.whoami.handler.ApiClient;
-import com.eleks.academy.whoami.model.CharacterSuggestion;
-import com.eleks.academy.whoami.model.GameDetails;
-import com.eleks.academy.whoami.model.GameLight;
-import com.eleks.academy.whoami.model.Message;
-import com.eleks.academy.whoami.model.NewGameRequest;
-import com.eleks.academy.whoami.model.PlayerState;
-import com.eleks.academy.whoami.model.PlayerWithState;
-import com.eleks.academy.whoami.model.QuestionAnswer;
-import com.eleks.academy.whoami.model.SynchronousPlayer;
-import com.eleks.academy.whoami.model.TurnDetails;
-import com.github.tomakehurst.wiremock.client.WireMock;
-import com.github.tomakehurst.wiremock.junit5.WireMockExtension;
+import java.io.IOException;
+import java.io.InputStream;
+
+import static com.github.tomakehurst.wiremock.client.WireMock.equalTo;
+import static com.github.tomakehurst.wiremock.client.WireMock.equalToJson;
+import static com.github.tomakehurst.wiremock.core.WireMockConfiguration.wireMockConfig;
+import static java.util.Collections.singletonList;
+import static org.assertj.core.api.Assertions.assertThat;
 
 class GameApiTest {
 

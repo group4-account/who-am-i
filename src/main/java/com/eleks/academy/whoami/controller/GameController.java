@@ -18,10 +18,8 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 import static com.eleks.academy.whoami.utils.StringUtils.Headers.PLAYER;
-import static org.springframework.web.bind.annotation.RequestMethod.DELETE;
 
 @RestController
 @RequestMapping("/games")
