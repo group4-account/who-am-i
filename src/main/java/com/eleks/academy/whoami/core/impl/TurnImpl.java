@@ -1,9 +1,9 @@
 package com.eleks.academy.whoami.core.impl;
 
-import java.util.List;
-
 import com.eleks.academy.whoami.core.Player;
 import com.eleks.academy.whoami.core.Turn;
+
+import java.util.List;
 
 public class TurnImpl implements Turn {
 	

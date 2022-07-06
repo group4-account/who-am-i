@@ -2,10 +2,6 @@ package com.eleks.academy.whoami.core.impl;
 
 import org.junit.jupiter.api.Test;
 
-import java.util.concurrent.Future;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
 class PersistentPlayerTest {

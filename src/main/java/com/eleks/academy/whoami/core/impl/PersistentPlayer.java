@@ -6,7 +6,8 @@ import lombok.Data;
 
 import java.util.Objects;
 import java.util.Queue;
-import java.util.concurrent.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
 
 @Data
 public class PersistentPlayer implements Player, SynchronousPlayer {

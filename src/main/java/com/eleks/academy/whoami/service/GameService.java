@@ -2,7 +2,6 @@ package com.eleks.academy.whoami.service;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
-import com.eleks.academy.whoami.model.request.Message;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;

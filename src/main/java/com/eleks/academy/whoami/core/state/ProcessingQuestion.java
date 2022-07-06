@@ -20,7 +20,6 @@ import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Optional.ofNullable;
-import static java.util.concurrent.CompletableFuture.completedFuture;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.partitioningBy;
@@ -37,8 +36,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.players = players;
 
 		resetToDefault();
-		players.get(currentPlayer).setState(ASKING);
-		players.values().stream()
+		this.players.get(currentPlayer).setState(ASKING);
+		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
 
@@ -67,7 +66,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	@Override
 	public List<PlayerWithState> getPlayersWithState() {
-		return players.values().stream().toList();
+		return this.players.values().stream().toList();
 	}
 
 
@@ -79,12 +78,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 				currentPlayer.getPlayer().getFirstQuestion().get(20, SECONDS);
 			} catch (TimeoutException e) {
 				List<String> playersList = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList)), players);
+				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList)), this.players);
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-		players.values().stream()
+		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
 						currentPlayer.getPlayer().getId()))
 				.forEach(player -> player.setState(ANSWERING));
@@ -138,7 +137,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private int findCurrentPlayerIndex(List<String> playersList) {
-		PlayerWithState currentPlayer = players.get(getCurrentTurn());
+		PlayerWithState currentPlayer = this.players.get(getCurrentTurn());
 		return Stream.of(playersList.indexOf(currentPlayer.getPlayer().getId()))
 				.map(playerIndex -> playerIndex + 1 >= this.players.size() ? 0 : playerIndex + 1)
 				.findFirst()
@@ -146,7 +145,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private void resetToDefault() {
-		players.values().forEach(playerWithState -> {
+		this.players.values().forEach(playerWithState -> {
 			playerWithState.setAnswer(null);
 			playerWithState.getPlayer().setQuestion(null);
 			ofNullable(playerWithState.getPlayer())

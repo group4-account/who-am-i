@@ -1,8 +1,8 @@
 package com.eleks.academy.whoami.networking.server;
 
-import java.io.IOException;
-
 import com.eleks.academy.whoami.core.Game;
+
+import java.io.IOException;
 
 public interface Server {
 	
