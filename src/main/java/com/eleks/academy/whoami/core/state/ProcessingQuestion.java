@@ -16,8 +16,7 @@ import java.util.stream.Stream;
 
 import static com.eleks.academy.whoami.model.request.QuestionAnswer.NO;
 import static com.eleks.academy.whoami.model.request.QuestionAnswer.NOT_SURE;
-import static com.eleks.academy.whoami.model.response.PlayerState.ANSWERING;
-import static com.eleks.academy.whoami.model.response.PlayerState.ASKING;
+import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.util.Optional.ofNullable;
@@ -41,10 +40,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 		players.get(currentPlayer).setState(ASKING);
 		players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
-				.forEach(player -> player.setState(ANSWERING));
-		players.values().stream()
-				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
-				.forEach(player -> player.getPlayer().setReadyForAnswerFuture(completedFuture(false)));
+				.forEach(player -> player.setState(READY));
+
 		supplyAsync(() -> this.makeTurn(new Answer(null)), executorService);
 	}
 
@@ -79,16 +76,18 @@ public final class ProcessingQuestion extends AbstractGameState {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		try {
 			try {
-				players.get(currentPlayer.getPlayer().getId())
-						.getPlayer().getFirstQuestion().get(20, SECONDS);
+				currentPlayer.getPlayer().getFirstQuestion().get(20, SECONDS);
 			} catch (TimeoutException e) {
-				List<String> collect = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect)), players);
+				List<String> playersList = new ArrayList<>(this.players.keySet());
+				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList)), players);
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-
+		players.values().stream()
+				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
+						currentPlayer.getPlayer().getId()))
+				.forEach(player -> player.setState(ANSWERING));
 		this.players.values()
 				.stream()
 				.filter(playerWithState -> Objects.equals(playerWithState.getState(), ANSWERING))
