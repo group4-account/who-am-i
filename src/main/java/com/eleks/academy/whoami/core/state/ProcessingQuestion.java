@@ -75,7 +75,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		try {
 			try {
-				currentPlayer.getPlayer().getFirstQuestion().get(20, SECONDS);
+				currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS);
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				newPlayersMap.remove(currentPlayer.getPlayer().getId());
