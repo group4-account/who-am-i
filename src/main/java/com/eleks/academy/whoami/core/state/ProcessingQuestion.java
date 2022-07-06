@@ -149,6 +149,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void resetToDefault() {
 		this.players.values().forEach(playerWithState -> {
 			playerWithState.setAnswer(null);
+			playerWithState.setQuestion(null);
 			playerWithState.getPlayer().setQuestion(null);
 			ofNullable(playerWithState.getPlayer())
 					.map(PersistentPlayer::inCompleteFuture);
