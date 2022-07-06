@@ -41,9 +41,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
-		players.values().stream()
-				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
-				.forEach(player -> player.getPlayer().setReadyForAnswerFuture(completedFuture(false)));
+
 		supplyAsync(() -> this.makeTurn(new Answer(null)), executorService);
 	}
 
@@ -78,11 +76,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		try {
 			try {
-				players.get(currentPlayer.getPlayer().getId())
-						.getPlayer().getFirstQuestion().get(20, SECONDS);
+				currentPlayer.getPlayer().getFirstQuestion().get(20, SECONDS);
 			} catch (TimeoutException e) {
-				List<String> collect = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect)), players);
+				List<String> playersList = new ArrayList<>(this.players.keySet());
+				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList)), players);
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
