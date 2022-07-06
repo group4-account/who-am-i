@@ -17,6 +17,8 @@ public class PlayerWithState {
 
 	private QuestionAnswer answer;
 
+	private String question;
+
 	private PlayerState state;
 
 }

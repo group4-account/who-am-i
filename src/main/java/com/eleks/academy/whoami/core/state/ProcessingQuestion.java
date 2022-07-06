@@ -75,7 +75,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		try {
 			try {
-				currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS);
+			currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS));
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				newPlayersMap.remove(currentPlayer.getPlayer().getId());
@@ -121,7 +121,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public GameState leaveGame(String answer) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
 		if (isAskingPlayer(answer)) {
-			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList, new PlayerWithState())), players);
+			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList,
+					this.players.get(getCurrentTurn()))), players);
 		} else {
 			//TODO: add remove player from list
 			return this;
