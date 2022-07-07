@@ -35,7 +35,7 @@ public final class SuggestingCharacters extends AbstractGameState {
         this.playerCharacterMap = new HashMap<>(this.players.size());
         supplyAsync(() -> {
             try {
-				Thread.sleep(60050);
+				Thread.sleep(10050);
 				if (this.players.values().stream()
 						.anyMatch(playerWithState -> playerWithState.getState().equals(NOT_READY)))
 					this.players.values().stream()
@@ -73,8 +73,10 @@ public final class SuggestingCharacters extends AbstractGameState {
 
     @Override
     public List<PlayerWithState> getPlayersWithState() {
-        return players.values().stream().toList();
-
+        return players.values()
+                .stream()
+                .filter(playerWithState -> !playerWithState.getState().equals(FINISHED))
+                .toList();
     }
 
     @Override
