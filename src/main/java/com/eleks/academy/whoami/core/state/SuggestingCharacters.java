@@ -35,7 +35,7 @@ public final class SuggestingCharacters extends AbstractGameState {
         this.playerCharacterMap = new HashMap<>(this.players.size());
         supplyAsync(() -> {
             try {
-				Thread.sleep(10050);
+				Thread.sleep(123050);
 				if (this.players.values().stream()
 						.anyMatch(playerWithState -> playerWithState.getState().equals(NOT_READY)))
 					this.players.values().stream()
