@@ -8,14 +8,15 @@ import com.eleks.academy.whoami.core.impl.StartGameAnswer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.eleks.academy.whoami.model.response.PlayerState.FINISHED;
-import static com.eleks.academy.whoami.model.response.PlayerState.READY;
+import static com.eleks.academy.whoami.model.response.PlayerState.*;
+import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
 
 public final class SuggestingCharacters extends AbstractGameState {
@@ -32,6 +33,20 @@ public final class SuggestingCharacters extends AbstractGameState {
         this.players = players;
         this.suggestedCharacters = new HashMap<>(this.players.size());
         this.playerCharacterMap = new HashMap<>(this.players.size());
+        supplyAsync(() -> {
+            try {
+				Thread.sleep(60050);
+				if (this.players.values().stream()
+						.anyMatch(playerWithState -> playerWithState.getState().equals(NOT_READY)))
+					this.players.values().stream()
+							.findFirst()
+							.ifPresent(player -> this.leaveGame(player.getPlayer().getId()));
+				return null;
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
+			return null;
+		});
     }
 
     /**
