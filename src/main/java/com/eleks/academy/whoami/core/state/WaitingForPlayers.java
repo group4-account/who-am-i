@@ -10,6 +10,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import static com.eleks.academy.whoami.model.response.PlayerState.NOT_READY;
 
@@ -21,7 +22,7 @@ public final class WaitingForPlayers extends AbstractGameState {
     public WaitingForPlayers(int maxPlayers) {
         super(0, maxPlayers);
         this.maxPlayers = maxPlayers;
-        this.players = new HashMap<>(maxPlayers);
+        this.players = new ConcurrentHashMap<>(maxPlayers);
     }
 
 
