@@ -10,8 +10,6 @@ import lombok.SneakyThrows;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -29,15 +27,15 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	private Map<String, PlayerWithState> players;
 
-	ExecutorService executorService = Executors.newSingleThreadExecutor();
-
 	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players) {
 		super(players.size(), players.size());
 		this.players = players;
+
 		this.players.values()
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(player -> this.leaveGame(player, currentPlayer1));
+
 		final String currentPlayer = currentPlayer1;
 
 		this.players.get(currentPlayer).setState(ASKING);
@@ -45,7 +43,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
 
-		supplyAsync(() -> this.makeTurn(new Answer(null)), executorService);
+		supplyAsync(() -> this.makeTurn(new Answer(null)));
 	}
 
 	@Override
@@ -105,8 +103,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 									player1.getPlayer().answerQuestion().get(20, SECONDS)));
 							player1.getPlayer().zeroTimePlayersBeingInactive();
 						} catch (TimeoutException e) {
-							player1.getPlayer().incrementBeingInactiveCount();
 							player1.setAnswer(NOT_SURE);
+							player1.getPlayer().incrementBeingInactiveCount();
 						}
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
@@ -126,7 +124,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	@Override
 	public GameState leaveGame(String answer) {
-
 		List<String> playersList = new ArrayList<>(this.players.keySet());
 		if (isAskingPlayer(answer)) {
 			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList,
@@ -137,18 +134,14 @@ public final class ProcessingQuestion extends AbstractGameState {
 		}
 	}
 
-
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {
 		Map<String, PlayerWithState> newPlayersMap = this.players;
-		List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
 		if (isAskingPlayer(playerWithState.getPlayer().getId())) {
 			newPlayersMap.remove(currentPlayer);
-
-			this.players = newPlayersMap;
 		} else {
 			newPlayersMap.remove(playerWithState.getPlayer().getId());
-			this.players = newPlayersMap;
 		}
+		this.players = newPlayersMap;
 	}
 
 	private boolean isAskingPlayer(String answer) {
