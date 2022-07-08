@@ -10,7 +10,6 @@ import lombok.SneakyThrows;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ForkJoinPool;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -104,8 +103,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 							player1.getPlayer().zeroTimePlayersBeingInactive();
 						} catch (TimeoutException e) {
 							player1.getPlayer().incrementBeingInactiveCount();
-						}
-						finally {
+						} finally {
 							this.players.values()
 									.stream().filter(playerWithState -> playerWithState.getAnswer() == null
 											&& playerWithState.getState().equals(ANSWERING))
