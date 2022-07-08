@@ -16,7 +16,7 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	private String character;
 	private String name;
 
-	private Queue<String> questionQueue;
+	private int beingInActiveCount;
 	private volatile CompletableFuture<String> question = new CompletableFuture<>();
 	private volatile CompletableFuture<String> currentAnswer = new CompletableFuture<>();
 	private volatile CompletableFuture<Boolean> readyForAnswerFuture;
@@ -71,5 +71,12 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 
 	}
 
+	public void incrementBeingInactiveCount() {
+		beingInActiveCount++;
+	}
+
+	public void zeroTimePlayersBeingInactive() {
+		beingInActiveCount = 0;
+	}
 
 }

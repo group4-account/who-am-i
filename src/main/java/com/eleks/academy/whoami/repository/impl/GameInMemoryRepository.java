@@ -31,7 +31,7 @@ public class GameInMemoryRepository implements GameRepository {
 
 	@Override
 	public Map<String, SynchronousGame> findAvailableQuickGames() {
-		return filterByValue(games, availableStatus -> availableStatus.isAvailable());
+		return filterByValue(games, SynchronousGame::isAvailable);
 	}
 
 	private static <K, V> Map<K, V> filterByValue(Map<K, V> map, Predicate<V> predicate) {
