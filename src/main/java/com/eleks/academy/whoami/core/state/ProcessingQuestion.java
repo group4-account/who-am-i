@@ -93,9 +93,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 						currentPlayer.getPlayer().getId()))
 				.forEach(player -> player.setState(ANSWERING));
 		this.players.values()
-				.stream()
+				.parallelStream()
 				.filter(playerWithState -> Objects.equals(playerWithState.getState(), ANSWERING))
-				.parallel()
 				.forEach(player1 -> {
 					try {
 						try {
@@ -103,8 +102,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 									player1.getPlayer().answerQuestion().get(20, SECONDS)));
 							player1.getPlayer().zeroTimePlayersBeingInactive();
 						} catch (TimeoutException e) {
-							player1.setAnswer(NOT_SURE);
 							player1.getPlayer().incrementBeingInactiveCount();
+						} finally {
+							this.players.values()
+									.stream().filter(playerWithState -> playerWithState.getAnswer() == null
+											&& playerWithState.getState().equals(ANSWERING))
+									.forEachOrdered(playerWithState -> playerWithState.setAnswer(NOT_SURE));
 						}
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
