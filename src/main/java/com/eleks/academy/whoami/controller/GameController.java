@@ -98,7 +98,7 @@ public class GameController {
 	@PostMapping("/{id}/questions")
 	public void askQuestion(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player,
-							@RequestBody Message message) {
+							@Valid @RequestBody Message message) {
 		this.gameService.askQuestion(id, player, message.getMessage());
 	}
 

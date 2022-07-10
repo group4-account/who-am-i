@@ -67,7 +67,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
 
     @Override
-    public void askQuestion(String id, String message) {
+    public void askQuestion(String playerId, String message) {
         this.findPlayer(this.getTurn()).ifPresent(player -> player.setQuestion(message));
     }
 

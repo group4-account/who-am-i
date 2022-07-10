@@ -121,7 +121,12 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void askQuestion(String gameId, String player, String message) {
 		this.gameRepository.findById(gameId)
-				.ifPresent(game -> game.askQuestion(player, message));
+				.ifPresentOrElse(
+						game -> game.askQuestion(player, message),
+						() -> {
+							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not your turn");
+						}
+				);
 	}
 
 	@Override

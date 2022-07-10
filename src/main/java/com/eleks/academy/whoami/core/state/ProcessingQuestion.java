@@ -126,9 +126,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 
 	@Override
-	public GameState leaveGame(String answer) {
+	public GameState leaveGame(String player) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
-		if (isAskingPlayer(answer)) {
+		if (isAskingPlayer(player)) {
 			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList,
 					this.players.get(getCurrentTurn()))), players);
 		} else {
