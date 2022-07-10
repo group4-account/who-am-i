@@ -161,7 +161,7 @@ public class GameServiceImpl implements GameService {
 						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
 		var gamePlayers = game.getPlayersInGame();
 		gamePlayers.stream()
-				.filter(playerWithState -> playerWithState.getPlayer().getId().equals(playerId))
+				.filter(playerWithState -> Objects.equals(playerWithState.getPlayer().getId(), playerId))
 				.collect(Collectors.toList())
 				.forEach(gamePlayers::remove);
 		game.removeFromGame(gameId, playerId);
