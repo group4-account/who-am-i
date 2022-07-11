@@ -22,6 +22,11 @@ public final class GameFinished extends AbstractGameState {
 	}
 
 	@Override
+	public long getTimer() {
+		return 0;
+	}
+
+	@Override
 	public Optional<SynchronousPlayer> findPlayer(String player) {
 		return Optional.empty();
 	}
