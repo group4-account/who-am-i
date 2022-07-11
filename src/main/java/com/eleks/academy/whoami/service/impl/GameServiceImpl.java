@@ -175,11 +175,6 @@ public class GameServiceImpl implements GameService {
 		SynchronousGame game = this.gameRepository.findById(gameId)
 				.orElseThrow(
 						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
-//		var gamePlayers = game.getPlayersInGame();
-//		gamePlayers.stream()
-//				.filter(playerWithState -> playerWithState.getPlayer().getId().equals(playerId))
-//				.collect(Collectors.toList())
-//				.forEach(gamePlayers::remove);
 		game.removeFromGame(gameId, playerId);
 		if (game.getPlayersInGame().size() == 0){
 			this.gameRepository.remove(game);

@@ -72,10 +72,6 @@ public final class SuggestingCharacters extends AbstractGameState {
 
     @Override
     public List<PlayerWithState> getPlayersWithState() {
-//        return players.values()
-//                .stream()
-//                .filter(playerWithState -> !playerWithState.getState().equals(FINISHED))
-//                .toList();
         return players.values().stream().toList();
     }
 
