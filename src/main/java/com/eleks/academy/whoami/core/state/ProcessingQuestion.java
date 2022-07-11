@@ -5,6 +5,7 @@ import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
+import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 import lombok.SneakyThrows;
 
@@ -76,21 +77,18 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public GameState makeTurn(Answer answerQuestion) {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		resetToDefault();
-		if (currentPlayer.getState().equals(ASKING)) {
+		try {
 			try {
-				try {
-					currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS));
-				} catch (TimeoutException e) {
-					Map<String, PlayerWithState> newPlayersMap = this.players;
-					newPlayersMap.remove(currentPlayer.getPlayer().getId());
-					List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
-					return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
-				}
-			} catch (InterruptedException | ExecutionException e) {
-				e.printStackTrace();
+				currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS));
+			} catch (TimeoutException e) {
+				Map<String, PlayerWithState> newPlayersMap = this.players;
+				newPlayersMap.remove(currentPlayer.getPlayer().getId());
+				List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
+				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
 			}
+		} catch (InterruptedException | ExecutionException e) {
+			e.printStackTrace();
 		}
-		else throw new GameException("Not your turn");
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
 						currentPlayer.getPlayer().getId()))
@@ -129,12 +127,19 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 
 	@Override
-	public GameState leaveGame(String removingPlayer) {
-		Map<String, PlayerWithState> newPlayersMap = this.players;
-		if(findPlayer(removingPlayer).isPresent())
-		newPlayersMap.remove(removingPlayer);
-		this.players = newPlayersMap;
-		return this;
+	public GameState leaveGame(String answer) {
+		List<String> playersList = new ArrayList<>(this.players.keySet());
+		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
+				this.players.get(getCurrentTurn())) + 1 % 4;
+		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
+
+		if (isAskingPlayer(answer)) {
+			this.players.remove(answer);
+			return new ProcessingQuestion(nextCurrentPlayer, players);
+		} else {
+			this.players.remove(answer);
+			return this;
+		}
 	}
 
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {

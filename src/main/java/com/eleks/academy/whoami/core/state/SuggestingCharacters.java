@@ -37,7 +37,7 @@ public final class SuggestingCharacters extends AbstractGameState {
 				Thread.sleep(123050);
 				if (this.players.values().stream()
 						.anyMatch(playerWithState -> playerWithState.getState().equals(NOT_READY)))
-					this.players.values().stream()
+                    new ArrayList<>(this.players.values()).stream()
 							.findFirst()
 							.ifPresent(player -> this.leaveGame(player.getPlayer().getId()));
 				return null;
