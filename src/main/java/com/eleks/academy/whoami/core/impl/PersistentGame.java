@@ -22,6 +22,11 @@ public class PersistentGame implements Game, SynchronousGame {
     private final String id;
     private final Queue<GameState> turns = new LinkedBlockingQueue<>();
 
+    @Override
+    public long getTimer() {
+        return this.applyIfPresent(this.turns.peek(), GameState::getTimer);
+    }
+
     /**
      * Creates a new game (game room) and makes a first enrolment turn by a current player
      * so that he won't have to enroll to the game he created

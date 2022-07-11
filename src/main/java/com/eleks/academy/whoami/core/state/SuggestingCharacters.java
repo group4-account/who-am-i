@@ -16,14 +16,22 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import static com.eleks.academy.whoami.model.response.PlayerState.*;
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
 
 public final class SuggestingCharacters extends AbstractGameState {
 
     private final Lock lock = new ReentrantLock();
-
+    private int maxTimes = 120;
+    private long timer;
     private final Map<String, PlayerWithState> players;
+
+    @Override
+    public long getTimer() {
+        return timer;
+    }
+
     private final Map<String, List<GameCharacter>> suggestedCharacters;
     private final Map<String, String> playerCharacterMap;
 
@@ -33,20 +41,21 @@ public final class SuggestingCharacters extends AbstractGameState {
         this.players = players;
         this.suggestedCharacters = new HashMap<>(this.players.size());
         this.playerCharacterMap = new HashMap<>(this.players.size());
-        supplyAsync(() -> {
-            try {
-				Thread.sleep(123050);
-				if (this.players.values().stream()
-						.anyMatch(playerWithState -> playerWithState.getState().equals(NOT_READY)))
-                    new ArrayList<>(this.players.values()).stream()
-							.findFirst()
-							.ifPresent(player -> this.leaveGame(player.getPlayer().getId()));
-				return null;
-			} catch (InterruptedException e) {
-				e.printStackTrace();
-			}
-			return null;
-		});
+        runAsync(() -> {
+            long start = System.currentTimeMillis();
+            while (true) {
+                long now = System.currentTimeMillis();
+                timer = 120 - TimeUnit.MILLISECONDS.toSeconds(now - start);;
+                if (timer == 0) {
+                    this.players.values().stream()
+                            .findFirst()
+                            .ifPresent(player -> leaveGame(player.getPlayer().getId()));
+                }
+                if (players.values().size() == 0)
+                    break;
+            }
+
+        });
     }
 
     /**

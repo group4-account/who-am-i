@@ -72,6 +72,11 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return this.players.values().stream().toList();
 	}
 
+	@Override
+	public long getTimer() {
+		return 0;
+	}
+
 	@SneakyThrows
 	@Override
 	public GameState makeTurn(Answer answerQuestion) {
