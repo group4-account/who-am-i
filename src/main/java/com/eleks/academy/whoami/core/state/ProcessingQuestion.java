@@ -79,7 +79,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		resetToDefault();
 		try {
 			try {
-				currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(80, SECONDS));
+				currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS));
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				newPlayersMap.remove(currentPlayer.getPlayer().getId());
@@ -100,7 +100,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 					try {
 						try {
 							player1.setAnswer(QuestionAnswer.valueOf(
-									player1.getPlayer().answerQuestion().get(180, SECONDS)));
+									player1.getPlayer().answerQuestion().get(20, SECONDS)));
 							player1.getPlayer().zeroTimePlayersBeingInactive();
 						} catch (TimeoutException e) {
 							player1.getPlayer().incrementBeingInactiveCount();
