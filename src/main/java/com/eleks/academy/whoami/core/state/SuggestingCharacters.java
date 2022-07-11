@@ -8,7 +8,6 @@ import com.eleks.academy.whoami.core.impl.StartGameAnswer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.BiFunction;
@@ -73,10 +72,11 @@ public final class SuggestingCharacters extends AbstractGameState {
 
     @Override
     public List<PlayerWithState> getPlayersWithState() {
-        return players.values()
-                .stream()
-                .filter(playerWithState -> !playerWithState.getState().equals(FINISHED))
-                .toList();
+//        return players.values()
+//                .stream()
+//                .filter(playerWithState -> !playerWithState.getState().equals(FINISHED))
+//                .toList();
+        return players.values().stream().toList();
     }
 
     @Override
@@ -149,7 +149,6 @@ public final class SuggestingCharacters extends AbstractGameState {
         if (findPlayer(player).isPresent()) {
             players.remove(player);
         }
-        this.players.values().forEach(playerWithState -> playerWithState.setState(FINISHED));
         return new GameFinished(players);
     }
 

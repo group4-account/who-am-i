@@ -76,18 +76,21 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public GameState makeTurn(Answer answerQuestion) {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		resetToDefault();
-		try {
+		if (currentPlayer.getState().equals(ASKING)) {
 			try {
-				currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS));
-			} catch (TimeoutException e) {
-				Map<String, PlayerWithState> newPlayersMap = this.players;
-				newPlayersMap.remove(currentPlayer.getPlayer().getId());
-				List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
-				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
+				try {
+					currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS));
+				} catch (TimeoutException e) {
+					Map<String, PlayerWithState> newPlayersMap = this.players;
+					newPlayersMap.remove(currentPlayer.getPlayer().getId());
+					List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
+					return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
+				}
+			} catch (InterruptedException | ExecutionException e) {
+				e.printStackTrace();
 			}
-		} catch (InterruptedException | ExecutionException e) {
-			e.printStackTrace();
 		}
+		else throw new GameException("Not your turn");
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
 						currentPlayer.getPlayer().getId()))
@@ -126,15 +129,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 
 	@Override
-	public GameState leaveGame(String player) {
-		List<String> playersList = new ArrayList<>(this.players.keySet());
-		if (isAskingPlayer(player)) {
-			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList,
-					this.players.get(getCurrentTurn()))), players);
-		} else {
-			//TODO: add remove player from list
-			return this;
-		}
+	public GameState leaveGame(String removingPlayer) {
+		Map<String, PlayerWithState> newPlayersMap = this.players;
+		if(findPlayer(removingPlayer).isPresent())
+		newPlayersMap.remove(removingPlayer);
+		this.players = newPlayersMap;
+		return this;
 	}
 
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {

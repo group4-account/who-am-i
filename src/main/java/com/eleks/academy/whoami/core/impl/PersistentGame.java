@@ -3,11 +3,13 @@ package com.eleks.academy.whoami.core.impl;
 import com.eleks.academy.whoami.core.Game;
 import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
+import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.core.state.WaitingForPlayers;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -21,6 +23,7 @@ public class PersistentGame implements Game, SynchronousGame {
     private final Lock turnLock = new ReentrantLock();
     private final String id;
     private final Queue<GameState> turns = new LinkedBlockingQueue<>();
+    private List<PlayerWithState> playerWithStateList = new ArrayList<>();
 
     /**
      * Creates a new game (game room) and makes a first enrolment turn by a current player
@@ -68,7 +71,10 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void askQuestion(String playerId, String message) {
-        this.findPlayer(this.getTurn()).ifPresent(player -> player.setQuestion(message));
+        if (this.getTurn().equals(playerId)){
+            this.findPlayer(this.getTurn()).ifPresent(player -> player.setQuestion(message));
+        }
+        else throw new GameException("Not your turn");
     }
 
     @Override
@@ -142,7 +148,6 @@ public class PersistentGame implements Game, SynchronousGame {
                 this.turnLock.unlock();
             }
         }
-
     }
 
     @Override
