@@ -31,7 +31,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		super(players.size(), players.size());
 		this.players = players;
 
-		this.players.values()
+		new ArrayList<>(this.players.values())
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(player -> this.leaveGame(player, currentPlayer1));

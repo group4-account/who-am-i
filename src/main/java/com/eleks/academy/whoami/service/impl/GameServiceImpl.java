@@ -13,7 +13,11 @@ import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.TurnDetails;
+import com.eleks.academy.whoami.repository.AddAnswerRequest;
+import com.eleks.academy.whoami.repository.AddQuestionRequest;
 import com.eleks.academy.whoami.repository.GameRepository;
+import com.eleks.academy.whoami.repository.QNAHistoryRepository;
+import com.eleks.academy.whoami.repository.impl.QNAHistoryRepositoryImpl;
 import com.eleks.academy.whoami.service.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -27,6 +31,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
 	private final GameRepository gameRepository;
+	private final QNAHistoryRepository qnaHistoryRepository;
 
 	@Override
 	public List<GameLight> findAvailableGames(String player) {
@@ -79,6 +84,11 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
+	public List<QNAHistoryRepositoryImpl.Question> getQnaHistory(String gameId){
+		return qnaHistoryRepository.GetGameHistory(gameId);
+	}
+
+	@Override
 	public Optional<SynchronousPlayer> enrollToGame(String id, String player) {
 		this.gameRepository.findById(id)
 				.filter(SynchronousGame::isAvailable)
@@ -121,12 +131,12 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void askQuestion(String gameId, String player, String message) {
 		this.gameRepository.findById(gameId)
-				.ifPresentOrElse(
-						game -> game.askQuestion(player, message),
-						() -> {
-							throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Not your turn");
-						}
-				);
+				.ifPresent(game -> game.askQuestion(player, message));
+
+		this.gameRepository.findById(gameId).stream()
+				.findFirst()
+				.map(sg -> sg.getPlayersInGame())
+				.ifPresent(pwsl -> this.qnaHistoryRepository.AddQuestionRequest(new AddQuestionRequest(false, gameId, player, message), pwsl));
 	}
 
 	@Override
@@ -156,6 +166,7 @@ public class GameServiceImpl implements GameService {
 	public void answerQuestion(String gameId, String player, String answer) {
 		this.gameRepository.findById(gameId)
 				.ifPresent(game -> game.answerQuestion(player, answer));
+		this.qnaHistoryRepository.AddAnswerRequest(new AddAnswerRequest(false, gameId, player, QuestionAnswer.valueOf(answer)));
 	}
 
 	@Override

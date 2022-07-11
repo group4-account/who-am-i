@@ -9,7 +9,9 @@ import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 import com.eleks.academy.whoami.repository.GameRepository;
+import com.eleks.academy.whoami.repository.QNAHistoryRepository;
 import com.eleks.academy.whoami.repository.impl.GameInMemoryRepository;
+import com.eleks.academy.whoami.repository.impl.QNAHistoryRepositoryImpl;
 import com.eleks.academy.whoami.service.impl.GameServiceImpl;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,7 +30,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class GameServiceTest {
     private final GameRepository gameRepository = new GameInMemoryRepository();
-    private final GameServiceImpl gameService = new GameServiceImpl(gameRepository);
+    private final QNAHistoryRepository qnaHistoryRepository = new QNAHistoryRepositoryImpl();
+    private final GameServiceImpl gameService = new GameServiceImpl(gameRepository, qnaHistoryRepository);
     private final NewGameRequest gameRequest = new NewGameRequest();
     private String gameId;
 
