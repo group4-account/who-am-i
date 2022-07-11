@@ -5,14 +5,12 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
+import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
-import com.eleks.academy.whoami.model.response.GameDetails;
-import com.eleks.academy.whoami.model.response.GameLight;
-import com.eleks.academy.whoami.model.response.PlayerState;
-import com.eleks.academy.whoami.model.response.TurnDetails;
+import com.eleks.academy.whoami.model.response.*;
 import com.eleks.academy.whoami.repository.AddAnswerRequest;
 import com.eleks.academy.whoami.repository.AddQuestionRequest;
 import com.eleks.academy.whoami.repository.GameRepository;
@@ -170,9 +168,13 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void leaveGame(String gameId, String playerId)
-	{
+	public void leaveGame(String gameId, String playerId) {
 		SynchronousGame game = this.gameRepository.findById(gameId)
+				.filter(game1 -> game1.getPlayersInGame()
+						.stream()
+						.map(PlayerWithState::getPlayer)
+						.map(PersistentPlayer::getId)
+						.anyMatch(id -> id.equals(playerId)))
 				.orElseThrow(
 						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
 
