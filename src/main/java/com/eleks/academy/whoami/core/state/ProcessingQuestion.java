@@ -32,7 +32,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	private Map<String, PlayerWithState> players;
 	private volatile long timer;
-	private final int maxTimeForQuestion = 30;
+	private final int maxTimeForQuestion = 60;
 	private final int maxTimeForAnswer = 20;
 
 	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players) {
