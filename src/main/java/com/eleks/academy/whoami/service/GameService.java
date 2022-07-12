@@ -36,7 +36,7 @@ public interface GameService {
 
 	void answerQuestion(String id, String player, String answer);
 
-	void leaveGame(String id, String player);
+	void leaveGame(String gameId, String player);
 
 	Optional<GameDetails> findAvailableQuickGame(String player);
 

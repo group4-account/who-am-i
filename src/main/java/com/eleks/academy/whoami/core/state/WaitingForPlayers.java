@@ -68,6 +68,11 @@ public final class WaitingForPlayers extends AbstractGameState {
     }
 
     @Override
+    public long getTimer() {
+        return 0;
+    }
+
+    @Override
     public GameState leaveGame(String player) {
         Map<String, PlayerWithState> players = new HashMap<>(this.players);
         players.remove(player);

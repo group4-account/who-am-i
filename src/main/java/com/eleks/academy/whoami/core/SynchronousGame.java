@@ -34,4 +34,7 @@ public interface SynchronousGame {
 	Optional<GameState> getCurrentTurnInfo();
 
 	void removeFromGame(String gameId, String playerId);
+
+	long getTimer();
+
 }

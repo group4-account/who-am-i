@@ -22,12 +22,15 @@ public class GameDetails {
 
 	private List<PlayerWithState> players;
 
+	private long timer;
+
 	public static GameDetails of(SynchronousGame game) {
 		return GameDetails.builder()
 				.id(game.getId())
 				.status(game.getStatus())
 				.currentTurn(game.getTurn())
 				.players(game.getPlayersInGame())
+				.timer(game.getTimer())
 				.build();
 	}
 
