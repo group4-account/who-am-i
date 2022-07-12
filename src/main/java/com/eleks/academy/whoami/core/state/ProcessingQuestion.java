@@ -5,13 +5,11 @@ import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
-import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
-import lombok.SneakyThrows;
 
 import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 import static com.eleks.academy.whoami.model.request.QuestionAnswer.NO;
@@ -19,12 +17,10 @@ import static com.eleks.academy.whoami.model.request.QuestionAnswer.NOT_SURE;
 import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
-import static java.lang.System.*;
+import static java.lang.System.currentTimeMillis;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
-import static java.util.concurrent.Executors.*;
-import static java.util.concurrent.TimeUnit.*;
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.partitioningBy;
 
@@ -80,7 +76,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return this.players.values().stream().toList();
 	}
 
-	@SneakyThrows
 	@Override
 	public GameState makeTurn(Answer answerQuestion) {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
@@ -134,7 +129,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 			return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players);
 		}
 	}
-
 
 	@Override
 	public GameState leaveGame(String answer) {
