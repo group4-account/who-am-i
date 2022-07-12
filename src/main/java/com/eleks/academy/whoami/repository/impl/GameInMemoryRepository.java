@@ -22,7 +22,9 @@ public class GameInMemoryRepository implements GameRepository {
 		Predicate<SynchronousGame> freeToJoin = SynchronousGame::isAvailable;
 
 		Predicate<SynchronousGame> playersGame = game ->
-				game.findPlayer(player).isPresent();
+				Optional.ofNullable(game)
+						.map(game1 -> game1.findPlayer(player))
+						.isPresent();
 
 		return this.games.values()
 				.stream()
