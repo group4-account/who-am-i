@@ -10,8 +10,8 @@ import com.eleks.academy.whoami.model.response.PlayerWithState;
 import lombok.SneakyThrows;
 
 import java.util.*;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.TimeoutException;
+import java.util.concurrent.*;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Stream;
 
 import static com.eleks.academy.whoami.model.request.QuestionAnswer.NO;
@@ -19,14 +19,21 @@ import static com.eleks.academy.whoami.model.request.QuestionAnswer.NOT_SURE;
 import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
+import static java.lang.System.*;
 import static java.util.Optional.ofNullable;
+import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.CompletableFuture.supplyAsync;
+import static java.util.concurrent.Executors.*;
+import static java.util.concurrent.TimeUnit.*;
 import static java.util.concurrent.TimeUnit.SECONDS;
 import static java.util.stream.Collectors.partitioningBy;
 
 public final class ProcessingQuestion extends AbstractGameState {
 
 	private Map<String, PlayerWithState> players;
+	private volatile long timer;
+	private final int maxTimeForQuestion = 30;
+	private final int maxTimeForAnswer = 20;
 
 	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players) {
 		super(players.size(), players.size());
@@ -44,7 +51,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
 
-		supplyAsync(() -> this.makeTurn(new Answer(null)));
+		runAsync(() -> this.makeTurn(new Answer(null)));
+		runAsync(this::startTimer);
 	}
 
 	@Override
@@ -72,11 +80,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return this.players.values().stream().toList();
 	}
 
-	@Override
-	public long getTimer() {
-		return 0;
-	}
-
 	@SneakyThrows
 	@Override
 	public GameState makeTurn(Answer answerQuestion) {
@@ -84,12 +87,14 @@ public final class ProcessingQuestion extends AbstractGameState {
 		resetToDefault();
 		try {
 			try {
-				currentPlayer.setQuestion(currentPlayer.getPlayer().getFirstQuestion().get(60, SECONDS));
+				currentPlayer.setQuestion(currentPlayer.getPlayer()
+						.getFirstQuestion().get(maxTimeForQuestion, SECONDS));
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				newPlayersMap.remove(currentPlayer.getPlayer().getId());
 				List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
-				return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
+				return new ProcessingQuestion(playersList
+						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -105,7 +110,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 					try {
 						try {
 							player1.setAnswer(QuestionAnswer.valueOf(
-									player1.getPlayer().answerQuestion().get(20, SECONDS)));
+									player1.getPlayer().answerQuestion().get(maxTimeForAnswer, SECONDS)));
 							player1.getPlayer().zeroTimePlayersBeingInactive();
 						} catch (TimeoutException e) {
 							player1.getPlayer().incrementBeingInactiveCount();
@@ -147,6 +152,11 @@ public final class ProcessingQuestion extends AbstractGameState {
 		}
 	}
 
+	@Override
+	public long getTimer() {
+		return timer;
+	}
+
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {
 		Map<String, PlayerWithState> newPlayersMap = this.players;
 		if (isAskingPlayer(playerWithState.getPlayer().getId())) {
@@ -182,6 +192,32 @@ public final class ProcessingQuestion extends AbstractGameState {
 					.map(PersistentPlayer::inCompleteFuture);
 			playerWithState.setAnswer(null);
 		});
+	}
+
+	private void startTimer() {
+		int limit = maxTimeForQuestion;
+		long start = currentTimeMillis();
+		boolean flag = true;
+		while (!this.players.isEmpty()) {
+			timer = 1;
+			boolean isQuestionPresent = false;
+			while (timer > 0) {
+				long now = currentTimeMillis();
+				timer = limit - MILLISECONDS.toSeconds(now - start);
+				if (this.players.values().stream()
+						.anyMatch(player -> player.getState().equals(ANSWERING)) && flag) {
+					isQuestionPresent = true;
+					break;
+				}
+			}
+			if (isQuestionPresent) {
+				limit = maxTimeForAnswer;
+				flag = false;
+			} else {
+				limit = maxTimeForQuestion;
+			}
+			start = currentTimeMillis();
+		}
 	}
 
 }

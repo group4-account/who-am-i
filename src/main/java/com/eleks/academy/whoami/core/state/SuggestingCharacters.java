@@ -43,17 +43,16 @@ public final class SuggestingCharacters extends AbstractGameState {
         this.playerCharacterMap = new HashMap<>(this.players.size());
         runAsync(() -> {
             long start = System.currentTimeMillis();
-            while (true) {
+            do {
                 long now = System.currentTimeMillis();
-                timer = 120 - TimeUnit.MILLISECONDS.toSeconds(now - start);;
-                if (timer == 0) {
+                timer = 120 - TimeUnit.MILLISECONDS.toSeconds(now - start);
+                if (timer == 0 && this.players.values().stream()
+                        .anyMatch(player -> player.getState().equals(NOT_READY))) {
                     this.players.values().stream()
                             .findFirst()
                             .ifPresent(player -> leaveGame(player.getPlayer().getId()));
                 }
-                if (players.values().size() == 0)
-                    break;
-            }
+            } while (players.values().size() != 0);
 
         });
     }
