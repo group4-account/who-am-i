@@ -5,6 +5,7 @@ import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
+import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 import lombok.SneakyThrows;
 
@@ -31,7 +32,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		super(players.size(), players.size());
 		this.players = players;
 
-		this.players.values()
+		new ArrayList<>(this.players.values())
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(player -> this.leaveGame(player, currentPlayer1));
@@ -128,11 +129,15 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@Override
 	public GameState leaveGame(String answer) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
+		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
+				this.players.get(getCurrentTurn())) + 1 % 4;
+		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
+
 		if (isAskingPlayer(answer)) {
-			return new ProcessingQuestion(playersList.get(findCurrentPlayerIndex(playersList,
-					this.players.get(getCurrentTurn()))), players);
+			this.players.remove(answer);
+			return new ProcessingQuestion(nextCurrentPlayer, players);
 		} else {
-			//TODO: add remove player from list
+			this.players.remove(answer);
 			return this;
 		}
 	}

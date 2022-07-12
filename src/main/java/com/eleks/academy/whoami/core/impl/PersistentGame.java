@@ -130,8 +130,6 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void removeFromGame(String gameId, String player) {
-        Optional<SynchronousPlayer> synchronousPlayer = findPlayer(player);
-        if (synchronousPlayer.isPresent()) {
             this.turnLock.lock();
 
             try {
@@ -141,8 +139,6 @@ public class PersistentGame implements Game, SynchronousGame {
             } finally {
                 this.turnLock.unlock();
             }
-        }
-
     }
 
     @Override

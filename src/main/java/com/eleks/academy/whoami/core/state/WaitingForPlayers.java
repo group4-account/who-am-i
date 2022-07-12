@@ -70,14 +70,8 @@ public final class WaitingForPlayers extends AbstractGameState {
     @Override
     public GameState leaveGame(String player) {
         Map<String, PlayerWithState> players = new HashMap<>(this.players);
-        if (findPlayer(player).isPresent()) {
-            players.remove(player);
-        }
-        if (players.size() == getMaxPlayers()) {
-            return new SuggestingCharacters(players);
-        } else {
-            return new WaitingForPlayers(getMaxPlayers(), players);
-        }
+        players.remove(player);
+        return new WaitingForPlayers(getMaxPlayers(), players);
     }
 
     @Override

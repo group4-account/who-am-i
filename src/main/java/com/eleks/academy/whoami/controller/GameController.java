@@ -9,6 +9,7 @@ import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.TurnDetails;
+import com.eleks.academy.whoami.repository.impl.QNAHistoryRepositoryImpl;
 import com.eleks.academy.whoami.service.GameService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -106,6 +107,12 @@ public class GameController {
 	public void submitGuess(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player, @RequestBody Message message) {
 		this.gameService.submitGuess(id, player, QuestionAnswer.valueOf(message.getMessage()));
+	}
+
+	@GetMapping("/{id}/history")
+	public List<QNAHistoryRepositoryImpl.Question> getHistory(@PathVariable("id") String id,
+															  @RequestHeader(PLAYER) String player) {
+		return this.gameService.getQnaHistory(id);
 	}
 
 	@PostMapping("/{id}/answer")
