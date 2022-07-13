@@ -42,7 +42,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.forEach(player -> this.leaveGame(player, currentPlayer1));
 
 		final String currentPlayer = currentPlayer1;
-
+		resetToDefault();
 		this.players.get(currentPlayer).setState(ASKING);
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
@@ -84,7 +84,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@Override
 	public GameState makeTurn(Answer answerQuestion) {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
-		resetToDefault();
 		try {
 			try {
 				currentPlayer.setQuestion(currentPlayer.getPlayer()
@@ -186,7 +185,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void resetToDefault() {
 		this.players.values().forEach(playerWithState -> {
 			playerWithState.setQuestion(null);
-			playerWithState.getPlayer().setQuestion(null);
 			ofNullable(playerWithState.getPlayer())
 					.map(PersistentPlayer::inCompleteFuture);
 			playerWithState.setAnswer(null);
