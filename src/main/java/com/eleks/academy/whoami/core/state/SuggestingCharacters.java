@@ -152,7 +152,7 @@ public final class SuggestingCharacters extends AbstractGameState {
     public GameState leaveGame(String player) {
         Map<String, PlayerWithState> players = new HashMap<>(this.players);
         if (findPlayer(player).isPresent()) {
-            players.remove(player);
+            this.players.values().forEach(playerWithState -> players.remove(playerWithState.getPlayer().getId()));
         }
         return new GameFinished(players);
     }
