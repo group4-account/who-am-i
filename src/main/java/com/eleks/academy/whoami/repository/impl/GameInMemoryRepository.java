@@ -12,6 +12,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Optional.*;
+
 @Repository
 public class GameInMemoryRepository implements GameRepository {
 
@@ -22,9 +24,9 @@ public class GameInMemoryRepository implements GameRepository {
 		Predicate<SynchronousGame> freeToJoin = SynchronousGame::isAvailable;
 
 		Predicate<SynchronousGame> playersGame = game ->
-				Optional.ofNullable(game)
-						.map(game1 -> game1.findPlayer(player))
-						.isPresent();
+				ofNullable(game.findPlayer(player))
+						.map(Optional::isPresent)
+						.orElse(false);
 
 		return this.games.values()
 				.stream()
@@ -52,14 +54,14 @@ public class GameInMemoryRepository implements GameRepository {
 
 	@Override
 	public Optional<SynchronousGame> findById(String id) {
-		return Optional.ofNullable(this.games.get(id));
+		return ofNullable(this.games.get(id));
 	}
 
 	@Override
 	public int getAllPlayersCount() {
 		return games.values()
 				.stream()
-				.map(game -> Optional.ofNullable(game.getPlayersInGame())
+				.map(game -> ofNullable(game.getPlayersInGame())
 						.map(List::size).orElse(0))
 				.mapToInt(Integer::intValue).sum();
 	}
