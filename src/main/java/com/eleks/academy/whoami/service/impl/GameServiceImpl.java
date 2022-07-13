@@ -5,12 +5,14 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
-import com.eleks.academy.whoami.model.response.*;
+import com.eleks.academy.whoami.model.response.GameDetails;
+import com.eleks.academy.whoami.model.response.GameLight;
+import com.eleks.academy.whoami.model.response.PlayerState;
+import com.eleks.academy.whoami.model.response.TurnDetails;
 import com.eleks.academy.whoami.repository.AddAnswerRequest;
 import com.eleks.academy.whoami.repository.AddQuestionRequest;
 import com.eleks.academy.whoami.repository.GameRepository;
@@ -23,9 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.stream.Collectors;
 
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 
 @Service
 @RequiredArgsConstructor
@@ -105,7 +106,9 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public Optional<GameDetails> findByIdAndPlayer(String id, String player) {
 		return this.gameRepository.findById(id)
-				.filter(game -> game.findPlayer(player).isPresent())
+				.filter(game -> ofNullable(game.findPlayer(player))
+						.map(Optional::isPresent)
+						.orElse(false))
 				.map(GameDetails::of);
 	}
 
