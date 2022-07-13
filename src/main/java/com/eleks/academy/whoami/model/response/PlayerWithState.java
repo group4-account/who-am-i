@@ -7,6 +7,9 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Future;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -20,5 +23,33 @@ public class PlayerWithState {
 	private String question;
 
 	private PlayerState state;
+
+	private CompletableFuture<String> questionFuture = new CompletableFuture<>();
+
+	private CompletableFuture<String> currentAnswer = new CompletableFuture<>();
+
+	public Future<String> getFirstQuestion() {
+		return questionFuture;
+	}
+
+	public void setFirstQuestion(String question) {
+		this.questionFuture.complete(question);
+		this.question = question;
+	}
+
+	public void inCompleteFuture() {
+		this.question = null;
+		this.answer = null;
+		questionFuture = this.questionFuture.newIncompleteFuture();
+		currentAnswer = this.currentAnswer.newIncompleteFuture();
+	}
+
+	public Future<String> answerQuestion() {
+		return currentAnswer;
+	}
+	public void setAnswerQuestion(String answer) {
+		this.currentAnswer.complete(answer);
+		this.answer = QuestionAnswer.valueOf(answer);
+	}
 
 }
