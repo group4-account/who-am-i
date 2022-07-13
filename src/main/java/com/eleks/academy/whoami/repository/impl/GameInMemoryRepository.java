@@ -30,7 +30,7 @@ public class GameInMemoryRepository implements GameRepository {
 				.stream()
 				.filter(freeToJoin.or(playersGame));
 	}
-
+///
 	@Override
 	public Map<String, SynchronousGame> findAvailableQuickGames() {
 		return filterByValue(games, SynchronousGame::isAvailable);
