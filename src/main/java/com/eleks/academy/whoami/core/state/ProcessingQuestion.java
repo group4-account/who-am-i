@@ -18,6 +18,7 @@ import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.System.currentTimeMillis;
+import static java.util.Optional.*;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -73,7 +74,11 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	@Override
 	public List<PlayerWithState> getPlayersWithState() {
-		return this.players.values().stream().toList();
+		return ofNullable(this.players)
+				.map(Map::values)
+				.map(Collection::stream)
+				.map(Stream::toList)
+				.orElse(new ArrayList<>());
 	}
 
 	@Override
