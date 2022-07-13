@@ -1,6 +1,7 @@
 package com.eleks.academy.whoami.repository.impl;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.PlayerState;
+import com.eleks.academy.whoami.model.response.PlayerWithState;
 import com.eleks.academy.whoami.repository.AddAnswerRequest;
 import com.eleks.academy.whoami.repository.AddQuestionRequest;
 import com.eleks.academy.whoami.repository.QNAHistoryRepository;
@@ -28,14 +29,14 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
     @AllArgsConstructor
     public class Question{
         public String GameId;
-        public Boolean IsActiveQuestion;
+        public Boolean isActiveQuestion;
         public Boolean IsGuess;
         public String Question;
         public Date AskedOn;
         public String PlayerId;
         public List<Answer> Answers;
         public List<String> Players;
-        private List<com.eleks.academy.whoami.model.response.PlayerWithState> ParticipatingPlayers;
+        private List<com.eleks.academy.whoami.model.response.PlayerWithState> participatingPlayers;
 
         public Question(){
             this.AskedOn = new Date();
@@ -48,14 +49,14 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
     @Override
     public void AddQuestionRequest(AddQuestionRequest addQuestionRequest, List<com.eleks.academy.whoami.model.response.PlayerWithState> players) {
         var question = new Question();
-        question.ParticipatingPlayers = players;
+        question.participatingPlayers = players;
         question.Players = players.stream().map(x -> x.getPlayer().getId()).collect(Collectors.toList());
         question.GameId = addQuestionRequest.gameId;
         question.PlayerId = addQuestionRequest.playerName;
         question.IsGuess = addQuestionRequest.IsGuess;
         question.Question = addQuestionRequest.question;
-        question.IsActiveQuestion = true;
-        questionsList.stream().filter(q -> q.GameId.equalsIgnoreCase(question.GameId)).forEach(x -> x.IsActiveQuestion = false);
+        question.isActiveQuestion = true;
+        questionsList.stream().filter(q -> q.GameId.equalsIgnoreCase(question.GameId)).forEach(x -> x.isActiveQuestion = false);
         questionsList.add(question);
 
     }
@@ -79,23 +80,27 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
         return questionsList.stream().filter(x -> x.GameId.equalsIgnoreCase(gameId))
                 .map(x -> {
                     var answers = GetAnswers(x);
-                   return new Question(x.GameId, x.IsActiveQuestion ,x.IsGuess, x.Question, x.AskedOn, x.PlayerId, answers, x.Players, x.ParticipatingPlayers);
+                   return new Question(x.GameId, x.isActiveQuestion,x.IsGuess, x.Question, x.AskedOn, x.PlayerId, answers, x.Players, x.participatingPlayers);
                 }).collect(Collectors.toList());
     }
 
     private List<Answer> GetAnswers(Question question) {
-        var currentQuestion = question.ParticipatingPlayers.stream().filter(p -> p.getState() == PlayerState.ASKING).findFirst().get().getQuestion();
-
-        if (!question.IsActiveQuestion){
+        if (!question.isActiveQuestion){
             return question.Answers;
         }
+
+        var currentQuestion = question.participatingPlayers.stream()
+                .filter(player -> player.getState() == PlayerState.ASKING)
+                .findFirst()
+                .map(PlayerWithState::getQuestion);
+
         var answersList = new ArrayList<Answer>();
         answersList.addAll(question.Answers);
-        question.ParticipatingPlayers.forEach(player ->{
-            if (!answersList.stream().anyMatch(a -> a.PlayerId.equalsIgnoreCase(player.getPlayer().getId()))){
+        question.participatingPlayers.forEach(player ->{
+            if (answersList.stream().noneMatch(a -> a.PlayerId.equalsIgnoreCase(player.getPlayer().getId()))){
 
-                if (currentQuestion == null || !currentQuestion.equalsIgnoreCase(question.Question)) {
-                    question.IsActiveQuestion = false;
+                if (currentQuestion == null || (currentQuestion.isPresent() ? currentQuestion.get() : "").equalsIgnoreCase(question.Question)) {
+                    question.isActiveQuestion = false;
                     answersList.add(new Answer(player.getPlayer().getId(), new Date(), true, QuestionAnswer.NOT_SURE));
                 }
             }
