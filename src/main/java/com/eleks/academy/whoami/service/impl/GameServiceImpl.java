@@ -176,7 +176,10 @@ public class GameServiceImpl implements GameService {
 				.orElseThrow(
 						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
 		game.removeFromGame(gameId, playerId);
-		if (game.getPlayersInGame().size() == 0){
+		if (Optional.ofNullable(game.getPlayersInGame())
+			.map(List::size)
+			.map(size -> size.equals(0))
+			.orElse(false)){
 			this.gameRepository.remove(game);
 		}
 
