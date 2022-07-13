@@ -25,6 +25,8 @@ import org.springframework.web.server.ResponseStatusException;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static java.util.Optional.*;
+
 @Service
 @RequiredArgsConstructor
 public class GameServiceImpl implements GameService {
@@ -170,15 +172,10 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public void leaveGame(String gameId, String playerId) {
 		SynchronousGame game = this.gameRepository.findById(gameId)
-				.filter(game1 -> game1.getPlayersInGame()
-						.stream()
-						.map(PlayerWithState::getPlayer)
-						.map(PersistentPlayer::getId)
-						.anyMatch(id -> id.equals(playerId)))
 				.orElseThrow(
 						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
 		game.removeFromGame(gameId, playerId);
-		if (Optional.ofNullable(game.getPlayersInGame())
+		if (ofNullable(game.getPlayersInGame())
 				.map(List::size)
 				.map(size -> size.equals(0))
 				.orElse(false)) {
