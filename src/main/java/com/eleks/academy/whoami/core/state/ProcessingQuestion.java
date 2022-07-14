@@ -118,7 +118,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 							this.players.values()
 									.stream().filter(playerWithState -> !playerWithState.getCurrentAnswer().isDone()
 											&& playerWithState.getState().equals(ANSWERING))
-									.forEach(playerWithState -> playerWithState.setAnswer(NOT_SURE));
+									.forEach(playerWithState -> playerWithState.setAnswer("NOT_SURE"));
 						}
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
@@ -186,7 +186,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void resetToDefault() {
 		this.players.values().forEach(PlayerWithState::inCompleteFuture);
 	}
-//
+
+	//
 	private void startTimer() {
 		int limit = maxTimeForQuestion;
 		long start = currentTimeMillis();

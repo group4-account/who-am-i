@@ -10,6 +10,8 @@ import lombok.NoArgsConstructor;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
+import static com.eleks.academy.whoami.model.request.QuestionAnswer.*;
+
 @Data
 @Builder
 @NoArgsConstructor
@@ -49,8 +51,11 @@ public class PlayerWithState {
 	}
 
 	public void setAnswerQuestion(String answer) {
-		this.answer = QuestionAnswer.valueOf(answer);
+		this.answer = valueOf(answer);
 		this.currentAnswer.complete(answer);
 	}
 
+	public void setAnswer(String answer) {
+		this.answer = valueOf(answer);
+	}
 }
