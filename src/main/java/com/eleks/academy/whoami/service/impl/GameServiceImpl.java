@@ -25,7 +25,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.*;
-import java.util.stream.Collectors;
+
+import static java.util.Optional.ofNullable;
 
 @Service
 @RequiredArgsConstructor
@@ -105,7 +106,9 @@ public class GameServiceImpl implements GameService {
 	@Override
 	public Optional<GameDetails> findByIdAndPlayer(String id, String player) {
 		return this.gameRepository.findById(id)
-				.filter(game -> game.findPlayer(player).isPresent())
+				.filter(game -> ofNullable(game.findPlayer(player))
+						.map(Optional::isPresent)
+						.orElse(false))
 				.map(GameDetails::of);
 	}
 
@@ -135,7 +138,7 @@ public class GameServiceImpl implements GameService {
 
 		this.gameRepository.findById(gameId).stream()
 				.findFirst()
-				.map(sg -> sg.getPlayersInGame())
+				.map(SynchronousGame::getPlayersInGame)
 				.ifPresent(pwsl -> this.qnaHistoryRepository.AddQuestionRequest(new AddQuestionRequest(false, gameId, player, message), pwsl));
 	}
 
@@ -170,16 +173,15 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void leaveGame(String gameId, String playerId)
-	{
+	public void leaveGame(String gameId, String playerId) {
 		SynchronousGame game = this.gameRepository.findById(gameId)
 				.orElseThrow(
 						() -> new GameException(String.format("ROOM_NOT_FOUND_BY_ID", gameId)));
 		game.removeFromGame(gameId, playerId);
-		if (Optional.ofNullable(game.getPlayersInGame())
+		if (ofNullable(game.getPlayersInGame())
 				.map(List::size)
-				.map(a -> a.equals(0))
-				.orElse(false)){
+				.map(size -> size.equals(0))
+				.orElse(false)) {
 			this.gameRepository.remove(game);
 		}
 

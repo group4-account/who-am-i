@@ -4,9 +4,10 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Stream;
+
+import static java.util.Optional.ofNullable;
 
 public final class GameFinished extends AbstractGameState {
 	private final Map<String, PlayerWithState> players;
@@ -22,19 +23,22 @@ public final class GameFinished extends AbstractGameState {
 	}
 
 	@Override
+	public Optional<SynchronousPlayer> findPlayer(String player) {
+		return Optional.empty();
+	}
+
+	@Override
 	public long getTimer() {
 		return 0;
 	}
 
 	@Override
-	public Optional<SynchronousPlayer> findPlayer(String player) {
-		return Optional.empty();
-	}
-
-
-	@Override
 	public List<PlayerWithState> getPlayersWithState() {
-		return players.values().stream().toList();
+		return ofNullable(this.players)
+				.map(Map::values)
+				.map(Collection::stream)
+				.map(Stream::toList)
+				.orElse(new ArrayList<>());
 	}
 
 	@Override

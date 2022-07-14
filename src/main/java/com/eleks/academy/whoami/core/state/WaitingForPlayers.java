@@ -6,10 +6,7 @@ import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.eleks.academy.whoami.model.response.PlayerState.NOT_READY;
@@ -18,6 +15,11 @@ public final class WaitingForPlayers extends AbstractGameState {
 
     private final Map<String, PlayerWithState> players;
     private int maxPlayers;
+
+    @Override
+    public long getTimer() {
+        return 0;
+    }
 
     public WaitingForPlayers(int maxPlayers) {
         super(0, maxPlayers);
@@ -70,11 +72,6 @@ public final class WaitingForPlayers extends AbstractGameState {
     }
 
     @Override
-    public long getTimer() {
-        return 0;
-    }
-
-    @Override
     public GameState leaveGame(String player) {
         Map<String, PlayerWithState> players = new HashMap<>(this.players);
         players.remove(player);
@@ -83,7 +80,7 @@ public final class WaitingForPlayers extends AbstractGameState {
 
     @Override
     public List<PlayerWithState> getPlayersWithState() {
-        return players.values().stream().toList();
+        return new ArrayList<>(players.values());
     }
 
 }

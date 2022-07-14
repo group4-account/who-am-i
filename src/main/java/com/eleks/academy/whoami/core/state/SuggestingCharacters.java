@@ -15,15 +15,15 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import static com.eleks.academy.whoami.model.response.PlayerState.*;
+import static com.eleks.academy.whoami.model.response.PlayerState.NOT_READY;
+import static com.eleks.academy.whoami.model.response.PlayerState.READY;
 import static java.util.concurrent.CompletableFuture.runAsync;
-import static java.util.concurrent.CompletableFuture.supplyAsync;
 import static java.util.stream.Collectors.toList;
 
 public final class SuggestingCharacters extends AbstractGameState {
 
     private final Lock lock = new ReentrantLock();
-    private int maxTimes = 120;
+    private int maxSecondsAwaiting = 120;
     private long timer;
     private final Map<String, PlayerWithState> players;
 
@@ -45,7 +45,7 @@ public final class SuggestingCharacters extends AbstractGameState {
             long start = System.currentTimeMillis();
             do {
                 long now = System.currentTimeMillis();
-                timer = 120 - TimeUnit.MILLISECONDS.toSeconds(now - start);
+                timer = maxSecondsAwaiting - TimeUnit.MILLISECONDS.toSeconds(now - start);
                 if (timer == 0 && this.players.values().stream()
                         .anyMatch(player -> player.getState().equals(NOT_READY))) {
                     this.players.values().stream()
@@ -152,7 +152,7 @@ public final class SuggestingCharacters extends AbstractGameState {
     public GameState leaveGame(String player) {
         Map<String, PlayerWithState> players = new HashMap<>(this.players);
         if (findPlayer(player).isPresent()) {
-            players.remove(player);
+            this.players.values().forEach(playerWithState -> players.remove(playerWithState.getPlayer().getId()));
         }
         return new GameFinished(players);
     }
