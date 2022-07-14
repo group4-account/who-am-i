@@ -3,8 +3,6 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
-import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
@@ -18,7 +16,6 @@ import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Optional.*;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -89,7 +86,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		try {
 			try {
-				currentPlayer.getFirstQuestion().get(maxTimeForQuestion, SECONDS);
+				currentPlayer.getFutureQuestion().get(maxTimeForQuestion, SECONDS);
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				newPlayersMap.remove(currentPlayer.getPlayer().getId());
@@ -119,9 +116,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 							player1.getPlayer().incrementBeingInactiveCount();
 						} finally {
 							this.players.values()
-									.stream().filter(playerWithState -> playerWithState.getAnswer() == null
+									.stream().filter(playerWithState -> !playerWithState.getCurrentAnswer().isDone()
 											&& playerWithState.getState().equals(ANSWERING))
-									.forEachOrdered(playerWithState -> playerWithState.setAnswer(NOT_SURE));
+									.forEach(playerWithState -> playerWithState.setAnswer(NOT_SURE));
 						}
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
@@ -142,7 +139,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public GameState leaveGame(String answer) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
 		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
-				this.players.get(getCurrentTurn())) + 1 % 4;
+				this.players.get(getCurrentTurn())) + 1 % playersList.size();
 		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
 
 		if (isAskingPlayer(answer)) {

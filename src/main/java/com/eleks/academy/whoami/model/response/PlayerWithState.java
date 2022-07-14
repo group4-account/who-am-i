@@ -28,13 +28,13 @@ public class PlayerWithState {
 
 	private CompletableFuture<String> currentAnswer = new CompletableFuture<>();
 
-	public Future<String> getFirstQuestion() {
+	public Future<String> getFutureQuestion() {
 		return questionFuture;
 	}
 
-	public void setFirstQuestion(String question) {
-		this.questionFuture.complete(question);
+	public void setFutureQuestion(String question) {
 		this.question = question;
+		this.questionFuture.complete(question);
 	}
 
 	public void inCompleteFuture() {
@@ -47,9 +47,10 @@ public class PlayerWithState {
 	public Future<String> answerQuestion() {
 		return currentAnswer;
 	}
+
 	public void setAnswerQuestion(String answer) {
-		this.currentAnswer.complete(answer);
 		this.answer = QuestionAnswer.valueOf(answer);
+		this.currentAnswer.complete(answer);
 	}
 
 }

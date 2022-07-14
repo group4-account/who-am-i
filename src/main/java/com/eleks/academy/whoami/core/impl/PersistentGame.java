@@ -75,7 +75,7 @@ public class PersistentGame implements Game, SynchronousGame {
     @Override
     public void askQuestion(String playerId, String message) {
         if (this.getTurn().equals(playerId)){
-            this.findPlayerWithState(this.getTurn()).ifPresent(player -> player.setFirstQuestion(message));
+            this.findPlayerWithState(this.getTurn()).ifPresent(player -> player.setFutureQuestion(message));
         }
         else throw new GameException("Not your turn");
     }
