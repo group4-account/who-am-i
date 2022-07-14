@@ -49,6 +49,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.forEach(player -> player.setState(READY));
 
 		runAsync(() -> this.makeTurn(new Answer(null)));
+
 	}
 
 	@Override
