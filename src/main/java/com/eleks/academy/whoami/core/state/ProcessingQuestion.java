@@ -189,7 +189,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void resetToDefault() {
 		this.players.values().forEach(PlayerWithState::inCompleteFuture);
 	}
-
+//
 	private void startTimer() {
 		int limit = maxTimeForQuestion;
 		long start = currentTimeMillis();
