@@ -52,6 +52,11 @@ public class PersistentGame implements Game, SynchronousGame {
     }
 
     @Override
+    public Optional<PlayerWithState> findPlayerWithState(String player) {
+        return this.applyIfPresent(this.turns.peek(), gameState -> gameState.findPlayerWithState(player));
+    }
+
+    @Override
     public String getId() {
         return this.id;
     }
@@ -70,14 +75,14 @@ public class PersistentGame implements Game, SynchronousGame {
     @Override
     public void askQuestion(String playerId, String message) {
         if (this.getTurn().equals(playerId)){
-            this.findPlayer(this.getTurn()).ifPresent(player -> player.setQuestion(message));
+            this.findPlayerWithState(this.getTurn()).ifPresent(player -> player.setFirstQuestion(message));
         }
         else throw new GameException("Not your turn");
     }
 
     @Override
     public void answerQuestion(String id, String answer) {
-        this.findPlayer(id).ifPresent(player -> player.setAnswerQuestion(answer));
+        this.findPlayerWithState(id).ifPresent(player -> player.setAnswerQuestion(answer));
     }
 
     @Override
@@ -140,7 +145,6 @@ public class PersistentGame implements Game, SynchronousGame {
     @Override
     public void removeFromGame(String gameId, String player) {
             this.turnLock.lock();
-
             try {
                 Optional.ofNullable(this.turns.poll())
                         .map(gameState -> gameState.leaveGame(player))

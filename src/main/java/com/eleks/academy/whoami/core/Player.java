@@ -6,11 +6,6 @@ public interface Player {
 
 	String getId();
 
-
-	Future<String> getFirstQuestion();
-
-	Future<String> answerQuestion();
-
 	Future<String> getGuess();
 
 	Future<Boolean> isReadyForGuess();

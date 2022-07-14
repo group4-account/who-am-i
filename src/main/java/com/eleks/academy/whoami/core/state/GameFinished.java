@@ -28,6 +28,11 @@ public final class GameFinished extends AbstractGameState {
 	}
 
 	@Override
+	public Optional<PlayerWithState> findPlayerWithState(String player) {
+		return Optional.empty();
+	}
+
+	@Override
 	public long getTimer() {
 		return 0;
 	}

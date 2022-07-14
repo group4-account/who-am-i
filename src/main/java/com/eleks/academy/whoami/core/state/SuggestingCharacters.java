@@ -157,6 +157,11 @@ public final class SuggestingCharacters extends AbstractGameState {
         return new GameFinished(players);
     }
 
+    @Override
+    public Optional<PlayerWithState> findPlayerWithState(String player) {
+        return Optional.empty();
+    }
+
     /**
      * The term author is referred to a player who suggested at least one character
      * <p>
