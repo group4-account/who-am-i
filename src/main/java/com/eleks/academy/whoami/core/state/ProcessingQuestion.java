@@ -90,8 +90,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		try {
 			try {
 				currentPlayer.getFirstQuestion().get(maxTimeForQuestion, SECONDS);
-			} catch (TimeoutException e)
-			{
+			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				newPlayersMap.remove(currentPlayer.getPlayer().getId());
 				List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
@@ -99,10 +98,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
 			} finally {
 				if (currentPlayer.getQuestion() != null)
-				this.players.values().stream()
-						.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
-								currentPlayer.getPlayer().getId()))
-						.forEach(player -> player.setState(ANSWERING));
+					this.players.values().stream()
+							.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
+									currentPlayer.getPlayer().getId()))
+							.forEach(player -> player.setState(ANSWERING));
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -190,6 +189,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void resetToDefault() {
 		this.players.values().forEach(PlayerWithState::inCompleteFuture);
 	}
+
 	private void startTimer() {
 		int limit = maxTimeForQuestion;
 		long start = currentTimeMillis();
