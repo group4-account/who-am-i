@@ -6,6 +6,7 @@ import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
+import lombok.SneakyThrows;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -18,7 +19,6 @@ import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Optional.*;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -35,19 +35,21 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players) {
 		super(players.size(), players.size());
 		this.players = players;
+
 		new ArrayList<>(this.players.values())
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(player -> this.leaveGame(player, currentPlayer1));
 
 		final String currentPlayer = currentPlayer1;
-		resetToDefault();
+
 		this.players.get(currentPlayer).setState(ASKING);
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
 
 		runAsync(() -> this.makeTurn(new Answer(null)));
+
 	}
 
 	@Override
@@ -72,49 +74,40 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	@Override
 	public List<PlayerWithState> getPlayersWithState() {
-		return ofNullable(this.players)
-				.map(Map::values)
-				.map(Collection::stream)
-				.map(Stream::toList)
-				.orElse(new ArrayList<>());
+		return this.players.values().stream().toList();
 	}
 
-	@Override
-	public Optional<PlayerWithState> findPlayerWithState(String player) {
-		return ofNullable(this.players.get(player));
-	}
-
+	@SneakyThrows
 	@Override
 	public GameState makeTurn(Answer answerQuestion) {
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
+		resetToDefault();
 		try {
 			try {
-				currentPlayer.getFirstQuestion().get(maxTimeForQuestion, SECONDS);
-			} catch (TimeoutException e)
-			{
+				currentPlayer.setQuestion(currentPlayer.getPlayer()
+						.getFirstQuestion().get(maxTimeForQuestion, SECONDS));
+			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				newPlayersMap.remove(currentPlayer.getPlayer().getId());
 				List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
 				return new ProcessingQuestion(playersList
 						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
-			} finally {
-				if (currentPlayer.getQuestion() != null)
-				this.players.values().stream()
-						.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
-								currentPlayer.getPlayer().getId()))
-						.forEach(player -> player.setState(ANSWERING));
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-
+		this.players.values().stream()
+				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
+						currentPlayer.getPlayer().getId()))
+				.forEach(player -> player.setState(ANSWERING));
 		this.players.values()
 				.parallelStream()
 				.filter(playerWithState -> Objects.equals(playerWithState.getState(), ANSWERING))
 				.forEach(player1 -> {
 					try {
 						try {
-							player1.answerQuestion().get(maxTimeForAnswer, SECONDS);
+							player1.setAnswer(QuestionAnswer.valueOf(
+									player1.getPlayer().answerQuestion().get(maxTimeForAnswer, SECONDS)));
 							player1.getPlayer().zeroTimePlayersBeingInactive();
 						} catch (TimeoutException e) {
 							player1.getPlayer().incrementBeingInactiveCount();
@@ -138,6 +131,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 			return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players);
 		}
 	}
+
 
 	@Override
 	public GameState leaveGame(String answer) {
@@ -188,8 +182,15 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private void resetToDefault() {
-		this.players.values().forEach(PlayerWithState::inCompleteFuture);
+		this.players.values().forEach(playerWithState -> {
+			playerWithState.setQuestion(null);
+			playerWithState.getPlayer().setQuestion(null);
+			ofNullable(playerWithState.getPlayer())
+					.map(PersistentPlayer::inCompleteFuture);
+			playerWithState.setAnswer(null);
+		});
 	}
+
 	private void startTimer() {
 		int limit = maxTimeForQuestion;
 		long start = currentTimeMillis();
