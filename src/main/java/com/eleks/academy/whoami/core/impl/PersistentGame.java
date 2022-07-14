@@ -145,7 +145,6 @@ public class PersistentGame implements Game, SynchronousGame {
     @Override
     public void removeFromGame(String gameId, String player) {
             this.turnLock.lock();
-
             try {
                 Optional.ofNullable(this.turns.poll())
                         .map(gameState -> gameState.leaveGame(player))

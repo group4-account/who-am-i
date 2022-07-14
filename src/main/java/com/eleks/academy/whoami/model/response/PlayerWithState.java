@@ -40,8 +40,8 @@ public class PlayerWithState {
 	public void inCompleteFuture() {
 		this.question = null;
 		this.answer = null;
-		questionFuture = this.questionFuture.newIncompleteFuture();
-		currentAnswer = this.currentAnswer.newIncompleteFuture();
+		questionFuture = new CompletableFuture<>();
+		currentAnswer = new CompletableFuture<>();
 	}
 
 	public Future<String> answerQuestion() {
