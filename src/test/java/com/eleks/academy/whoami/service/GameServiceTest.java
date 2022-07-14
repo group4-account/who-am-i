@@ -179,8 +179,8 @@ class GameServiceTest {
                 .map(GameDetails::of).get().getPlayers().stream()
                 .collect(Collectors.toMap(a -> a.getPlayer().getId(), Function.identity()));
         assertEquals(player3, this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
-        assertNotNull(playerWithStateMap.get(player3).getPlayer().getFirstQuestion());
-        assertEquals(question, playerWithStateMap.get(player3).getPlayer().getFirstQuestion().get());
+        assertNotNull(playerWithStateMap.get(player3).getPlayer());
+        assertEquals(question, playerWithStateMap.get(player3).getPlayer());
 
     }
     @Test
@@ -271,11 +271,11 @@ class GameServiceTest {
                 .map(GameDetails::of).get().getPlayers().stream()
                 .collect(Collectors.toMap(a -> a.getPlayer().getId(), Function.identity()));
         assertEquals(player3, this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
-        assertNotNull(playerWithStateMap.get(player3).getPlayer().getFirstQuestion().get());
-        assertEquals(question, playerWithStateMap.get(player3).getPlayer().getFirstQuestion().get());
-        assertEquals(answer, playerWithStateMap.get(player).getPlayer().getCurrentAnswer().get());
-        assertEquals(answer1, playerWithStateMap.get(player1).getPlayer().getCurrentAnswer().get());
-        assertEquals(answer2, playerWithStateMap.get(player2).getPlayer().getCurrentAnswer().get());
+        assertNotNull(playerWithStateMap.get(player3).getPlayer());
+        assertEquals(question, playerWithStateMap.get(player3).getPlayer());
+        assertEquals(answer, playerWithStateMap.get(player).getPlayer());
+        assertEquals(answer1, playerWithStateMap.get(player1).getPlayer());
+        assertEquals(answer2, playerWithStateMap.get(player2).getPlayer());
         Thread.sleep(200);
         System.out.println(this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
     }

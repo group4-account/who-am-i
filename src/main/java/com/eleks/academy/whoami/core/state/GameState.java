@@ -53,4 +53,6 @@ public sealed interface GameState permits AbstractGameState {
 	GameState leaveGame(String player);
 
 	long getTimer();
+
+	Optional<PlayerWithState> findPlayerWithState(String player);
 }

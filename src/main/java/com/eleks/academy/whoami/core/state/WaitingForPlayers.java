@@ -7,6 +7,7 @@ import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static com.eleks.academy.whoami.model.response.PlayerState.NOT_READY;
@@ -62,13 +63,24 @@ public final class WaitingForPlayers extends AbstractGameState {
         } else {
             PersistentPlayer persistentPlayer = new PersistentPlayer(answer.getPlayer());
             nextPlayers.put(answer.getPlayer(),
-                    new PlayerWithState(persistentPlayer, null, null, NOT_READY));
+                    PlayerWithState.builder()
+                            .player(persistentPlayer)
+                            .state(NOT_READY)
+                            .currentAnswer(new CompletableFuture<>())
+                            .questionFuture(new CompletableFuture<>())
+                            .build()
+                    );
         }
         if (nextPlayers.size() == getMaxPlayers()) {
             return new SuggestingCharacters(nextPlayers);
         } else {
             return new WaitingForPlayers(getMaxPlayers(), nextPlayers);
         }
+    }
+
+    @Override
+    public Optional<PlayerWithState> findPlayerWithState(String player) {
+        return Optional.empty();
     }
 
     @Override
