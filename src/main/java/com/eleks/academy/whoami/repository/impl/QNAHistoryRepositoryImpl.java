@@ -99,7 +99,7 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
         question.participatingPlayers.forEach(player ->{
             if (answersList.stream().noneMatch(a -> a.PlayerId.equalsIgnoreCase(player.getPlayer().getId()))){
 
-                if (currentQuestion == null || (currentQuestion.isPresent() ? currentQuestion.get() : "").equalsIgnoreCase(question.Question)) {
+                if ((currentQuestion.isPresent() ? currentQuestion.get() : "") == "" || !(currentQuestion.isPresent() ? currentQuestion.get() : "").equalsIgnoreCase(question.Question)) {
                     question.isActiveQuestion = false;
                     answersList.add(new Answer(player.getPlayer().getId(), new Date(), true, QuestionAnswer.NOT_SURE));
                 }
