@@ -139,7 +139,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public GameState leaveGame(String answer) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
 		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
-				this.players.get(getCurrentTurn())) + 1 % 4;
+				this.players.get(getCurrentTurn())) + 1 % playersList.size();
 		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
 
 		if (isAskingPlayer(answer)) {
