@@ -157,13 +157,11 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {
-		Map<String, PlayerWithState> newPlayersMap = this.players;
 		if (isAskingPlayer(playerWithState.getPlayer().getId())) {
-			newPlayersMap.remove(currentPlayer);
+			players.remove(currentPlayer);
 		} else {
-			newPlayersMap.remove(playerWithState.getPlayer().getId());
+			players.remove(playerWithState.getPlayer().getId());
 		}
-		this.players = newPlayersMap;
 	}
 
 	private boolean isAskingPlayer(String answer) {
