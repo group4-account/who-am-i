@@ -28,18 +28,16 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private volatile long timer;
 	private final int maxTimeForQuestion = 60;
 	private final int maxTimeForAnswer = 20;
-	private String currentPlayer1;
 
 	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players) {
 		super(players.size(), players.size());
-		this.currentPlayer1 = currentPlayer1;
 		this.players = players;
 		this.players.values()
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(player -> this.leaveGame(player, currentPlayer1));
 
-		final String currentPlayer = this.currentPlayer1;
+		final String currentPlayer = currentPlayer1;
 		this.players.get(currentPlayer).setState(ASKING);
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
@@ -159,18 +157,13 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {
-		String answer = playerWithState.getPlayer().getId();
-		List<String> playersList = new ArrayList<>(this.players.keySet());
-		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
-				this.players.get(getCurrentTurn())) + 1 % playersList.size();
-		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
-		if (isAskingPlayer(answer)) {
-			this.players.remove(answer);
-			currentPlayer1 = nextCurrentPlayer;
+		Map<String, PlayerWithState> newPlayersMap = this.players;
+		if (isAskingPlayer(playerWithState.getPlayer().getId())) {
+			newPlayersMap.remove(currentPlayer);
 		} else {
-			this.players.remove(answer);
-			currentPlayer1 = currentPlayer;
+			newPlayersMap.remove(playerWithState.getPlayer().getId());
 		}
+		this.players = newPlayersMap;
 	}
 
 	private boolean isAskingPlayer(String answer) {
