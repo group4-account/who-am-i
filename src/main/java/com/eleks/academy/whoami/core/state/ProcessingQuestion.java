@@ -26,7 +26,7 @@ import static java.util.stream.Collectors.partitioningBy;
 public final class ProcessingQuestion extends AbstractGameState {
 
 	private final Map<String, PlayerWithState> players;
-	private volatile long timer;
+	private volatile long timer = 1;
 	private final int maxTimeForQuestion = 60;
 	private final int maxTimeForAnswer = 20;
 	private String currentPlayer1;
