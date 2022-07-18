@@ -37,6 +37,11 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 	}
 
 	@Override
+	public Future<Boolean> isLeaving() {
+		return null;
+	}
+
+	@Override
 	public void close() {
 
 	}

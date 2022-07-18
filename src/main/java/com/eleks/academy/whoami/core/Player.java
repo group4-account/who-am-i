@@ -12,6 +12,8 @@ public interface Player {
 
 	Future<String> answerGuess(String guess, String character);
 
+	Future<Boolean> isLeaving();
+
 	void close();
 
 }

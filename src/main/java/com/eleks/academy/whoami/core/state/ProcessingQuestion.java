@@ -9,6 +9,7 @@ import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -29,6 +30,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	private Map<String, PlayerWithState> players;
 	private volatile long timer;
+	private volatile long timerToLeave;
 	private final int maxTimeForQuestion = 60;
 	private final int maxTimeForAnswer = 20;
 
@@ -92,8 +94,20 @@ public final class ProcessingQuestion extends AbstractGameState {
 				currentPlayer.getFirstQuestion().get(maxTimeForQuestion, SECONDS);
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
-				newPlayersMap.remove(currentPlayer.getPlayer().getId());
-				List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
+				int limit = 1;
+				boolean flag = true;
+				currentPlayer.setIsLeaving(true);
+				runAsync(() -> {
+					long start = System.currentTimeMillis();
+					timerToLeave = 3;
+					while (timerToLeave > 0) {
+						long now = System.currentTimeMillis();
+						timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
+					}
+					newPlayersMap.remove(currentPlayer.getPlayer().getId());
+					this.players = newPlayersMap;
+				});
+				List<String> playersList = new ArrayList<>(this.players.keySet());
 				return new ProcessingQuestion(playersList
 						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
 			} finally {
@@ -139,19 +153,32 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	@Override
-	public GameState leaveGame(String answer) {
+	public GameState leaveGame(String player) {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
+		Map<String, PlayerWithState> newPlayersMap = this.players;
 		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
 				this.players.get(getCurrentTurn())) + 1 % playersList.size();
 		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
+		this.players.get(player);
+		int limit = 10;
+		boolean flag = true;
+		this.players.get(player).setIsLeaving(true);
+		runAsync(() -> {
+			long start = System.currentTimeMillis();
+			timerToLeave = 1;
+		while (timerToLeave > 0) {
+				long now = System.currentTimeMillis();
+				timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
+			}
+		newPlayersMap.remove(player);
+		this.players = newPlayersMap;
 
-		if (isAskingPlayer(answer)) {
-			this.players.remove(answer);
-			return new ProcessingQuestion(nextCurrentPlayer, players);
-		} else {
-			this.players.remove(answer);
-			return this;
-		}
+		});
+			if (isAskingPlayer(player)) {
+				return new ProcessingQuestion(nextCurrentPlayer, players);
+			} else {
+				return this;
+			}
 	}
 
 	@Override
@@ -161,11 +188,23 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {
 		Map<String, PlayerWithState> newPlayersMap = this.players;
-		if (isAskingPlayer(playerWithState.getPlayer().getId())) {
-			newPlayersMap.remove(currentPlayer);
-		} else {
-			newPlayersMap.remove(playerWithState.getPlayer().getId());
-		}
+		int limit = 10;
+		boolean flag = true;
+		this.players.get(currentPlayer).setIsLeaving(true);
+		runAsync(() -> {
+			long start = System.currentTimeMillis();
+			timerToLeave = 1;
+			while (timerToLeave > 0) {
+				long now = System.currentTimeMillis();
+				timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
+			}
+			if (isAskingPlayer(playerWithState.getPlayer().getId())) {
+				newPlayersMap.remove(currentPlayer);
+			} else {
+				newPlayersMap.remove(playerWithState.getPlayer().getId());
+			}
+
+		});
 		this.players = newPlayersMap;
 	}
 
@@ -189,7 +228,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void resetToDefault() {
 		this.players.values().forEach(PlayerWithState::inCompleteFuture);
 	}
-//
+
 	private void startTimer() {
 		int limit = maxTimeForQuestion;
 		long start = currentTimeMillis();
@@ -215,5 +254,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 			start = currentTimeMillis();
 		}
 	}
+
+
 
 }
