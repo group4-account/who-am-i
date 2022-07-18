@@ -3,8 +3,6 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
-import com.eleks.academy.whoami.core.impl.PersistentPlayer;
-import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
@@ -18,7 +16,6 @@ import static com.eleks.academy.whoami.model.response.PlayerState.*;
 import static java.lang.Boolean.FALSE;
 import static java.lang.Boolean.TRUE;
 import static java.lang.System.currentTimeMillis;
-import static java.util.Optional.*;
 import static java.util.Optional.ofNullable;
 import static java.util.concurrent.CompletableFuture.runAsync;
 import static java.util.concurrent.TimeUnit.MILLISECONDS;
@@ -35,18 +32,23 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players) {
 		super(players.size(), players.size());
 		this.players = players;
-		this.players.values()
-				.stream()
-				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
-				.forEach(player -> this.leaveGame(player, currentPlayer1));
-
 		final String currentPlayer = currentPlayer1;
 		this.players.get(currentPlayer).setState(ASKING);
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
-
+		this.players.values()
+				.stream()
+				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
+				.forEach(player -> {
+					extracted(players, player);
+				});
 		runAsync(() -> this.makeTurn(new Answer(null)));
+	}
+
+	private void extracted(Map<String, PlayerWithState> players, PlayerWithState player) {
+		players.remove(player.getPlayer().getId());
+		System.out.println("ok");
 	}
 
 	@Override
@@ -63,7 +65,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@Override
 	public String getCurrentTurn() {
 		return this.players.values().stream()
-				.filter(player -> Objects.equals(player.getState(), ASKING))
+				.filter(player -> Objects.equals(player.getState(), ASKING) ||
+						Objects.equals(player.getState(), ASKED))
 				.findFirst()
 				.map(playerWithState -> playerWithState.getPlayer().getId())
 				.orElse("No one asking at this time");
@@ -90,6 +93,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		try {
 			try {
 				currentPlayer.getFirstQuestion().get(maxTimeForQuestion, SECONDS);
+				currentPlayer.setState(ASKED);
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				newPlayersMap.remove(currentPlayer.getPlayer().getId());
@@ -130,6 +134,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
 				.filter(player -> Objects.equals(player.getState(), ANSWERING))
 				.collect(partitioningBy(playerWithState -> Objects.equals(playerWithState.getAnswer(), NO)));
+
 		if (booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size()) {
 			List<String> collect = new ArrayList<>(this.players.keySet());
 			return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
@@ -159,21 +164,21 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return timer;
 	}
 
-	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {
-		Map<String, PlayerWithState> newPlayersMap = this.players;
-		if (isAskingPlayer(playerWithState.getPlayer().getId())) {
-			newPlayersMap.remove(currentPlayer);
-		} else {
-			newPlayersMap.remove(playerWithState.getPlayer().getId());
-		}
-		this.players = newPlayersMap;
+	public void leaveGame(PlayerWithState answer) {
+		List<String> playersList = new ArrayList<>(this.players.keySet());
+		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
+				this.players.get(getCurrentTurn())) + 1 % playersList.size();
+		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
+
+		this.players.remove(answer.getPlayer().getId());
 	}
 
 	private boolean isAskingPlayer(String answer) {
 		return Objects.equals(answer,
 				this.players.values()
 						.stream()
-						.filter(player -> Objects.equals(player.getState(), ASKING))
+						.filter(player -> Objects.equals(player.getState(), ASKING) ||
+								Objects.equals(player.getState(), ASKED))
 						.findFirst()
 						.map(playerWithState -> playerWithState.getPlayer().getId())
 						.orElse("NOT_ASKING_PLAYER"));
