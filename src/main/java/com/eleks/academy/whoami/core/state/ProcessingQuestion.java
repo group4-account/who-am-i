@@ -40,7 +40,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.players.values()
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
-				.forEach(player -> this.leaveGame(player, currentPlayer1));
+				.forEach(this::leaveGame);
 
 		final String currentPlayer = currentPlayer1;
 		this.players.get(currentPlayer).setState(ASKING);
@@ -177,7 +177,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		});
 	}
 
-	private void leaveGame(PlayerWithState player, String currentPlayer) {
+	private void leaveGame(PlayerWithState player) {
 		Map<String, PlayerWithState> newPlayersMap = this.players;
 		setTimerToLeave(player, newPlayersMap);
 		this.players = newPlayersMap;
