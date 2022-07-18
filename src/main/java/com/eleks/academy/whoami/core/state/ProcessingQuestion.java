@@ -167,6 +167,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void setTimerToLeave(PlayerWithState removingPlayer, Map<String, PlayerWithState> newPlayersMap){
 		int limit = 3;
 		removingPlayer.setIsLeaving(true);
+		removingPlayer.setState(LEAVING);
 		runAsync(() -> {
 			long start = System.currentTimeMillis();
 			timerToLeave = 1;
