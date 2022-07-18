@@ -38,7 +38,7 @@ public class PersistentPlayer implements Player, SynchronousPlayer {
 
 	@Override
 	public Future<Boolean> isLeaving() {
-		return null;
+		return CompletableFuture.completedFuture(false);
 	}
 
 	@Override
