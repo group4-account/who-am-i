@@ -7,6 +7,7 @@ import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
@@ -26,6 +27,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	private Map<String, PlayerWithState> players;
 	private volatile long timer;
+	private volatile long timerToLeave;
 	private final int maxTimeForQuestion = 60;
 	private final int maxTimeForAnswer = 20;
 
@@ -40,9 +42,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.players.values()
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
-				.forEach(player -> {
-					extracted(players, player);
-				});
+				.forEach(this::leaveGame);
 		runAsync(() -> this.makeTurn(new Answer(null)));
 	}
 
@@ -96,8 +96,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 				currentPlayer.setState(ASKED);
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
-				newPlayersMap.remove(currentPlayer.getPlayer().getId());
-				List<String> playersList = new ArrayList<>(newPlayersMap.keySet());
+				setTimerToLeave(currentPlayer, newPlayersMap);
+				List<String> playersList = new ArrayList<>(this.players.keySet());
 				return new ProcessingQuestion(playersList
 						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
 			} finally {
@@ -144,19 +144,19 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	@Override
-	public GameState leaveGame(String answer) {
+	public GameState leaveGame(String player) {
+		Map<String, PlayerWithState> newPlayersMap = this.players;
+		PlayerWithState removingPlayer = players.get(player);
+		setTimerToLeave(removingPlayer, newPlayersMap);
 		List<String> playersList = new ArrayList<>(this.players.keySet());
-		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
-				this.players.get(getCurrentTurn())) + 1 % playersList.size();
-		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
-
-		if (isAskingPlayer(answer)) {
-			this.players.remove(answer);
-			return new ProcessingQuestion(nextCurrentPlayer, players);
-		} else {
-			this.players.remove(answer);
-			return this;
-		}
+			if (isAskingPlayer(player)) {
+				PlayerWithState currentPlayer = players.get(getCurrentTurn());
+				return new ProcessingQuestion(playersList
+						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
+			} else if(this.players.size() == 1){
+				return new GameFinished(this.players);
+			}
+			else {return this;}
 	}
 
 	@Override
@@ -164,13 +164,24 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return timer;
 	}
 
-	public void leaveGame(PlayerWithState answer) {
-		List<String> playersList = new ArrayList<>(this.players.keySet());
-		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
-				this.players.get(getCurrentTurn())) + 1 % playersList.size();
-		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
+	private void setTimerToLeave(PlayerWithState removingPlayer, Map<String, PlayerWithState> newPlayersMap){
+		int limit = 3;
+		removingPlayer.setIsLeaving(true);
+		runAsync(() -> {
+			long start = System.currentTimeMillis();
+			timerToLeave = 1;
+			while (timerToLeave > 0) {
+				long now = System.currentTimeMillis();
+				timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
+			}
+			newPlayersMap.remove(removingPlayer.getPlayer().getId());
+			this.players = newPlayersMap;
+		});
+	}
 
-		this.players.remove(answer.getPlayer().getId());
+	private void leaveGame(PlayerWithState player) {
+		Map<String, PlayerWithState> newPlayersMap = this.players;
+		setTimerToLeave(player, newPlayersMap);
 	}
 
 	private boolean isAskingPlayer(String answer) {
@@ -194,7 +205,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void resetToDefault() {
 		this.players.values().forEach(PlayerWithState::inCompleteFuture);
 	}
-//
+
 	private void startTimer() {
 		int limit = maxTimeForQuestion;
 		long start = currentTimeMillis();
@@ -220,5 +231,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 			start = currentTimeMillis();
 		}
 	}
+
+
 
 }
