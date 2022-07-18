@@ -94,19 +94,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				currentPlayer.getFirstQuestion().get(maxTimeForQuestion, SECONDS);
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
-				int limit = 1;
-				boolean flag = true;
-				currentPlayer.setIsLeaving(true);
-				runAsync(() -> {
-					long start = System.currentTimeMillis();
-					timerToLeave = 3;
-					while (timerToLeave > 0) {
-						long now = System.currentTimeMillis();
-						timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
-					}
-					newPlayersMap.remove(currentPlayer.getPlayer().getId());
-					this.players = newPlayersMap;
-				});
+				setTimerToLeave(currentPlayer, newPlayersMap);
 				List<String> playersList = new ArrayList<>(this.players.keySet());
 				return new ProcessingQuestion(playersList
 						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
@@ -154,31 +142,18 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	@Override
 	public GameState leaveGame(String player) {
-		List<String> playersList = new ArrayList<>(this.players.keySet());
 		Map<String, PlayerWithState> newPlayersMap = this.players;
-		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
-				this.players.get(getCurrentTurn())) + 1 % playersList.size();
-		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
-		this.players.get(player);
-		int limit = 10;
-		boolean flag = true;
-		this.players.get(player).setIsLeaving(true);
-		runAsync(() -> {
-			long start = System.currentTimeMillis();
-			timerToLeave = 1;
-		while (timerToLeave > 0) {
-				long now = System.currentTimeMillis();
-				timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
-			}
-		newPlayersMap.remove(player);
-		this.players = newPlayersMap;
-
-		});
+		PlayerWithState removingPlayer = players.get(player);
+		setTimerToLeave(removingPlayer, newPlayersMap);
+		List<String> playersList = new ArrayList<>(this.players.keySet());
 			if (isAskingPlayer(player)) {
-				return new ProcessingQuestion(nextCurrentPlayer, players);
-			} else {
-				return this;
+				PlayerWithState currentPlayer = players.get(getCurrentTurn());
+				return new ProcessingQuestion(playersList
+						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
+			} else if(this.players.size() == 1){
+				return new GameFinished(this.players);
 			}
+			else {return this;}
 	}
 
 	@Override
@@ -186,10 +161,25 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return timer;
 	}
 
+	private void setTimerToLeave(PlayerWithState removingPlayer, Map<String, PlayerWithState> newPlayersMap){
+		int limit = 3;
+		removingPlayer.setIsLeaving(true);
+		runAsync(() -> {
+			long start = System.currentTimeMillis();
+			timerToLeave = 1;
+			while (timerToLeave > 0) {
+				long now = System.currentTimeMillis();
+				timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
+			}
+			newPlayersMap.remove(removingPlayer.getPlayer().getId());
+			this.players = newPlayersMap;
+
+		});
+	}
+
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {
 		Map<String, PlayerWithState> newPlayersMap = this.players;
 		int limit = 10;
-		boolean flag = true;
 		this.players.get(currentPlayer).setIsLeaving(true);
 		runAsync(() -> {
 			long start = System.currentTimeMillis();
