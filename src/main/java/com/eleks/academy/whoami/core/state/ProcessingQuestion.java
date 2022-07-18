@@ -180,22 +180,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void leaveGame(PlayerWithState player, String currentPlayer) {
 		Map<String, PlayerWithState> newPlayersMap = this.players;
 		setTimerToLeave(player, newPlayersMap);
-//		int limit = 3;
-//		this.players.get(currentPlayer).setIsLeaving(true);
-//		runAsync(() -> {
-//			long start = System.currentTimeMillis();
-//			timerToLeave = 1;
-//			while (timerToLeave > 0) {
-//				long now = System.currentTimeMillis();
-//				timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
-//			}
-//			if (isAskingPlayer(playerWithState.getPlayer().getId())) {
-//				newPlayersMap.remove(currentPlayer);
-//			} else {
-//				newPlayersMap.remove(playerWithState.getPlayer().getId());
-//			}
-//
-//		});
 		this.players = newPlayersMap;
 	}
 
