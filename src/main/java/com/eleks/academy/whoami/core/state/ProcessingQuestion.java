@@ -119,6 +119,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 						try {
 							player1.answerQuestion().get(maxTimeForAnswer, SECONDS);
 							player1.getPlayer().zeroTimePlayersBeingInactive();
+							player1.setState(ANSWERED);
 						} catch (TimeoutException e) {
 							player1.getPlayer().incrementBeingInactiveCount();
 						} finally {
