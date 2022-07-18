@@ -179,7 +179,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	private void leaveGame(PlayerWithState playerWithState, String currentPlayer) {
 		Map<String, PlayerWithState> newPlayersMap = this.players;
-		int limit = 10;
+		int limit = 3;
 		this.players.get(currentPlayer).setIsLeaving(true);
 		runAsync(() -> {
 			long start = System.currentTimeMillis();
