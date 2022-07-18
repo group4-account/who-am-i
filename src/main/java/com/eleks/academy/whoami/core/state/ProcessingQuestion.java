@@ -173,14 +173,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 			}
 			newPlayersMap.remove(removingPlayer.getPlayer().getId());
 			this.players = newPlayersMap;
-
 		});
 	}
 
 	private void leaveGame(PlayerWithState player) {
 		Map<String, PlayerWithState> newPlayersMap = this.players;
 		setTimerToLeave(player, newPlayersMap);
-		this.players = newPlayersMap;
 	}
 
 	private boolean isAskingPlayer(String answer) {
