@@ -90,7 +90,7 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
         }
 
         var currentQuestion = question.participatingPlayers.stream()
-                .filter(player -> player.getState() == PlayerState.ASKING)
+                .filter(player -> player.getState() == PlayerState.ASKING  || player.getState() == PlayerState.ASKED)
                 .findFirst()
                 .map(PlayerWithState::getQuestion);
 
