@@ -133,10 +133,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 					}
 				});
 		Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
-				.filter(player -> Objects.equals(player.getState(), ANSWERING))
+				.filter(player -> Objects.equals(player.getState(), ANSWERED))
 				.collect(partitioningBy(playerWithState -> Objects.equals(playerWithState.getAnswer(), NO)));
 
-		if (booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size()) {
+		if (booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size() && !booleanPlayersAnswerMap.isEmpty()) {
 			List<String> collect = new ArrayList<>(this.players.keySet());
 			return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
 		} else {
