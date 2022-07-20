@@ -47,7 +47,7 @@ public final class SuggestingCharacters extends AbstractGameState {
                 long now = System.currentTimeMillis();
                 timer = maxSecondsAwaiting - TimeUnit.MILLISECONDS.toSeconds(now - start);
                 if (timer == 0 && this.players.values().stream()
-                        .anyMatch(player -> player.getState().equals(NOT_READY))) {
+                        .anyMatch(player -> player.getState() == NOT_READY)) {
                     this.players.values().stream()
                             .findFirst()
                             .ifPresent(player -> leaveGame(player.getPlayer().getId()));
@@ -132,11 +132,10 @@ public final class SuggestingCharacters extends AbstractGameState {
                             players.get(answer.getPlayer()).getPlayer().getId()))
                     .findFirst()
                     .ifPresent(a -> a.getPlayer().setName(answer.getSecondMessage()));
-            if(players.values().stream().filter(playerWithState -> playerWithState.getState()
-                    .equals(READY)).count() >= 4) {
-                this.suggestCharacter(answer.getPlayer(), answer.getMessage());
-                return this.next();
-            }
+			if (players.values().stream().filter(playerWithState -> playerWithState.getState() == READY).count() >= 4) {
+				this.suggestCharacter(answer.getPlayer(), answer.getMessage());
+				return this.next();
+			}
             return Optional.of(answer)
                     .filter(StartGameAnswer.class::isInstance)
                     .map(StartGameAnswer.class::cast)
