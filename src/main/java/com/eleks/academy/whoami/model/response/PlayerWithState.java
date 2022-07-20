@@ -49,7 +49,10 @@ public class PlayerWithState {
 	public Future<String> answerQuestion() {
 		return currentAnswer;
 	}
+
 	public void setAnswerQuestion(String answer) {
+		if (this.currentAnswer.isDone())
+			return;
 		this.currentAnswer.complete(answer);
 		this.answer = QuestionAnswer.valueOf(answer);
 	}
