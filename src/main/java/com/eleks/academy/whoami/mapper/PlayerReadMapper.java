@@ -11,6 +11,6 @@ public class PlayerReadMapper implements Mapper<Player, PlayerDto> {
 	public PlayerDto map(Player object) {
 		return new PlayerDto(
 				object.getId(),
-				object.getUsername());
+				object.getEmail());
 	}
 }

@@ -17,7 +17,6 @@ import java.util.Optional;
 
 @Service
 @NoArgsConstructor
-@Transactional(readOnly = true)
 public class PlayerServiceImpl implements PlayerService {
 
 	private PlayerRepository playerRepository;
@@ -47,6 +46,7 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
+	@Transactional
 	public Optional<Player> findByEmail(String email) {
 		return this.playerRepository.findByEmail(email);
 	}
