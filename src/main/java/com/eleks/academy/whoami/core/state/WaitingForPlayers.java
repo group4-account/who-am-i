@@ -66,6 +66,7 @@ public final class WaitingForPlayers extends AbstractGameState {
                     PlayerWithState.builder()
                             .player(persistentPlayer)
                             .state(NOT_READY)
+                            .isLeaving(false)
                             .currentAnswer(new CompletableFuture<>())
                             .questionFuture(new CompletableFuture<>())
                             .build()

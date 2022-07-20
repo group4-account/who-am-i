@@ -26,6 +26,8 @@ public class PlayerWithState {
 
 	private PlayerState state;
 
+	private Boolean isLeaving;
+
 	private CompletableFuture<String> questionFuture = new CompletableFuture<>();
 
 	private CompletableFuture<String> currentAnswer = new CompletableFuture<>();
