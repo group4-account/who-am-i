@@ -86,7 +86,9 @@ public class GameServiceImpl implements GameService {
 
 	@Override
 	public List<QNAHistoryRepositoryImpl.Question> getQnaHistory(String gameId){
-		return qnaHistoryRepository.GetGameHistory(gameId);
+		var history = new ArrayList<>(qnaHistoryRepository.GetGameHistory(gameId));
+		history.stream().filter(x -> x.isActiveQuestion).forEach(x -> x.Answers = new ArrayList<>());
+		return history;
 	}
 
 	@Override

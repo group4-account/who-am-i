@@ -1,4 +1,5 @@
 package com.eleks.academy.whoami.repository.impl;
+import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
@@ -56,8 +57,15 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
         question.IsGuess = addQuestionRequest.IsGuess;
         question.Question = addQuestionRequest.question;
         question.isActiveQuestion = true;
-        questionsList.stream().filter(q -> q.GameId.equalsIgnoreCase(question.GameId)).forEach(x -> x.isActiveQuestion = false);
-        questionsList.add(question);
+        if (questionsList.stream().noneMatch(x -> x.PlayerId.equalsIgnoreCase(addQuestionRequest.playerName)
+                && x.Question.equalsIgnoreCase(addQuestionRequest.question)
+                && x.GameId.equalsIgnoreCase(addQuestionRequest.gameId)))
+        {
+            questionsList.stream().filter(q -> q.GameId.equalsIgnoreCase(question.GameId)).forEach(x -> x.isActiveQuestion = false);
+            questionsList.add(question);
+        } else {
+            throw new GameException("Player " + addQuestionRequest.playerName + " already asked this question in this game");
+        }
 
     }
 
@@ -67,12 +75,19 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
                 .filter(q -> q.GameId.equalsIgnoreCase(addAnswerRequest.gameId))
                 .reduce((first, second) -> second);
         var answer = new Answer();
-        answer.PlayerId = addAnswerRequest.playerName;
-        answer.Answer = addAnswerRequest.answer;
-        answer.WasSetAutomatically = false;
+        if (question.map(x -> x.isActiveQuestion).orElse(false)) {
+            answer.PlayerId = addAnswerRequest.playerName;
+            answer.Answer = addAnswerRequest.answer;
+            answer.WasSetAutomatically = false;
 
-        question.ifPresent(q -> q.Answers.add(answer));
-
+            question.ifPresent(q -> {
+                if (q.Answers.stream().noneMatch(x -> x.PlayerId.equalsIgnoreCase(addAnswerRequest.playerName))) {
+                    q.Answers.add(answer);
+                } else {
+                    throw new GameException("Player " + addAnswerRequest.playerName + " already answered this question in this game");
+                }
+            });
+        }
     }
 
     @Override
@@ -99,7 +114,7 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
         question.participatingPlayers.forEach(player ->{
             if (answersList.stream().noneMatch(a -> a.PlayerId.equalsIgnoreCase(player.getPlayer().getId()))){
 
-                if ((currentQuestion.isPresent() ? currentQuestion.get() : "") == "" || !(currentQuestion.isPresent() ? currentQuestion.get() : "").equalsIgnoreCase(question.Question)) {
+                if (currentQuestion.orElse("").equals("") || !(currentQuestion.orElse("")).equalsIgnoreCase(question.Question)) {
                     question.isActiveQuestion = false;
                     answersList.add(new Answer(player.getPlayer().getId(), new Date(), true, QuestionAnswer.NOT_SURE));
                 }
