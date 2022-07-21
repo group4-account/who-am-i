@@ -4,6 +4,7 @@ import com.eleks.academy.whoami.core.SynchronousGame;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
+import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.PlayerState;
@@ -24,6 +25,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.eleks.academy.whoami.model.request.QuestionAnswer.*;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -232,13 +234,13 @@ class GameServiceTest {
         thread.start();
         Thread.sleep(200);
 
-        final String answer = "YES";
-        final String answer1 = "YES";
-        final String answer2 = "NO";
+        QuestionAnswer answer = YES;
+        QuestionAnswer answer1 = YES;
+        QuestionAnswer answer2 = NO;
          task2 = () -> {
             try {
                 Thread.sleep(100);
-                gameService.answerQuestion(gameId, player, answer);
+                gameService.answerQuestion(gameId, player, answer.name());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -246,7 +248,7 @@ class GameServiceTest {
         Runnable task3 = () -> {
             try {
                 Thread.sleep(100);
-                gameService.answerQuestion(gameId, player1, answer1);
+                gameService.answerQuestion(gameId, player1, answer1.name());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -254,7 +256,7 @@ class GameServiceTest {
         Runnable task4 = () -> {
             try {
                 Thread.sleep(100);
-                gameService.answerQuestion(gameId, player2, answer2);
+                gameService.answerQuestion(gameId, player2, answer2.name());
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -272,10 +274,10 @@ class GameServiceTest {
                 .collect(Collectors.toMap(a -> a.getPlayer().getId(), Function.identity()));
         assertEquals(player3, this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
         assertNotNull(playerWithStateMap.get(player3).getPlayer());
-        assertEquals(question, playerWithStateMap.get(player3).getPlayer());
-        assertEquals(answer, playerWithStateMap.get(player).getPlayer());
-        assertEquals(answer1, playerWithStateMap.get(player1).getPlayer());
-        assertEquals(answer2, playerWithStateMap.get(player2).getPlayer());
+        assertEquals(question, playerWithStateMap.get(player3).getQuestion());
+        assertEquals(answer, playerWithStateMap.get(player).getAnswer());
+        assertEquals(answer1, playerWithStateMap.get(player1).getAnswer());
+        assertEquals(answer2, playerWithStateMap.get(player2).getAnswer());
         Thread.sleep(200);
         System.out.println(this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
     }

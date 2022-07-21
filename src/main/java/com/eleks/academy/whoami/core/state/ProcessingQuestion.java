@@ -44,11 +44,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(this::leaveGame);
 		runAsync(() -> this.makeTurn(new Answer(null)));
-	}
-
-	private void extracted(Map<String, PlayerWithState> players, PlayerWithState player) {
-		players.remove(player.getPlayer().getId());
-		System.out.println("ok");
+		runAsync(this::startTimer);
 	}
 
 	@Override
@@ -113,7 +109,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 		this.players.values()
 				.parallelStream()
-				.filter(playerWithState -> Objects.equals(playerWithState.getState(), ANSWERING))
+				.filter(playerWithState -> playerWithState.getState() == ANSWERING)
 				.forEach(player1 -> {
 					try {
 						try {
@@ -124,8 +120,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 							player1.getPlayer().incrementBeingInactiveCount();
 						} finally {
 							this.players.values()
-									.stream().filter(playerWithState -> playerWithState.getAnswer() == null
-											&& playerWithState.getState().equals(ANSWERING))
+									.stream().filter(playerWithState -> playerWithState.getState() == ANSWERING)
 									.forEachOrdered(playerWithState -> playerWithState.setAnswer(NOT_SURE));
 						}
 					} catch (InterruptedException | ExecutionException e) {
@@ -133,10 +128,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 					}
 				});
 		Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
-				.filter(player -> Objects.equals(player.getState(), ANSWERED))
-				.collect(partitioningBy(playerWithState -> Objects.equals(playerWithState.getAnswer(), NO)));
+				.filter(player -> player.getState() == ANSWERING || player.getState() == ANSWERED)
+				.collect(partitioningBy(playerWithState -> playerWithState.getAnswer() == NO));
 
-		if (booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size() && !booleanPlayersAnswerMap.isEmpty()) {
+		if (booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size()) {
 			List<String> collect = new ArrayList<>(this.players.keySet());
 			return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
 		} else {
@@ -150,14 +145,15 @@ public final class ProcessingQuestion extends AbstractGameState {
 		PlayerWithState removingPlayer = players.get(player);
 		setTimerToLeave(removingPlayer, newPlayersMap);
 		List<String> playersList = new ArrayList<>(this.players.keySet());
-			if (isAskingPlayer(player)) {
-				PlayerWithState currentPlayer = players.get(getCurrentTurn());
-				return new ProcessingQuestion(playersList
-						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
-			} else if(this.players.size() == 1){
-				return new GameFinished(this.players);
-			}
-			else {return this;}
+		if (isAskingPlayer(player)) {
+			PlayerWithState currentPlayer = players.get(getCurrentTurn());
+			return new ProcessingQuestion(playersList
+					.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
+		} else if (this.players.size() == 1) {
+			return new GameFinished(this.players);
+		} else {
+			return this;
+		}
 	}
 
 	@Override
@@ -165,7 +161,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return timer;
 	}
 
-	private void setTimerToLeave(PlayerWithState removingPlayer, Map<String, PlayerWithState> newPlayersMap){
+	private void setTimerToLeave(PlayerWithState removingPlayer, Map<String, PlayerWithState> newPlayersMap) {
 		int limit = 3;
 		removingPlayer.setIsLeaving(true);
 		removingPlayer.setState(LEAVING);
@@ -190,8 +186,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return Objects.equals(answer,
 				this.players.values()
 						.stream()
-						.filter(player -> Objects.equals(player.getState(), ASKING) ||
-								Objects.equals(player.getState(), ASKED))
+						.filter(player -> player.getState() == ASKING || player.getState() == ASKED)
 						.findFirst()
 						.map(playerWithState -> playerWithState.getPlayer().getId())
 						.orElse("NOT_ASKING_PLAYER"));
@@ -209,31 +204,27 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private void startTimer() {
-		int limit = maxTimeForQuestion;
-		long start = currentTimeMillis();
-		boolean flag = true;
-		while (!this.players.isEmpty()) {
-			timer = 1;
-			boolean isQuestionPresent = false;
-			while (timer > 0) {
+		while (true) {
+			long start = currentTimeMillis();
+			boolean isQuestion = true;
+			while (this.players.values().stream().anyMatch(player -> player.getState() == READY)) {
 				long now = currentTimeMillis();
-				timer = limit - MILLISECONDS.toSeconds(now - start);
-				if (this.players.values().stream()
-						.anyMatch(player -> player.getState().equals(ANSWERING)) && flag) {
-					isQuestionPresent = true;
+				timer = maxTimeForQuestion - MILLISECONDS.toSeconds(now - start);
+				if (timer <= 0) {
+					isQuestion = false;
 					break;
 				}
 			}
-			if (isQuestionPresent) {
-				limit = maxTimeForAnswer;
-				flag = false;
-			} else {
-				limit = maxTimeForQuestion;
-			}
 			start = currentTimeMillis();
+			while (this.players.values().stream().allMatch(player -> player.getState() != ASKING) && isQuestion) {
+				long now = currentTimeMillis();
+				timer = maxTimeForAnswer - MILLISECONDS.toSeconds(now - start);
+				if (timer < 0) {
+					break;
+				}
+			}
 		}
+
+
 	}
-
-
-
 }
