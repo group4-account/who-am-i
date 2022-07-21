@@ -46,7 +46,7 @@ public class PlayerServiceImpl implements PlayerService {
 	}
 
 	@Override
-	@Transactional
+	@Transactional(readOnly = true)
 	public Optional<Player> findByEmail(String email) {
 		return this.playerRepository.findByEmail(email);
 	}
