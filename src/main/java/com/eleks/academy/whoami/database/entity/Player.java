@@ -10,7 +10,7 @@ import javax.persistence.*;
 import static javax.persistence.GenerationType.*;
 
 @Entity
-@Table(name = "players")
+@Table(name = "players", schema = "public")
 @Data
 @Builder
 @NoArgsConstructor
