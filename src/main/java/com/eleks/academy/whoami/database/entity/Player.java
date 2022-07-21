@@ -10,7 +10,7 @@ import javax.persistence.*;
 import static javax.persistence.GenerationType.*;
 
 @Entity
-@Table(name = "players", schema = "public")
+@Table(name = "players", schema = "for_heroku", catalog = "dac7okrn1q4c25")
 @Data
 @Builder
 @NoArgsConstructor
