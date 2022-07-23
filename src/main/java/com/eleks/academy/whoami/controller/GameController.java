@@ -105,8 +105,9 @@ public class GameController {
 
 	@PostMapping("/{id}/guess")
 	public void submitGuess(@PathVariable("id") String id,
-							@RequestHeader(PLAYER) String player, @RequestBody Message message) {
-		this.gameService.submitGuess(id, player, QuestionAnswer.valueOf(message.getMessage()));
+							@RequestHeader(PLAYER) String player,
+							@Valid @RequestBody Message message) {
+		this.gameService.submitGuess(id, player, message.getMessage());
 	}
 
 	@GetMapping("/{id}/history")

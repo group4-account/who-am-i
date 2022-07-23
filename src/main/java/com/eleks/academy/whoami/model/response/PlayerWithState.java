@@ -22,11 +22,15 @@ public class PlayerWithState {
 
 	private String question;
 
+	private String guess;
+
 	private PlayerState state;
 
 	private Boolean isLeaving;
 
 	private CompletableFuture<String> questionFuture = new CompletableFuture<>();
+
+	private CompletableFuture<String> guessFuture = new CompletableFuture<>();
 
 	private CompletableFuture<String> currentAnswer = new CompletableFuture<>();
 
@@ -34,16 +38,36 @@ public class PlayerWithState {
 		return questionFuture;
 	}
 
+	public Future<String> getFirstGuess() {
+		return guessFuture;
+	}
+
+	public  Future<String> getQuestionMessage(){
+		if (guessFuture!= null && !questionFuture.isDone()){
+			return  guessFuture;
+		}
+		else {
+			return questionFuture;
+		}
+	}
+
 	public void setFirstQuestion(String question) {
 		this.questionFuture.complete(question);
 		this.question = question;
 	}
 
+	public void setFirstGuess(String guess) {
+		this.guessFuture.complete(guess);
+		this.guess = guess;
+	}
+
 	public void inCompleteFuture() {
 		this.question = null;
 		this.answer = null;
+		this.guess = null;
 		questionFuture = new CompletableFuture<>();
 		currentAnswer = new CompletableFuture<>();
+		guessFuture = new CompletableFuture<>();
 	}
 
 	public Future<String> answerQuestion() {
