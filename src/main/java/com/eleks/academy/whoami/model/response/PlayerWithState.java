@@ -43,7 +43,7 @@ public class PlayerWithState {
 	}
 
 	public  Future<String> getQuestionMessage(){
-		if (guessFuture!= null && !questionFuture.isDone()){
+		if (!guessFuture.isDone() && !questionFuture.isDone()){
 			return  guessFuture;
 		}
 		else {
