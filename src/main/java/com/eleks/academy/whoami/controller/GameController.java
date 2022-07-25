@@ -108,7 +108,7 @@ public class GameController {
 	@PostMapping("/{id}/guess")
 	public void submitGuess(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player,
-							@Valid @Size(min = 2, max = 128, message = "message must be less than 128 characters")
+							@Size(min = 2, max = 128, message = "message must be less than 128 characters")
 								@RequestBody Message message) {
 
 		this.gameService.submitGuess(id, player, message.getMessage());
