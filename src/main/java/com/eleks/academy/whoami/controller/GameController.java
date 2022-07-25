@@ -17,6 +17,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Optional;
 
@@ -99,14 +100,17 @@ public class GameController {
 	@PostMapping("/{id}/questions")
 	public void askQuestion(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player,
-							@Valid @RequestBody Message message) {
+							@Valid @Size(min = 1, max = 256, message = "message must be less than 256 characters")
+								@RequestBody Message message) {
 		this.gameService.askQuestion(id, player, message.getMessage());
 	}
 
 	@PostMapping("/{id}/guess")
 	public void submitGuess(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player,
-							@Valid @RequestBody Message message) {
+							@Valid @Size(min = 2, max = 128, message = "message must be less than 128 characters")
+								@RequestBody Message message) {
+
 		this.gameService.submitGuess(id, player, message.getMessage());
 	}
 
