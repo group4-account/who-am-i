@@ -50,7 +50,7 @@ public class PlayerWithState {
 	}
 
 	public  Future<String> getFirstGuessQuestion(){
-		if (!guessFuture.isDone() && !questionFuture.isDone()){
+		if (guessFuture.isDone()){
 			return  guessFuture;
 		}
 		else {

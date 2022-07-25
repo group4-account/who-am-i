@@ -11,7 +11,7 @@ import javax.validation.constraints.Size;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Guess {
-    @Size(min =2, max = 128, message = "message must be more than 2 and less than 128 characters")
-    @NotBlank
+//    @NotBlank
+    @Size(min =2, max =128, message = "message must be more than 2 and less than 128 characters")
     private String message;
 }
