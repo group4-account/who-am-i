@@ -42,7 +42,14 @@ public class PlayerWithState {
 		return guessFuture;
 	}
 
-	public  Future<String> getQuestionMessage(){
+	public String getGuessQuestion() {
+		if(this.guess != null){
+			return this.guess;
+		}
+		else return this.question;
+	}
+
+	public  Future<String> getFirstGuessQuestion(){
 		if (!guessFuture.isDone() && !questionFuture.isDone()){
 			return  guessFuture;
 		}
