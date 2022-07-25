@@ -149,7 +149,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 		List<String> playersList = new ArrayList<>(this.players.keySet());
 		Map<String, PlayerWithState> newPlayersMap = this.players;
 		PlayerWithState removingPlayer = players.get(player);
-		removingPlayer.setState(LEAVING);
 		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
 				this.players.get(getCurrentTurn())) + 1 % playersList.size();
 		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
@@ -170,7 +169,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private void setTimerToLeave(PlayerWithState removingPlayer, Map<String, PlayerWithState> newPlayersMap) {
 		int limit = 3;
 		removingPlayer.setIsLeaving(true);
-		removingPlayer.setState(LEAVING);
 		runAsync(() -> {
 			long start = System.currentTimeMillis();
 			timerToLeave = 1;
