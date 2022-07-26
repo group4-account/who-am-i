@@ -10,9 +10,8 @@ import javax.validation.constraints.Size;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class Message {
-	@Size(min = 1, max = 256, message = "message must be less than 256 characters")
-	@NotBlank
-	private String message;
-
+public class Guess {
+    @Size(min =2, max = 128, message = "message must be more than 2 and less than 128 characters")
+    @NotBlank
+    private String message;
 }

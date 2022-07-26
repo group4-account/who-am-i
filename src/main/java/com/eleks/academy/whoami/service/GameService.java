@@ -32,7 +32,7 @@ public interface GameService {
 
 	Optional<TurnDetails> findTurnInfo(String id, String player);
 
-	void submitGuess(String id, String player, String message);
+	void submitGuess(String gameId, String player, String message);
 
 	void answerQuestion(String id, String player, String answer);
 

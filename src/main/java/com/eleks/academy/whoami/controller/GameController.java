@@ -2,10 +2,7 @@ package com.eleks.academy.whoami.controller;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
-import com.eleks.academy.whoami.model.request.CharacterSuggestion;
-import com.eleks.academy.whoami.model.request.Message;
-import com.eleks.academy.whoami.model.request.NewGameRequest;
-import com.eleks.academy.whoami.model.request.QuestionAnswer;
+import com.eleks.academy.whoami.model.request.*;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.TurnDetails;
@@ -17,6 +14,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.Size;
 import java.util.List;
 import java.util.Optional;
@@ -100,16 +100,14 @@ public class GameController {
 	@PostMapping("/{id}/questions")
 	public void askQuestion(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player,
-							@Valid @Size(min = 1, max = 256, message = "message must be less than 256 characters")
-								@RequestBody Message message) {
+							@Valid @RequestBody Message message) {
 		this.gameService.askQuestion(id, player, message.getMessage());
 	}
 
 	@PostMapping("/{id}/guess")
 	public void submitGuess(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player,
-							@Size(min = 2, max = 128, message = "message must be less than 128 characters")
-								@RequestBody Message message) {
+							@Valid @RequestBody Guess message) {
 
 		this.gameService.submitGuess(id, player, message.getMessage());
 	}
