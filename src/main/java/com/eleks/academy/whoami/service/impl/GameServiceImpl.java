@@ -167,6 +167,12 @@ public class GameServiceImpl implements GameService {
 	public void submitGuess(String gameId, String player, String message) {
 		this.gameRepository.findById(gameId)
 				.ifPresent(game -> game.guessCharacter(player, message));
+
+		this.gameRepository.findById(gameId).stream()
+				.findFirst()
+				.map(SynchronousGame::getPlayersInGame)
+				.ifPresent(pwsl -> this.qnaHistoryRepository.AddQuestionRequest(new AddQuestionRequest(true, gameId, player, message), pwsl));
+
 	}
 
 	@Override

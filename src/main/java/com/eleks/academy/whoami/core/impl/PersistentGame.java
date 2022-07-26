@@ -83,7 +83,12 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void answerQuestion(String id, String answer) {
-        this.findPlayerWithState(id).ifPresent(player -> player.setAnswerQuestion(answer));
+        var player = this.findPlayerWithState(id).orElse(null);
+        if (player != null && player.getState() == PlayerState.ANSWERING_GUESS) {
+            player.setAnswerGuess(answer);
+        }else{
+            player.setAnswerQuestion(answer);
+        }
     }
 
     @Override
