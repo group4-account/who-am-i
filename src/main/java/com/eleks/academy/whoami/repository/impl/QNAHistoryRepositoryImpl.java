@@ -37,6 +37,7 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
         public String PlayerId;
         public List<Answer> Answers;
         public List<String> Players;
+        public String WinnerPlayerName;
         private List<com.eleks.academy.whoami.model.response.PlayerWithState> participatingPlayers;
 
         public Question(){
@@ -95,7 +96,7 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
         return questionsList.stream().filter(x -> x.GameId.equalsIgnoreCase(gameId))
                 .map(x -> {
                     var answers = GetAnswers(x);
-                   return new Question(x.GameId, x.isActiveQuestion,x.IsGuess, x.Question, x.AskedOn, x.PlayerId, answers, x.Players, x.participatingPlayers);
+                   return new Question(x.GameId, x.isActiveQuestion,x.IsGuess, x.Question, x.AskedOn, x.PlayerId, answers, x.Players, x.WinnerPlayerName, x.participatingPlayers);
                 }).collect(Collectors.toList());
     }
 
@@ -116,6 +117,7 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
 
                 if (currentQuestion.orElse("").equals("") || !(currentQuestion.orElse("")).equalsIgnoreCase(question.Question)) {
                     question.isActiveQuestion = false;
+                    question.WinnerPlayerName = GetWinnerPlayerName(question);
                     answersList.add(new Answer(player.getPlayer().getId(), new Date(), true, QuestionAnswer.NOT_SURE));
                 }
             }
@@ -124,5 +126,20 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
         answersList.removeIf(x -> x.PlayerId.equalsIgnoreCase(question.PlayerId));
         question.Answers = answersList;
         return answersList;
+    }
+
+    private String GetWinnerPlayerName(Question question) {
+        if (!question.isActiveQuestion && question.IsGuess){
+            var yesAnswer = QuestionAnswer.valueOf("YES");
+            var noAnswer = QuestionAnswer.valueOf("NO");
+            var yesCount = question.Answers.stream().filter(a->a.Answer == yesAnswer).count();
+            var noCount = question.Answers.stream().filter(a->a.Answer == noAnswer).count();
+
+            if (yesCount >= noCount && yesCount + noCount > 0){
+                return question.PlayerId;
+            }
+        }
+
+        return null;
     }
 }

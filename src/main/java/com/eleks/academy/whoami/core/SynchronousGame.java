@@ -31,6 +31,8 @@ public interface SynchronousGame {
 
 	void answerQuestion(String player, String answer);
 
+	void guessCharacter(String playerId, String message);
+
 	SynchronousGame start();
 
 	Optional<GameState> getCurrentTurnInfo();

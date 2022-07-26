@@ -9,6 +9,7 @@ import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.eleks.academy.whoami.model.request.QuestionAnswer.NO;
@@ -35,7 +36,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		super(players.size(), players.size());
 		this.players = players;
 		final String currentPlayer = currentPlayer1;
-		this.players.get(currentPlayer).setState(ASKING);
+ 		this.players.get(currentPlayer).setState(ASKING);
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
@@ -62,7 +63,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public String getCurrentTurn() {
 		return this.players.values().stream()
 				.filter(player -> Objects.equals(player.getState(), ASKING) ||
-						Objects.equals(player.getState(), ASKED))
+						Objects.equals(player.getState(), ASKED)
+				|| Objects.equals(player.getState(), GUESSING)
+				|| Objects.equals(player.getState(), GUESSED))
 				.findFirst()
 				.map(playerWithState -> playerWithState.getPlayer().getId())
 				.orElse("No one asking at this time");
@@ -86,10 +89,13 @@ public final class ProcessingQuestion extends AbstractGameState {
 	public GameState makeTurn(Answer answerQuestion) {
 		resetToDefault();
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
+		var isGuess = false;
 		try {
 			try {
-				currentPlayer.getFirstQuestion().get(maxTimeForQuestion, SECONDS);
-				currentPlayer.setState(ASKED);
+
+				currentPlayer.getQuestionMessage().get(maxTimeForQuestion, SECONDS).toString();
+				isGuess = players.values().stream().anyMatch(p->p.getState() == GUESSING || p.getState() == GUESSED);
+				currentPlayer.setState(isGuess ? GUESSED : ASKED);
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				setTimerToLeave(currentPlayer, newPlayersMap);
@@ -97,61 +103,98 @@ public final class ProcessingQuestion extends AbstractGameState {
 				return new ProcessingQuestion(playersList
 						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
 			} finally {
-				if (currentPlayer.getQuestion() != null)
+				if (currentPlayer.getQuestionMessage().toString() != null) {
+					boolean finalIsGuess = isGuess;
 					this.players.values().stream()
 							.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
 									currentPlayer.getPlayer().getId()))
-							.forEach(player -> player.setState(ANSWERING));
+							.forEach(player -> player.setState(finalIsGuess ? ANSWERING_GUESS : ANSWERING));
+				}
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
 
+		var stateToBeChecked = isGuess ? ANSWERING_GUESS : ANSWERING;
+		boolean finalIsGuess = isGuess;
+
 		this.players.values()
 				.parallelStream()
-				.filter(playerWithState -> playerWithState.getState() == ANSWERING)
+				.filter(playerWithState -> playerWithState.getState() == stateToBeChecked)
 				.forEach(player1 -> {
 					try {
 						try {
-							player1.answerQuestion().get(maxTimeForAnswer, SECONDS);
+							GetPlayerAnswerOnQuestionOrGuess(player1, finalIsGuess);
 							player1.getPlayer().zeroTimePlayersBeingInactive();
-							player1.setState(ANSWERED);
 						} catch (TimeoutException e) {
 							player1.getPlayer().incrementBeingInactiveCount();
+							if(!finalIsGuess) player1.setAnswer(NOT_SURE);
 						} finally {
-							this.players.values()
-									.stream().filter(playerWithState -> playerWithState.getState() == ANSWERING)
-									.forEachOrdered(playerWithState -> playerWithState.setAnswer(NOT_SURE));
+							player1.setState(finalIsGuess ? ANSWERED_GUESS : ANSWERED);
+							if (finalIsGuess && !player1.getCurrentGuess().isDone()) player1.setGuess("PLAYER WAS INACTIVE");
 						}
 					} catch (InterruptedException | ExecutionException e) {
 						throw new RuntimeException(e);
 					}
 				});
-		Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
-				.filter(player -> player.getState() == ANSWERING || player.getState() == ANSWERED)
-				.collect(partitioningBy(playerWithState -> playerWithState.getAnswer() == NO));
 
-		if (booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size()) {
-			List<String> collect = new ArrayList<>(this.players.keySet());
-			return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
+		if (isGuess){
+			Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
+					.filter(player -> (player.getState() == ANSWERING_GUESS
+							|| player.getState() == ANSWERED_GUESS)
+							&& !player.getGuess().equalsIgnoreCase("PLAYER WAS INACTIVE")
+					)
+					.collect(partitioningBy(playerWithState -> playerWithState.getGuess().equalsIgnoreCase("NO")));
+
+			var anyOneGuessed = booleanPlayersAnswerMap.get(FALSE).size() > 0 || booleanPlayersAnswerMap.get(TRUE).size() > 0;
+
+			if (!anyOneGuessed || (anyOneGuessed && booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size())) {
+				List<String> collect = new ArrayList<>(this.players.keySet());
+				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
+			} else {
+				currentPlayer.setState(WINNER);
+				var nextCurrentPlayerIndex = findCurrentPlayerIndex(players.keySet().stream().toList(),
+						currentPlayer);
+				var nextCurrentPlayer = players.values().stream().toList().get(nextCurrentPlayerIndex);
+				players.remove(currentPlayer.getPlayer().getId());
+				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players);
+			}
 		} else {
-			return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players);
+
+			Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
+					.filter(player -> player.getState() == ANSWERING || player.getState() == ANSWERED)
+					.collect(partitioningBy(playerWithState -> playerWithState.getAnswer() == NO));
+
+			if (booleanPlayersAnswerMap.get(FALSE).size() <= booleanPlayersAnswerMap.get(TRUE).size()) {
+				List<String> collect = new ArrayList<>(this.players.keySet());
+				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
+			} else {
+				return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players);
+			}
+		}
+	}
+
+	private void GetPlayerAnswerOnQuestionOrGuess(PlayerWithState player1, boolean isGuess) throws InterruptedException, ExecutionException, TimeoutException {
+		if (!isGuess) {
+			player1.answerQuestion().get(maxTimeForAnswer, SECONDS);
+		} else {
+			player1.answerGuess().get(maxTimeForAnswer, SECONDS);
 		}
 	}
 
 	@Override
 	public GameState leaveGame(String player) {
+		List<String> playersList = new ArrayList<>(this.players.keySet());
 		Map<String, PlayerWithState> newPlayersMap = this.players;
 		PlayerWithState removingPlayer = players.get(player);
-		setTimerToLeave(removingPlayer, newPlayersMap);
-		List<String> playersList = new ArrayList<>(this.players.keySet());
+		var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
+				this.players.get(getCurrentTurn())) + 1 % playersList.size();
+		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
 		if (isAskingPlayer(player)) {
-			PlayerWithState currentPlayer = players.get(getCurrentTurn());
-			return new ProcessingQuestion(playersList
-					.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
-		} else if (this.players.size() == 1) {
-			return new GameFinished(this.players);
+			setTimerToLeave(removingPlayer, newPlayersMap);
+			return new ProcessingQuestion(nextCurrentPlayer, this.players);
 		} else {
+			setTimerToLeave(removingPlayer, newPlayersMap);
 			return this;
 		}
 	}
@@ -185,7 +228,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 		return Objects.equals(answer,
 				this.players.values()
 						.stream()
-						.filter(player -> player.getState() == ASKING || player.getState() == ASKED)
+						.filter(player -> player.getState() == ASKING || player.getState() == ASKED
+								|| player.getState() == GUESSING)
 						.findFirst()
 						.map(playerWithState -> playerWithState.getPlayer().getId())
 						.orElse("NOT_ASKING_PLAYER"));
@@ -212,8 +256,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 				if (timer <= 0) {
 					isQuestion = false;
 					break;
+					}
 				}
-			}
 			start = currentTimeMillis();
 			while (this.players.values().stream().allMatch(player -> player.getState() != ASKING) && isQuestion) {
 				long now = currentTimeMillis();
@@ -223,7 +267,5 @@ public final class ProcessingQuestion extends AbstractGameState {
 				}
 			}
 		}
-
-
 	}
 }
