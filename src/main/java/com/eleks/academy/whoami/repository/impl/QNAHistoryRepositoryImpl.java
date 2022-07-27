@@ -108,14 +108,22 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
             return question.Answers;
         }
 
+        var isGuess = question.participatingPlayers.stream().anyMatch(
+                x -> x.getState() == PlayerState.GUESSING || x.getState() == PlayerState.GUESSED);
+
         var currentQuestion = question.participatingPlayers.stream()
-                .filter(player -> player.getState() == PlayerState.ASKING  || player.getState() == PlayerState.ASKED)
+                .filter(player ->
+
+                        player.getState() == PlayerState.ASKING
+                                || player.getState() == PlayerState.ASKED
+                                || player.getState() == PlayerState.GUESSING
+                                || player.getState() == PlayerState.GUESSED)
                 .findFirst()
-                .map(PlayerWithState::getQuestion);
+                .map(isGuess ? PlayerWithState::getGuess :PlayerWithState::getQuestion);
 
         var answersList = new ArrayList<Answer>();
         answersList.addAll(question.Answers);
-        question.participatingPlayers.forEach(player ->{
+        question.participatingPlayers.forEach(player -> {
             if (answersList.stream().noneMatch(a -> a.PlayerId.equalsIgnoreCase(player.getPlayer().getId()))){
 
                 if (currentQuestion.orElse("").equals("") || !(currentQuestion.orElse("")).equalsIgnoreCase(question.Question)) {
