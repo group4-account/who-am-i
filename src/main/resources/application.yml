@@ -11,9 +11,9 @@ players:
   max: 4
 spring:
     datasource:
-      url: jdbc:postgresql://ec2-34-247-72-29.eu-west-1.compute.amazonaws.com:5432/dd2av7eqokg7cn
-      username: ttgrptavimafvd
-      password: cc9cf5b3cc69dd214e18cc1410a23ce5edddeab100e4ffb86096bcc84fd4b8c9
+      url: jdbc:postgresql://ec2-54-229-217-195.eu-west-1.compute.amazonaws.com:5432/dac7okrn1q4c25
+      username: zjjwekeoaqdllc
+      password: 8b191380acc873b37c39d51e3e645c95937c5a469e6daa844016b1f831f31369
       driver-class-name: org.postgresql.Driver
     jpa:
       properties.hibernate:
