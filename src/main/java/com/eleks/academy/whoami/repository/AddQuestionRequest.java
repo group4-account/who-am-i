@@ -1,6 +1,5 @@
 package com.eleks.academy.whoami.repository;
 
-import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 

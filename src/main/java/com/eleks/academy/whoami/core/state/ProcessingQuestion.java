@@ -3,13 +3,13 @@ package com.eleks.academy.whoami.core.state;
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
+import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.eleks.academy.whoami.model.request.QuestionAnswer.NO;
@@ -27,14 +27,16 @@ import static java.util.stream.Collectors.partitioningBy;
 public final class ProcessingQuestion extends AbstractGameState {
 
 	private Map<String, PlayerWithState> players;
+	private final List<PlayerWithState> playersWhoFinishedGame;
 	private volatile long timer;
 	private volatile long timerToLeave;
 	private final int maxTimeForQuestion = 60;
 	private final int maxTimeForAnswer = 20;
 
-	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players) {
+	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players, List<PlayerWithState> playersWhoFinishedGame) {
 		super(players.size(), players.size());
 		this.players = players;
+		this.playersWhoFinishedGame = playersWhoFinishedGame;
 		final String currentPlayer = currentPlayer1;
  		this.players.get(currentPlayer).setState(ASKING);
 		this.players.values().stream()
@@ -43,7 +45,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.players.values()
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
-				.forEach(this::leaveGame);
+				.forEach(playerWithState -> setPlayersWhoFinishedGame(playerWithState, INACTIVE));
 		runAsync(() -> this.makeTurn(new Answer(null)));
 		runAsync(this::startTimer);
 	}
@@ -73,11 +75,15 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 	@Override
 	public List<PlayerWithState> getPlayersWithState() {
-		return ofNullable(this.players)
+		List<PlayerWithState> playerWithStateList = new ArrayList<>();
+		List<PlayerWithState> playerWithStateList1 = (ofNullable(this.players))
 				.map(Map::values)
 				.map(Collection::stream)
 				.map(Stream::toList)
 				.orElse(new ArrayList<>());
+		playerWithStateList.addAll(playerWithStateList1);
+		playerWithStateList.addAll(playersWhoFinishedGame);
+		return playerWithStateList;
 	}
 
 	@Override
@@ -92,7 +98,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 		var isGuess = false;
 		try {
 			try {
-
 				currentPlayer.getQuestionMessage().get(maxTimeForQuestion, SECONDS).toString();
 				isGuess = players.values().stream().anyMatch(p->p.getState() == GUESSING || p.getState() == GUESSED);
 				currentPlayer.setState(isGuess ? GUESSED : ASKED);
@@ -101,7 +106,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				setTimerToLeave(currentPlayer, newPlayersMap);
 				List<String> playersList = new ArrayList<>(this.players.keySet());
 				return new ProcessingQuestion(playersList
-						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
+						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap, this.playersWhoFinishedGame);
 			} finally {
 				if (currentPlayer.getQuestionMessage().toString() != null) {
 					boolean finalIsGuess = isGuess;
@@ -150,14 +155,13 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 			if (!anyOneGuessed || (anyOneGuessed && booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size())) {
 				List<String> collect = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
+				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame);
 			} else {
-				currentPlayer.setState(WINNER);
 				var nextCurrentPlayerIndex = findCurrentPlayerIndex(players.keySet().stream().toList(),
 						currentPlayer);
 				var nextCurrentPlayer = players.values().stream().toList().get(nextCurrentPlayerIndex);
-				players.remove(currentPlayer.getPlayer().getId());
-				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players);
+				setPlayersWhoFinishedGame(currentPlayer, WINNER);
+				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame);
 			}
 		} else {
 
@@ -167,9 +171,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 			if (booleanPlayersAnswerMap.get(FALSE).size() <= booleanPlayersAnswerMap.get(TRUE).size()) {
 				List<String> collect = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players);
+				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame);
 			} else {
-				return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players);
+				return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame);
 			}
 		}
 	}
@@ -192,7 +196,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
 		if (isAskingPlayer(player)) {
 			setTimerToLeave(removingPlayer, newPlayersMap);
-			return new ProcessingQuestion(nextCurrentPlayer, this.players);
+			return new ProcessingQuestion(nextCurrentPlayer, this.players, this.playersWhoFinishedGame);
 		} else {
 			setTimerToLeave(removingPlayer, newPlayersMap);
 			return this;
@@ -219,11 +223,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 		});
 	}
 
-	private void leaveGame(PlayerWithState player) {
-		Map<String, PlayerWithState> newPlayersMap = this.players;
-		setTimerToLeave(player, newPlayersMap);
-	}
-
 	private boolean isAskingPlayer(String answer) {
 		return Objects.equals(answer,
 				this.players.values()
@@ -246,26 +245,44 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.players.values().forEach(PlayerWithState::inCompleteFuture);
 	}
 
+	private void setPlayersWhoFinishedGame(PlayerWithState playerWhoFinishedGame, PlayerState state) {
+		playerWhoFinishedGame.setState(state);
+		this.players.remove(playerWhoFinishedGame.getPlayer().getId());
+		this.playersWhoFinishedGame.add(playerWhoFinishedGame);
+		changeTurnIfGameFinished();
+	}
+
+	private void changeTurnIfGameFinished() {
+		if (Optional.ofNullable(this.players).map(Map::values)
+				.stream().count() == 1) {
+			this.players.values().stream().findFirst().ifPresent(player -> setPlayersWhoFinishedGame(player, LOSER));
+		}
+	}
+
 	private void startTimer() {
-		while (true) {
-			long start = currentTimeMillis();
-			boolean isQuestion = true;
-			while (this.players.values().stream().anyMatch(player -> player.getState() == READY)) {
-				long now = currentTimeMillis();
-				timer = maxTimeForQuestion - MILLISECONDS.toSeconds(now - start);
-				if (timer <= 0) {
-					isQuestion = false;
-					break;
+		try {
+			while (true) {
+				long start = currentTimeMillis();
+				boolean isQuestion = true;
+				while (this.players.values().stream().anyMatch(player -> player.getState() == READY)) {
+					long now = currentTimeMillis();
+					timer = maxTimeForQuestion - MILLISECONDS.toSeconds(now - start);
+					if (timer <= 0) {
+						isQuestion = false;
+						break;
+						}
+					}
+				start = currentTimeMillis();
+				while (this.players.values().stream().allMatch(player -> player.getState() != ASKING) && isQuestion) {
+					long now = currentTimeMillis();
+					timer = maxTimeForAnswer - MILLISECONDS.toSeconds(now - start);
+					if (timer < 0) {
+						break;
 					}
 				}
-			start = currentTimeMillis();
-			while (this.players.values().stream().allMatch(player -> player.getState() != ASKING) && isQuestion) {
-				long now = currentTimeMillis();
-				timer = maxTimeForAnswer - MILLISECONDS.toSeconds(now - start);
-				if (timer < 0) {
-					break;
-				}
 			}
+		} catch (Exception e) {
+			// do nothing
 		}
 	}
 }

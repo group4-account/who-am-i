@@ -33,7 +33,6 @@ public class PlayerServiceTest {
 	void init() {
 		playerRepository = Mockito.mock(PlayerRepository.class);
 		createPlayerMapper = new CreatePlayerMapper(passwordEncoder);
-		playerReadMapper = new PlayerReadMapper();
 		playerService = new PlayerServiceImpl(playerRepository, createPlayerMapper, playerReadMapper);
 	}
 

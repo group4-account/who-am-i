@@ -11,5 +11,6 @@ public class PlayerDto {
 
 	Integer id;
 
-	String email;
+	String token;
+	
 }

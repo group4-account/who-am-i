@@ -12,7 +12,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Optional.*;
+import static java.util.Optional.ofNullable;
 
 @Repository
 public class GameInMemoryRepository implements GameRepository {

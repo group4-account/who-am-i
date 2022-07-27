@@ -69,7 +69,7 @@ public final class SuggestingCharacters extends AbstractGameState {
         return Optional.of(this)
                 .filter(SuggestingCharacters::finished)
                 .map(SuggestingCharacters::assignCharacters)
-                .map(then -> new ProcessingQuestion(playersName.get(0), this.players))
+                .map(then -> new ProcessingQuestion(playersName.get(0), this.players, new ArrayList<>()))
                 .orElseThrow(() -> new GameException("Cannot start game"));
     }
 
