@@ -116,7 +116,7 @@ public class QNAHistoryRepositoryImpl implements QNAHistoryRepository{
                                 || player.getState() == PlayerState.GUESSING
                                 || player.getState() == PlayerState.GUESSED)
                 .findFirst()
-                .map(isGuess ? PlayerWithState::getGuess :PlayerWithState::getQuestion);
+                .map(isGuess ? PlayerWithState::getGuess : PlayerWithState::getQuestion);
 
         var answersList = new ArrayList<Answer>();
         answersList.addAll(question.Answers);
