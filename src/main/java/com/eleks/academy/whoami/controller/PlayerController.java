@@ -16,13 +16,13 @@ import javax.validation.Valid;
 import static org.springframework.http.ResponseEntity.status;
 
 @RestController
-@RequestMapping("/players")
+@RequestMapping("/users")
 @RequiredArgsConstructor
 public class PlayerController {
 
 	private final PlayerService playerService;
 
-	@PostMapping
+	@PostMapping("registration")
 	public ResponseEntity<PlayerDto> create(@Valid @RequestBody CreatePlayerDto player) {
 		return status(HttpStatus.CREATED).body(this.playerService.createPlayer(player));
 	}
