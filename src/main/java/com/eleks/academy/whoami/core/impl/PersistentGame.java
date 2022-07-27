@@ -6,6 +6,7 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.core.state.WaitingForPlayers;
+import com.eleks.academy.whoami.model.response.PlayerState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
@@ -82,7 +83,23 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void answerQuestion(String id, String answer) {
-        this.findPlayerWithState(id).ifPresent(player -> player.setAnswerQuestion(answer));
+        var player = this.findPlayerWithState(id).orElse(null);
+        if (player != null) {
+            if (player.getState() == PlayerState.ANSWERING_GUESS) {
+                player.setAnswerGuess(answer);
+            } else {
+                player.setAnswerQuestion(answer);
+            }
+        }
+    }
+
+    @Override
+    public void guessCharacter(String playerId, String message) {
+        if (this.getTurn().equals(playerId)){
+            this.findPlayerWithState(this.getTurn()).ifPresent(player -> player.setState(PlayerState.GUESSING));
+            this.findPlayerWithState(this.getTurn()).ifPresent(player -> player.setFirstGuess(message));
+        }
+        else throw new GameException("Not your turn");
     }
 
     @Override

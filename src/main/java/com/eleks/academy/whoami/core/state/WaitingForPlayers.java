@@ -69,6 +69,7 @@ public final class WaitingForPlayers extends AbstractGameState {
                             .isLeaving(false)
                             .currentAnswer(new CompletableFuture<>())
                             .questionFuture(new CompletableFuture<>())
+                            .guessFuture(new CompletableFuture<>())
                             .build()
                     );
         }

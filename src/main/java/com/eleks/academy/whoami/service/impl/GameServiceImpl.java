@@ -7,6 +7,7 @@ import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.PersistentGame;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.model.request.CharacterSuggestion;
+import com.eleks.academy.whoami.model.request.Message;
 import com.eleks.academy.whoami.model.request.NewGameRequest;
 import com.eleks.academy.whoami.model.request.QuestionAnswer;
 import com.eleks.academy.whoami.model.response.GameDetails;
@@ -163,7 +164,14 @@ public class GameServiceImpl implements GameService {
 	}
 
 	@Override
-	public void submitGuess(String id, String player, QuestionAnswer guess) {
+	public void submitGuess(String gameId, String player, String message) {
+		this.gameRepository.findById(gameId)
+				.ifPresent(game -> game.guessCharacter(player, message));
+
+		this.gameRepository.findById(gameId).stream()
+				.findFirst()
+				.map(SynchronousGame::getPlayersInGame)
+				.ifPresent(pwsl -> this.qnaHistoryRepository.AddQuestionRequest(new AddQuestionRequest(true, gameId, player, message), pwsl));
 
 	}
 
