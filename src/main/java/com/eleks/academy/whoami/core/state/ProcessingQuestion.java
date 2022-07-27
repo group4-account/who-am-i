@@ -214,7 +214,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		runAsync(() -> {
 			long start = System.currentTimeMillis();
 			timerToLeave = 1;
-			while (timerToLeave > 0) {
+			while (limit - TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis() - start) > 0) {
 				long now = System.currentTimeMillis();
 				timerToLeave = limit - TimeUnit.MILLISECONDS.toSeconds(now - start);
 			}
@@ -267,7 +267,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				while (this.players.values().stream().anyMatch(player -> player.getState() == READY)) {
 					long now = currentTimeMillis();
 					timer = maxTimeForQuestion - MILLISECONDS.toSeconds(now - start);
-					if (timer <= 0) {
+					if (maxTimeForAnswer - MILLISECONDS.toSeconds(now - start) <= 0) {
 						isQuestion = false;
 						break;
 						}
@@ -276,7 +276,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				while (this.players.values().stream().allMatch(player -> player.getState() != ASKING) && isQuestion) {
 					long now = currentTimeMillis();
 					timer = maxTimeForAnswer - MILLISECONDS.toSeconds(now - start);
-					if (timer < 0) {
+					if (maxTimeForAnswer - MILLISECONDS.toSeconds(now - start) <= 0) {
 						break;
 					}
 				}

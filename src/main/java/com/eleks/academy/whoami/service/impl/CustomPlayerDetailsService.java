@@ -1,5 +1,6 @@
 package com.eleks.academy.whoami.service.impl;
 
+import com.eleks.academy.whoami.core.exception.PlayerAuthorizationException;
 import com.eleks.academy.whoami.core.exception.PlayerCreationException;
 import com.eleks.academy.whoami.database.repository.PlayerRepository;
 import com.eleks.academy.whoami.dto.PlayersDetails;
@@ -21,7 +22,7 @@ public class CustomPlayerDetailsService implements UserDetailsService {
 	public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
 		return this.playerRepository.findByEmail(email)
 				.map(PlayersDetails::new)
-				.orElseThrow(() -> new PlayerCreationException("Player not found!"));
+				.orElseThrow(() -> new PlayerAuthorizationException("Player not found!"));
 	}
 
 }

@@ -1,6 +1,7 @@
 package com.eleks.academy.whoami.configuration;
 
 import com.eleks.academy.whoami.core.exception.ErrorResponse;
+import com.eleks.academy.whoami.core.exception.PlayerAuthorizationException;
 import com.eleks.academy.whoami.core.exception.PlayerCreationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -21,9 +22,9 @@ public class PlayerControllerAdvice extends ResponseEntityExceptionHandler {
 				.body(new ErrorResponse("Registration player failed !", List.of(e.getMessage())));
 	}
 
-	@ExceptionHandler(PlayerCreationException.class)
+	@ExceptionHandler(PlayerAuthorizationException.class)
 	@ResponseStatus(HttpStatus.BAD_REQUEST)
-	public ResponseEntity<Object> authorithationPlayerException(PlayerCreationException e) {
+	public ResponseEntity<Object> handlePlayerAuthorizationException(PlayerCreationException e) {
 		return ResponseEntity.badRequest()
 				.body(new ErrorResponse("Registration player failed !", List.of(e.getMessage())));
 	}
