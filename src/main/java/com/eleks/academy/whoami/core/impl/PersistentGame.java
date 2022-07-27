@@ -163,6 +163,8 @@ PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void removeFromGame(String gameId, String player) {
+        var removingPlayer = this.findPlayerWithState(id).orElse(null);
+        if (removingPlayer != null){
             this.turnLock.lock();
             try {
                 Optional.ofNullable(this.turns.poll())
@@ -171,6 +173,7 @@ PersistentGame implements Game, SynchronousGame {
             } finally {
                 this.turnLock.unlock();
             }
+        }
     }
 
     @Override
