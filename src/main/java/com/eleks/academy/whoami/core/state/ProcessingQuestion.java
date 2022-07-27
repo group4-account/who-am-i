@@ -100,8 +100,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				setTimerToLeave(currentPlayer, newPlayersMap);
 				List<String> playersList = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(playersList
-						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap);
+				var nextCurrentPlayerIndex = findCurrentPlayerIndex(playersList,
+						this.players.get(getCurrentTurn())) + 1 % playersList.size();
+				var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
+				return new ProcessingQuestion(nextCurrentPlayer, this.players);
 			} finally {
 				if (currentPlayer.getQuestionMessage().toString() != null) {
 					boolean finalIsGuess = isGuess;
