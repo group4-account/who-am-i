@@ -2,10 +2,7 @@ package com.eleks.academy.whoami.controller;
 
 import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
-import com.eleks.academy.whoami.model.request.CharacterSuggestion;
-import com.eleks.academy.whoami.model.request.Message;
-import com.eleks.academy.whoami.model.request.NewGameRequest;
-import com.eleks.academy.whoami.model.request.QuestionAnswer;
+import com.eleks.academy.whoami.model.request.*;
 import com.eleks.academy.whoami.model.response.GameDetails;
 import com.eleks.academy.whoami.model.response.GameLight;
 import com.eleks.academy.whoami.model.response.TurnDetails;
@@ -106,7 +103,7 @@ public class GameController {
 	@PostMapping("/{id}/guess")
 	public void submitGuess(@PathVariable("id") String id,
 							@RequestHeader(PLAYER) String player,
-							@Valid @RequestBody Message message) {
+							@Valid @RequestBody GuessMessage message) {
 		this.gameService.submitGuess(id, player, message.getMessage());
 	}
 
