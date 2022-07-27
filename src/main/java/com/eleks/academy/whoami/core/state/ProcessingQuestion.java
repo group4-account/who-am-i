@@ -39,13 +39,13 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.playersWhoFinishedGame = playersWhoFinishedGame;
 		final String currentPlayer = currentPlayer1;
  		this.players.get(currentPlayer).setState(ASKING);
-		this.players.values().stream()
-				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
-				.forEach(player -> player.setState(READY));
 		this.players.values()
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(playerWithState -> setPlayersWhoFinishedGame(playerWithState, INACTIVE));
+		this.players.values().stream()
+				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
+				.forEach(player -> player.setState(READY));
 		runAsync(() -> this.makeTurn(new Answer(null)));
 	}
 
@@ -97,28 +97,28 @@ public final class ProcessingQuestion extends AbstractGameState {
 		var isGuess = false;
 		try {
 			try {
-				currentPlayer.getQuestionMessage().get(maxTimeForQuestion, SECONDS).toString();
+				currentPlayer.getQuestionMessage().get(maxTimeForQuestion, SECONDS);
 				isGuess = players.values().stream().anyMatch(p -> p.getState() == GUESSING || p.getState() == GUESSED);
 				currentPlayer.setState(isGuess ? GUESSED : ASKED);
 			} catch (TimeoutException e) {
-				Map<String, PlayerWithState> newPlayersMap = this.players;
-				setTimerToLeave(currentPlayer, newPlayersMap);
-				List<String> playersList = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(playersList
-						.get(findCurrentPlayerIndex(playersList, currentPlayer)), newPlayersMap, this.playersWhoFinishedGame);
+				var nextCurrentPlayerIndex = findCurrentPlayerIndex(players.keySet().stream().toList(),
+						currentPlayer);
+				var nextCurrentPlayer = players.values().stream().toList().get(nextCurrentPlayerIndex);
+				this.setPlayersWhoFinishedGame(currentPlayer, INACTIVE);
+				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame);
 			} finally {
-				if (currentPlayer.getQuestionMessage().toString() != null) {
-					boolean finalIsGuess = isGuess;
-					this.players.values().stream()
-							.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
-									currentPlayer.getPlayer().getId()))
-							.forEach(player -> player.setState(finalIsGuess ? ANSWERING_GUESS : ANSWERING));
-				}
+
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
 		}
-
+		if (currentPlayer.getQuestionMessage().toString() != null) {
+			boolean finalIsGuess = isGuess;
+			this.players.values().stream()
+					.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(),
+							currentPlayer.getPlayer().getId()))
+					.forEach(player -> player.setState(finalIsGuess ? ANSWERING_GUESS : ANSWERING));
+		}
 		var stateToBeChecked = isGuess ? ANSWERING_GUESS : ANSWERING;
 		boolean finalIsGuess = isGuess;
 
@@ -159,7 +159,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				var nextCurrentPlayerIndex = findCurrentPlayerIndex(players.keySet().stream().toList(),
 						currentPlayer);
 				var nextCurrentPlayer = players.values().stream().toList().get(nextCurrentPlayerIndex);
-				setPlayersWhoFinishedGame(currentPlayer, WINNER);
+				this.setPlayersWhoFinishedGame(currentPlayer, WINNER);
 				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame);
 			}
 		} else {
@@ -252,9 +252,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private void changeTurnIfGameFinished() {
-		if (Optional.ofNullable(this.players).map(Map::values)
-				.stream().count() == 1) {
-			this.players.values().stream().findFirst().ifPresent(player -> setPlayersWhoFinishedGame(player, LOSER));
+		if (ofNullable(this.players).map(Map::size).map(size -> size == 1).orElse(false)) {
+			this.players.values().stream().
+					findFirst()
+					.ifPresent(player -> this.setPlayersWhoFinishedGame(player, LOSER));
 		}
 	}
 
