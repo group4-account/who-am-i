@@ -9,12 +9,13 @@ game:
 players:
   min: 2
   max: 4
+jwt_secret: secret
+jwt_issuer: who-i-am
 spring:
     datasource:
       url: jdbc:postgresql://ec2-54-229-217-195.eu-west-1.compute.amazonaws.com:5432/dac7okrn1q4c25
       username: zjjwekeoaqdllc
       password: 8b191380acc873b37c39d51e3e645c95937c5a469e6daa844016b1f831f31369
-      driver-class-name: org.postgresql.Driver
     jpa:
       properties.hibernate:
         show_sql: true
