@@ -47,7 +47,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(playerWithState -> setPlayersWhoFinishedGame(playerWithState, INACTIVE));
 		runAsync(() -> this.makeTurn(new Answer(null)));
-		runAsync(this::startTimer);
 	}
 
 	@Override

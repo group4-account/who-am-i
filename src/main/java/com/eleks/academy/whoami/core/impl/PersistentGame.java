@@ -11,6 +11,7 @@ import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.time.Instant;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -18,7 +19,8 @@ import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Function;
 
-public class PersistentGame implements Game, SynchronousGame {
+public class
+PersistentGame implements Game, SynchronousGame {
     private int maxPlayers;
     private final Lock turnLock = new ReentrantLock();
     private final String id;
@@ -75,7 +77,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void askQuestion(String playerId, String message) {
-        if (this.getTurn().equals(playerId)){
+        if (Objects.equals(this.getTurn(), playerId)){
             this.findPlayerWithState(this.getTurn()).ifPresent(player -> player.setFirstQuestion(message));
         }
         else throw new GameException("Not your turn");
@@ -93,7 +95,7 @@ public class PersistentGame implements Game, SynchronousGame {
 
     @Override
     public void guessCharacter(String playerId, String message) {
-        if (this.getTurn().equals(playerId)){
+        if (Objects.equals(this.getTurn(), playerId)){
             this.findPlayerWithState(this.getTurn()).ifPresent(player -> player.setState(PlayerState.GUESSING));
             this.findPlayerWithState(this.getTurn()).ifPresent(player -> player.setFirstGuess(message));
         }
