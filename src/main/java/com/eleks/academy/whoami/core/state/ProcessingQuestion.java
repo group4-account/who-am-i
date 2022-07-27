@@ -95,7 +95,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 				currentPlayer.getQuestionMessage().get(maxTimeForQuestion, SECONDS).toString();
 				isGuess = players.values().stream().anyMatch(p -> p.getState() == GUESSING || p.getState() == GUESSED);
-				currentPlayer.setState(isGuess ? GUESSED : ASKED);
+				currentPlayer.setState(isGuess ? GUESSING : ASKED);
 			} catch (TimeoutException e) {
 				Map<String, PlayerWithState> newPlayersMap = this.players;
 				setTimerToLeave(currentPlayer, newPlayersMap);
