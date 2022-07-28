@@ -44,7 +44,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.playersWhoFinishedGame = playersWhoFinishedGame;
 		final String currentPlayer = currentPlayer1;
 		this.players.get(currentPlayer).setState(ASKING);
-		this.players.values()
+		new HashMap<>(players).values()
 				.stream()
 				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
 				.forEach(playerWithState -> {
