@@ -265,23 +265,26 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private void changeTurnIfGameFinished() {
-		if (ofNullable(this.players)
-				.map(Map::size)
-				.map(size -> size == 1)
-				.orElse(false)) {
+		if (isGameFinished()) {
 			this.players.values().stream().
 					findFirst()
 					.ifPresent(player -> {
 						player.setState(LOSER);
 						try {
-							SECONDS.sleep(3);
+							SECONDS.sleep(10);
 						} catch (InterruptedException e) {
 							e.printStackTrace();
 						}
 						this.players.remove(player.getPlayer().getId());
-						this.setPlayersWhoFinishedGame(player);
 					});
 		}
+	}
+
+	private Boolean isGameFinished() {
+		return ofNullable(this.players)
+				.map(Map::size)
+				.map(size -> size == 1)
+				.orElse(false);
 	}
 
 	private void startTimer() {
