@@ -273,6 +273,11 @@ public final class ProcessingQuestion extends AbstractGameState {
 					findFirst()
 					.ifPresent(player -> {
 						player.setState(LOSER);
+						try {
+							SECONDS.sleep(3);
+						} catch (InterruptedException e) {
+							e.printStackTrace();
+						}
 						this.players.remove(player.getPlayer().getId());
 						this.setPlayersWhoFinishedGame(player);
 					});
