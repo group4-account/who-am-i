@@ -59,7 +59,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 			this.makeTurn(new Answer(null));
 		});
 		if (!this.timerIsCalled) {
-			this.timerIsCalled = true;
 			runAsync(this::startTimer);
 		}
 	}
@@ -121,7 +120,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				currentPlayer.setState(isGuess ? GUESSED : ASKED);
 			} catch (TimeoutException e) {
 				PlayerWithState nextCurrentPlayer = removePlayerAndSetState(currentPlayer, INACTIVE);
-				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, this.timerIsCalled);
+				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, true);
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -181,10 +180,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 			if (!anyOneGuessed || (anyOneGuessed && booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size())) {
 				List<String> collect = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame, this.timerIsCalled);
+				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame, true);
 			} else {
 				PlayerWithState nextCurrentPlayer = removePlayerAndSetState(currentPlayer, WINNER);
-				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, this.timerIsCalled);
+				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, true);
 			}
 		} else {
 
@@ -193,9 +192,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 					.collect(partitioningBy(playerWithState -> playerWithState.getAnswer() == NO));
 			if (booleanPlayersAnswerMap.get(FALSE).size() <= booleanPlayersAnswerMap.get(TRUE).size()) {
 				List<String> collect = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame, this.timerIsCalled);
+				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame, true);
 			} else {
-				return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, this.timerIsCalled);
+				return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, true);
 			}
 		}
 	}
@@ -228,7 +227,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
 		if (isAskingPlayer(player)) {
 			setTimerToLeave(removingPlayer, newPlayersMap);
-			return new ProcessingQuestion(nextCurrentPlayer, this.players, this.playersWhoFinishedGame, this.timerIsCalled);
+			return new ProcessingQuestion(nextCurrentPlayer, this.players, this.playersWhoFinishedGame, true);
 		} else {
 			setTimerToLeave(removingPlayer, newPlayersMap);
 			return this;
@@ -280,7 +279,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@SneakyThrows
 	private void setPlayersWhoFinishedGame(PlayerWithState playerWhoFinishedGame) {
 		this.playersWhoFinishedGame.put(playerWhoFinishedGame.getPlayer().getId(), playerWhoFinishedGame);
-		SECONDS.sleep(5);
+		SECONDS.sleep(2);
 		this.playersWhoFinishedGame.remove(playerWhoFinishedGame.getPlayer().getId());
 		changeTurnIfGameFinished();
 	}
