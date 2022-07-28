@@ -297,30 +297,25 @@ public final class ProcessingQuestion extends AbstractGameState {
 	}
 
 	private void startTimer() {
-		try {
-			while (true) {
-				long start = currentTimeMillis();
-				boolean isQuestion = true;
-				while (this.players.values().stream().anyMatch(player -> player.getState() == READY)) {
-					long now = currentTimeMillis();
-					timer = maxTimeForQuestion - MILLISECONDS.toSeconds(now - start);
-					if (timer <= 0) {
-						isQuestion = false;
-						break;
-					}
-				}
-				start = currentTimeMillis();
-				while (this.players.values().stream().allMatch(player -> player.getState() != ASKING ||
-						player.getState() != GUESSING) && isQuestion) {
-					long now = currentTimeMillis();
-					timer = maxTimeForAnswer - MILLISECONDS.toSeconds(now - start);
-					if (timer <= 0) {
-						break;
-					}
+		while (timer > -20 && this.players != null && this.players.size() != 0) {
+			long start = currentTimeMillis();
+			boolean isQuestion = true;
+			while (this.players.values().stream().anyMatch(player -> player.getState() == READY)) {
+				long now = currentTimeMillis();
+				timer = maxTimeForQuestion - MILLISECONDS.toSeconds(now - start);
+				if (timer <= 0) {
+					isQuestion = false;
+					break;
 				}
 			}
-		} catch (Exception e) {
-			// do nothing
+			start = currentTimeMillis();
+			while (this.players.values().stream().allMatch(player -> player.getState() != ASKING) && isQuestion) {
+				long now = currentTimeMillis();
+				timer = maxTimeForAnswer - MILLISECONDS.toSeconds(now - start);
+				if (timer <= 0) {
+					break;
+				}
+			}
 		}
 	}
 }
