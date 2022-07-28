@@ -1,7 +1,6 @@
 package com.eleks.academy.whoami.service.impl;
 
 import com.eleks.academy.whoami.core.exception.PlayerAuthorizationException;
-import com.eleks.academy.whoami.core.exception.PlayerCreationException;
 import com.eleks.academy.whoami.database.repository.PlayerRepository;
 import com.eleks.academy.whoami.dto.PlayersDetails;
 import org.springframework.security.core.userdetails.UserDetails;
