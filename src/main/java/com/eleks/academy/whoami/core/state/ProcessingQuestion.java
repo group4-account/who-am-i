@@ -146,11 +146,12 @@ public final class ProcessingQuestion extends AbstractGameState {
 							player1.getPlayer().zeroTimePlayersBeingInactive();
 						} catch (TimeoutException e) {
 							player1.getPlayer().incrementBeingInactiveCount();
+
+						} finally {
 							if (!finalIsGuess) {
 								player1.setAnswer(NOT_SURE);
 								player1.setState(ANSWERED);
 							}
-						} finally {
 							player1.setState(finalIsGuess ? ANSWERED_GUESS : ANSWERED);
 							if (finalIsGuess && !player1.getCurrentGuess().isDone())
 								player1.setGuess("PLAYER WAS INACTIVE");
