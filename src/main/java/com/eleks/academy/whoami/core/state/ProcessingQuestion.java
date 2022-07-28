@@ -137,7 +137,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 		boolean finalIsGuess = isGuess;
 
 		this.players.values()
-				.parallelStream()
+				.stream()
+				.parallel()
 				.filter(playerWithState -> playerWithState.getState() == stateToBeChecked)
 				.forEach(player1 -> {
 					try {
