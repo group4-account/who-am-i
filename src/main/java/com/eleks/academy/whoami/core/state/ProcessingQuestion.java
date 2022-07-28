@@ -34,10 +34,13 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private volatile long timerToLeave;
 	private final int maxTimeForQuestion = 60;
 	private final int maxTimeForAnswer = 20;
-	static boolean timerIsCalled = false;
-	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players, Map<String, PlayerWithState> playersWhoFinishedGame) {
+	boolean timerIsCalled;
+
+	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players, Map<String,
+			PlayerWithState> playersWhoFinishedGame, boolean timerIsCalled) {
 		super(players.size(), players.size());
 		this.players = players;
+		this.timerIsCalled = timerIsCalled;
 		this.playersWhoFinishedGame = playersWhoFinishedGame;
 		final String currentPlayer = currentPlayer1;
 		this.players.get(currentPlayer).setState(ASKING);
@@ -55,8 +58,8 @@ public final class ProcessingQuestion extends AbstractGameState {
 		runAsync(() -> {
 			this.makeTurn(new Answer(null));
 		});
-		if (!timerIsCalled) {
-			timerIsCalled = true;
+		if (!this.timerIsCalled) {
+			this.timerIsCalled = true;
 			runAsync(this::startTimer);
 		}
 	}
@@ -118,7 +121,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				currentPlayer.setState(isGuess ? GUESSED : ASKED);
 			} catch (TimeoutException e) {
 				PlayerWithState nextCurrentPlayer = removePlayerAndSetState(currentPlayer, INACTIVE);
-				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame);
+				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, this.timerIsCalled);
 			}
 		} catch (InterruptedException | ExecutionException e) {
 			e.printStackTrace();
@@ -166,10 +169,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 			if (!anyOneGuessed || (anyOneGuessed && booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size())) {
 				List<String> collect = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame);
+				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame, this.timerIsCalled);
 			} else {
 				PlayerWithState nextCurrentPlayer = removePlayerAndSetState(currentPlayer, WINNER);
-				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame);
+				return new ProcessingQuestion(nextCurrentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, this.timerIsCalled);
 			}
 		} else {
 
@@ -178,9 +181,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 					.collect(partitioningBy(playerWithState -> playerWithState.getAnswer() == NO));
 			if (booleanPlayersAnswerMap.get(FALSE).size() <= booleanPlayersAnswerMap.get(TRUE).size()) {
 				List<String> collect = new ArrayList<>(this.players.keySet());
-				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame);
+				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame, this.timerIsCalled);
 			} else {
-				return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame);
+				return new ProcessingQuestion(currentPlayer.getPlayer().getId(), players, this.playersWhoFinishedGame, this.timerIsCalled);
 			}
 		}
 	}
@@ -213,7 +216,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
 		if (isAskingPlayer(player)) {
 			setTimerToLeave(removingPlayer, newPlayersMap);
-			return new ProcessingQuestion(nextCurrentPlayer, this.players, this.playersWhoFinishedGame);
+			return new ProcessingQuestion(nextCurrentPlayer, this.players, this.playersWhoFinishedGame, this.timerIsCalled);
 		} else {
 			setTimerToLeave(removingPlayer, newPlayersMap);
 			return this;
