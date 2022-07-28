@@ -50,7 +50,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				.forEach(playerWithState -> {
 					playerWithState.setState(INACTIVE);
 					extracted(playerWithState);
-					setPlayersWhoFinishedGame(playerWithState);
+					runAsync(() -> this.setPlayersWhoFinishedGame(playerWithState));
 				});
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
@@ -283,7 +283,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@SneakyThrows
 	private void setPlayersWhoFinishedGame(PlayerWithState playerWhoFinishedGame) {
 		this.playersWhoFinishedGame.put(playerWhoFinishedGame.getPlayer().getId(), playerWhoFinishedGame);
-		MILLISECONDS.sleep(750);
+		MILLISECONDS.sleep(1000);
 		this.playersWhoFinishedGame.remove(playerWhoFinishedGame.getPlayer().getId());
 		changeTurnIfGameFinished();
 	}
