@@ -1,6 +1,7 @@
 package com.eleks.academy.whoami.core;
 
 import com.eleks.academy.whoami.core.impl.Answer;
+import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.core.state.GameState;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
@@ -9,7 +10,7 @@ import java.util.Optional;
 
 public interface SynchronousGame {
 
-	Optional<SynchronousPlayer> findPlayer(String player);
+	Optional<PersistentPlayer> findPlayer(String player);
 
 	Optional<PlayerWithState> findPlayerWithState(String player);
 
