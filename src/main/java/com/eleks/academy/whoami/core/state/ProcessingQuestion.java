@@ -28,7 +28,7 @@ import static java.util.stream.Collectors.toList;
 
 public final class ProcessingQuestion extends AbstractGameState {
 
-	private Map<String, PlayerWithState> players;
+	private volatile Map<String, PlayerWithState> players;
 	private final Map<String, PlayerWithState> playersWhoFinishedGame;
 	private volatile long timer;
 	private volatile long timerToLeave;
@@ -149,8 +149,11 @@ public final class ProcessingQuestion extends AbstractGameState {
 
 						} finally {
 							if (!finalIsGuess) {
-								player1.setAnswer(NOT_SURE);
-								player1.setState(ANSWERED);
+								this.players.values().forEach(player -> {
+									player.setAnswer(NOT_SURE);
+									player.setState(ANSWERED);
+								});
+
 							}
 							player1.setState(finalIsGuess ? ANSWERED_GUESS : ANSWERED);
 							if (finalIsGuess && !player1.getCurrentGuess().isDone())
