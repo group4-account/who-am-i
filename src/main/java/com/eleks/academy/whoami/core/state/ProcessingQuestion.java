@@ -155,7 +155,15 @@ public final class ProcessingQuestion extends AbstractGameState {
 						throw new RuntimeException(e);
 					}
 				});
+		if (!finalIsGuess) {
+			this.players.values()
+					.stream().filter(player -> player.getState() == ANSWERING)
+					.forEach(player -> {
+						player.setAnswer(NOT_SURE);
+						player.setState(ANSWERED);
+					});
 
+		}
 		if (isGuess) {
 			Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
 					.filter(player -> (player.getState() == ANSWERING_GUESS
@@ -165,15 +173,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 					.collect(partitioningBy(playerWithState -> playerWithState.getGuess().equalsIgnoreCase("NO")));
 
 			var anyOneGuessed = booleanPlayersAnswerMap.get(FALSE).size() > 0 || booleanPlayersAnswerMap.get(TRUE).size() > 0;
-			if (!finalIsGuess) {
-				this.players.values()
-						.stream().filter(player -> player.getState() == ANSWERING)
-						.forEach(player -> {
-							player.setAnswer(NOT_SURE);
-							player.setState(ANSWERED);
-						});
 
-			}
 			if (!anyOneGuessed || (anyOneGuessed && booleanPlayersAnswerMap.get(FALSE).size() < booleanPlayersAnswerMap.get(TRUE).size())) {
 				List<String> collect = new ArrayList<>(this.players.keySet());
 				return new ProcessingQuestion(collect.get(findCurrentPlayerIndex(collect, currentPlayer)), players, this.playersWhoFinishedGame, this.timerIsCalled);
@@ -223,11 +223,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 		var nextCurrentPlayer = playersList.get(nextCurrentPlayerIndex);
 		if (isAskingPlayer(player)) {
 			setTimerToLeave(removingPlayer, newPlayersMap);
-			changeTurnIfGameFinished();
 			return new ProcessingQuestion(nextCurrentPlayer, this.players, this.playersWhoFinishedGame, this.timerIsCalled);
 		} else {
 			setTimerToLeave(removingPlayer, newPlayersMap);
-			changeTurnIfGameFinished();
 			return this;
 		}
 	}
