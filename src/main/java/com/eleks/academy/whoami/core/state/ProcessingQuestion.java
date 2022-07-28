@@ -34,7 +34,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	private volatile long timerToLeave;
 	private final int maxTimeForQuestion = 60;
 	private final int maxTimeForAnswer = 20;
-
+	static boolean timerIsCalled = false;
 	public ProcessingQuestion(String currentPlayer1, Map<String, PlayerWithState> players, Map<String, PlayerWithState> playersWhoFinishedGame) {
 		super(players.size(), players.size());
 		this.players = players;
@@ -52,7 +52,13 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
-		runAsync(() -> this.makeTurn(new Answer(null)));
+		runAsync(() -> {
+			this.makeTurn(new Answer(null));
+		});
+		if (!timerIsCalled) {
+			timerIsCalled = true;
+			runAsync(this::startTimer);
+		}
 	}
 
 	@Override
