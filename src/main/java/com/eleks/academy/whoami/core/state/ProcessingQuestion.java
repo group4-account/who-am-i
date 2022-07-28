@@ -44,14 +44,6 @@ public final class ProcessingQuestion extends AbstractGameState {
 		this.playersWhoFinishedGame = playersWhoFinishedGame;
 		final String currentPlayer = currentPlayer1;
 		this.players.get(currentPlayer).setState(ASKING);
-		this.players.values()
-				.stream()
-				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
-				.forEach(playerWithState -> {
-					playerWithState.setState(INACTIVE);
-					this.players.remove(playerWithState.getPlayer().getId());
-					setPlayersWhoFinishedGame(playerWithState);
-				});
 		this.players.values().stream()
 				.filter(playerWithState -> !Objects.equals(playerWithState.getPlayer().getId(), currentPlayer))
 				.forEach(player -> player.setState(READY));
@@ -168,6 +160,14 @@ public final class ProcessingQuestion extends AbstractGameState {
 					});
 
 		}
+		this.players.values()
+				.stream()
+				.filter(playerWithState -> playerWithState.getPlayer().getBeingInActiveCount() == 3)
+				.forEach(playerWithState -> {
+					playerWithState.setState(INACTIVE);
+					this.players.remove(playerWithState.getPlayer().getId());
+					setPlayersWhoFinishedGame(playerWithState);
+				});
 		if (isGuess) {
 			Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
 					.filter(player -> (player.getState() == ANSWERING_GUESS
