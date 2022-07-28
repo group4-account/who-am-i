@@ -259,7 +259,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@SneakyThrows
 	private void setPlayersWhoFinishedGame(PlayerWithState playerWhoFinishedGame) {
 		this.playersWhoFinishedGame.put(playerWhoFinishedGame.getPlayer().getId(), playerWhoFinishedGame);
-		SECONDS.sleep(3);
+		SECONDS.sleep(5);
 		this.playersWhoFinishedGame.remove(playerWhoFinishedGame.getPlayer().getId());
 		changeTurnIfGameFinished();
 	}
