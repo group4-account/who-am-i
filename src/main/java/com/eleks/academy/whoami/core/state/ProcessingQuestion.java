@@ -269,7 +269,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 			this.players.values().stream().
 					findFirst()
 					.ifPresent(player -> {
-						player.setState(LOSER);
+						player.setState(LOOSER);
 						try {
 							SECONDS.sleep(10);
 						} catch (InterruptedException e) {
