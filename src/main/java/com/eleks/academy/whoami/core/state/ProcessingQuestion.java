@@ -304,7 +304,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 				while (this.players.values().stream().anyMatch(player -> player.getState() == READY)) {
 					long now = currentTimeMillis();
 					timer = maxTimeForQuestion - MILLISECONDS.toSeconds(now - start);
-					if (maxTimeForAnswer - MILLISECONDS.toSeconds(now - start) <= 0) {
+					if (timer <= 0) {
 						isQuestion = false;
 						break;
 					}
@@ -314,7 +314,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 						player.getState() != GUESSING) && isQuestion) {
 					long now = currentTimeMillis();
 					timer = maxTimeForAnswer - MILLISECONDS.toSeconds(now - start);
-					if (maxTimeForAnswer - MILLISECONDS.toSeconds(now - start) <= 0) {
+					if (timer <= 0) {
 						break;
 					}
 				}
