@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
 import java.time.ZonedDateTime;
 import java.util.Date;
 
-@Configuration
 @Component
 public class JWTUtils {
 
