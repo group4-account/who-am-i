@@ -4,10 +4,12 @@ import com.eleks.academy.whoami.core.SynchronousPlayer;
 import com.eleks.academy.whoami.core.exception.GameException;
 import com.eleks.academy.whoami.core.impl.Answer;
 import com.eleks.academy.whoami.core.impl.GameCharacter;
+import com.eleks.academy.whoami.core.impl.PersistentPlayer;
 import com.eleks.academy.whoami.core.impl.StartGameAnswer;
 import com.eleks.academy.whoami.model.response.PlayerWithState;
 
 import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -69,12 +71,12 @@ public final class SuggestingCharacters extends AbstractGameState {
         return Optional.of(this)
                 .filter(SuggestingCharacters::finished)
                 .map(SuggestingCharacters::assignCharacters)
-                .map(then -> new ProcessingQuestion(playersName.get(0), this.players, new ArrayList<>()))
+                .map(then -> new ProcessingQuestion(playersName.get(0), this.players, new ConcurrentHashMap<>()))
                 .orElseThrow(() -> new GameException("Cannot start game"));
     }
 
     @Override
-    public Optional<SynchronousPlayer> findPlayer(String player) {
+    public Optional<PersistentPlayer> findPlayer(String player) {
         return Optional.ofNullable(this.players.get(player))
                 .map(PlayerWithState::getPlayer);
     }
