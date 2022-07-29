@@ -43,18 +43,4 @@ public class PlayerControllerTest {
 				);
 	}
 
-	@Test
-	void failCreate() throws Exception {
-		mockMvc.perform(post("/users/registration")
-						.contentType(MediaType.APPLICATION_JSON)
-						.content("""
-								{
-								    "username": "Test_",
-								    "email": "test@gmail.com",
-								    "password": "AA45aa$aad"
-								}"""))
-				.andExpect(
-						status().isBadRequest()
-				);
-	}
 }

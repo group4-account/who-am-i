@@ -177,7 +177,7 @@ class GameServiceTest {
 
         Thread thread = new Thread(task2);
         thread.start();
-        Thread.sleep(2000);
+        Thread.sleep(500);
         Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().stream()
