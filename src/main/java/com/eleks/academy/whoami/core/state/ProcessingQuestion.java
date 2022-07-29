@@ -145,6 +145,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 						try {
 							GetPlayerAnswerOnQuestionOrGuess(player1, finalIsGuess);
 							player1.getPlayer().zeroTimePlayersBeingInactive();
+							player1.setState(ANSWERED);
 						} catch (TimeoutException e) {
 							this.players.values()
 									.stream().filter(player -> player.getState() == ANSWERING && !player.getCurrentAnswer().isDone())
@@ -276,7 +277,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@SneakyThrows
 	private void setPlayersWhoFinishedGame(PlayerWithState playerWhoFinishedGame) {
 		this.playersWhoFinishedGame.put(playerWhoFinishedGame.getPlayer().getId(), playerWhoFinishedGame);
-		SECONDS.sleep(5);
+		SECONDS.sleep(2);
 		this.playersWhoFinishedGame.remove(playerWhoFinishedGame.getPlayer().getId());
 		changeTurnIfGameFinished();
 	}
