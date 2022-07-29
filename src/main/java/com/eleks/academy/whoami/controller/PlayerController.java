@@ -28,7 +28,7 @@ public class PlayerController {
 		return status(HttpStatus.CREATED).body(this.playerService.createPlayer(player));
 	}
 
-	@PostMapping("/login")
+	@PostMapping("/authorisation")
 	public ResponseEntity<ResponsePlayerDto> create(@Valid @RequestBody AuthenticationDTO player) {
 		return status(HttpStatus.ACCEPTED).body(this.playerService.loginPlayer(player));
 	}
