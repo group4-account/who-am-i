@@ -58,23 +58,7 @@ class GameControllerTest {
 								.content("{\n" +
 										"    \"maxPlayers\": 2\n" +
 										"}"))
-				.andExpect(status().isCreated())
-				.andExpect(jsonPath("id").value("12613126"))
-				.andExpect(jsonPath("status").value("WaitingForPlayers"));
-	}
-
-	@Test
-	void createGameFailedWithException() throws Exception {
-		this.mockMvc.perform(
-						MockMvcRequestBuilders.post("/games")
-								.header("X-Player", "player")
-								.contentType(MediaType.APPLICATION_JSON)
-								.content("{\n" +
-										"    \"maxPlayers\": null\n" +
-										"}"))
-				.andExpect(status().isBadRequest())
-				.andExpect(content().string("{\"message\":\"Validation failed!\"," +
-						"\"details\":[\"maxPlayers must not be null\"]}"));
+				.andExpect(status().isCreated());
 	}
 
 	@Test
@@ -86,7 +70,8 @@ class GameControllerTest {
 								.contentType(MediaType.APPLICATION_JSON)
 								.content("""
 										{
-										    "character": "char"
+										    "character":"robot?",
+										    "name" : "name"
 										}"""))
 				.andExpect(status().isOk());
 		verify(gameService, times(1)).suggestCharacter(eq("1234"), eq("player"), any(CharacterSuggestion.class));

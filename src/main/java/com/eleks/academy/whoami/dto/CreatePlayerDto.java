@@ -27,8 +27,5 @@ public class CreatePlayerDto {
 	String email;
 
 	@NotBlank
-	@Pattern(regexp = "^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()+~+])[A-Za-z\\d!@#$%^&*()+~+]{8,127}$",
-			message = "The password shall contain at least 8 symbols (max 127):" +
-					" min 1 upper-case, 1 lower-case letter, special symbol and number")
 	String password;
 }

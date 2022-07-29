@@ -1,5 +1,6 @@
 package com.eleks.academy.whoami.controller;
 
+import com.eleks.academy.whoami.configuration.PlayerControllerAdvice;
 import com.eleks.academy.whoami.service.PlayerService;
 import com.eleks.academy.whoami.service.impl.PlayerServiceImpl;
 import lombok.RequiredArgsConstructor;
@@ -23,12 +24,13 @@ public class PlayerControllerTest {
 
 	@BeforeEach
 	public void setMockMvc() {
-		mockMvc = MockMvcBuilders.standaloneSetup(playerController).build();
+		mockMvc = MockMvcBuilders.standaloneSetup(playerController)
+				.setControllerAdvice(new PlayerControllerAdvice()).build();
 	}
 
 	@Test
 	void create() throws Exception {
-		mockMvc.perform(post("/players")
+		mockMvc.perform(post("/users/registration")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{
@@ -43,7 +45,7 @@ public class PlayerControllerTest {
 
 	@Test
 	void failCreate() throws Exception {
-		mockMvc.perform(post("/players")
+		mockMvc.perform(post("/users/registration")
 						.contentType(MediaType.APPLICATION_JSON)
 						.content("""
 								{

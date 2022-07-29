@@ -70,11 +70,13 @@ class GameServiceTest {
     void setStateInSuggestCharacters() {
         final String player = "Player-1";
         final String player1 = "Player-2";
+        final String player2 = "Player-3";
         final PlayerState previousState = PlayerState.NOT_READY;
         final PlayerState updateState = PlayerState.READY;
         CharacterSuggestion character = new CharacterSuggestion("char", null);
         gameService.enrollToGame(gameId, player);
         gameService.enrollToGame(gameId, player1);
+        gameService.enrollToGame(gameId, player2);
         PlayerState playerState = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().get(0).getState();
@@ -166,7 +168,7 @@ class GameServiceTest {
         Runnable task2 = () -> {
             try {
                 Thread.sleep(1000);
-                gameService.askQuestion(gameId, player3, question);
+                gameService.askQuestion(gameId, player2, question);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -180,9 +182,9 @@ class GameServiceTest {
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().stream()
                 .collect(Collectors.toMap(a -> a.getPlayer().getId(), Function.identity()));
-        assertEquals(player3, this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
+        assertEquals(player2, this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
         assertNotNull(playerWithStateMap.get(player3).getPlayer());
-        assertEquals(question, playerWithStateMap.get(player3).getPlayer());
+        assertEquals(question, playerWithStateMap.get(player2).getQuestion());
 
     }
     @Test
@@ -223,7 +225,7 @@ class GameServiceTest {
         Runnable task2 = () -> {
             try {
                 Thread.sleep(100);
-                gameService.askQuestion(gameId, player3, question);
+                gameService.askQuestion(gameId, "host", question);
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
@@ -253,33 +255,21 @@ class GameServiceTest {
                 e.printStackTrace();
             }
         };
-        Runnable task4 = () -> {
-            try {
-                Thread.sleep(100);
-                gameService.answerQuestion(gameId, player2, answer2.name());
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        };
-        Thread thread4 = new Thread(task4);
-        thread4.start();
+
         Thread thread3 = new Thread(task3);
          thread = new Thread(task2);
         thread.start();
         thread3.start();
-        Thread.sleep(200);
+        Thread.sleep(500);
         Map<String, PlayerWithState> playerWithStateMap = this.gameRepository.findById(gameId)
                 .filter(game -> game.findPlayer(player).isPresent())
                 .map(GameDetails::of).get().getPlayers().stream()
                 .collect(Collectors.toMap(a -> a.getPlayer().getId(), Function.identity()));
-        assertEquals(player3, this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
+        assertEquals(player2, this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
         assertNotNull(playerWithStateMap.get(player3).getPlayer());
-        assertEquals(question, playerWithStateMap.get(player3).getQuestion());
+        assertEquals(question, playerWithStateMap.get(player2).getQuestion());
         assertEquals(answer, playerWithStateMap.get(player).getAnswer());
         assertEquals(answer1, playerWithStateMap.get(player1).getAnswer());
-        assertEquals(answer2, playerWithStateMap.get(player2).getAnswer());
-        Thread.sleep(200);
-        System.out.println(this.gameService.findByIdAndPlayer(gameId,player3).get().getCurrentTurn());
     }
     @Test
     void createGame() {
