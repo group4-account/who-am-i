@@ -1,5 +1,6 @@
 package com.eleks.academy.whoami.controller;
 
+import com.eleks.academy.whoami.dto.AuthenticationDTO;
 import com.eleks.academy.whoami.dto.CreatePlayerDto;
 import com.eleks.academy.whoami.dto.PlayerDto;
 import com.eleks.academy.whoami.service.PlayerService;
@@ -22,8 +23,13 @@ public class PlayerController {
 
 	private final PlayerService playerService;
 
-	@PostMapping("registration")
+	@PostMapping("/registration")
 	public ResponseEntity<PlayerDto> create(@Valid @RequestBody CreatePlayerDto player) {
 		return status(HttpStatus.CREATED).body(this.playerService.createPlayer(player));
+	}
+
+	@PostMapping("/login")
+	public ResponseEntity<PlayerDto> create(@Valid @RequestBody AuthenticationDTO player) {
+		return status(HttpStatus.ACCEPTED).body(this.playerService.loginPlayer(player));
 	}
 }
