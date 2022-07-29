@@ -136,8 +136,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		}
 		var stateToBeChecked = isGuess ? ANSWERING_GUESS : ANSWERING;
 		boolean finalIsGuess = isGuess;
-		this.players.values().stream()
-				.filter(player -> player.getState() == ANSWERING)
+		this.players.values()
 				.forEach(p -> p.setIsPlayerActiveThisTurn(true));
 		this.players.values()
 				.stream()
@@ -165,7 +164,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 						throw new RuntimeException(e);
 					}
 				});
-		this.players.values()
+		 new HashMap<>(this.players).values()
 				.stream()
 				.filter(player -> !player.getIsPlayerActiveThisTurn())
 				.forEach(p -> p.getPlayer().incrementBeingInactiveCount());
