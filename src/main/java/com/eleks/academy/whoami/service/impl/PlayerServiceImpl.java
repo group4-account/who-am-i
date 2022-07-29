@@ -5,14 +5,13 @@ import com.eleks.academy.whoami.database.entity.Player;
 import com.eleks.academy.whoami.database.repository.PlayerRepository;
 import com.eleks.academy.whoami.dto.AuthenticationDTO;
 import com.eleks.academy.whoami.dto.CreatePlayerDto;
-import com.eleks.academy.whoami.dto.PlayerDto;
+import com.eleks.academy.whoami.dto.ResponsePlayerDto;
 import com.eleks.academy.whoami.mapper.CreatePlayerMapper;
 import com.eleks.academy.whoami.mapper.PlayerReadMapper;
 import com.eleks.academy.whoami.security.AuthProvider;
 import com.eleks.academy.whoami.service.PlayerService;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -38,7 +37,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	@Transactional(readOnly = true)
-	public PlayerDto loginPlayer(AuthenticationDTO player) {
+	public ResponsePlayerDto loginPlayer(AuthenticationDTO player) {
 		return Optional.ofNullable(this.authProvider.authenticate(player))
 				.map(authentification -> Optional.ofNullable(this.findByEmail(player.getEmail())))
 				.flatMap(Optional::get)
@@ -48,7 +47,7 @@ public class PlayerServiceImpl implements PlayerService {
 
 	@Override
 	@Transactional
-	public PlayerDto createPlayer(CreatePlayerDto createPlayerDto) {
+	public ResponsePlayerDto createPlayer(CreatePlayerDto createPlayerDto) {
 		this.findByEmail(createPlayerDto.getEmail())
 				.ifPresent(then -> {
 					throw new PlayerCreationException("Player with this email already exist!");

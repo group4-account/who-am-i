@@ -1,7 +1,6 @@
 package com.eleks.academy.whoami.security;
 
 import com.eleks.academy.whoami.dto.AuthenticationDTO;
-import com.eleks.academy.whoami.dto.PlayerDto;
 import com.eleks.academy.whoami.service.impl.CustomPlayerDetailsService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +14,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
 import java.util.Collections;
-import java.util.Objects;
 
 @RequiredArgsConstructor
 @Component

@@ -7,9 +7,9 @@ import lombok.NoArgsConstructor;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PlayerDto {
+public class ResponsePlayerDto {
 
-	Integer id;
+	String username;
 
 	String token;
 	
