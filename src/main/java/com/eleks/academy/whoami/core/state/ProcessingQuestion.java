@@ -146,9 +146,15 @@ public final class ProcessingQuestion extends AbstractGameState {
 							GetPlayerAnswerOnQuestionOrGuess(player1, finalIsGuess);
 							player1.getPlayer().zeroTimePlayersBeingInactive();
 						} catch (TimeoutException e) {
-							player1.getPlayer().incrementBeingInactiveCount();
+							this.players.values()
+									.stream().filter(player -> player.getState() == ANSWERING && !player.getCurrentAnswer().isDone())
+									.forEach(player -> {
+										player.setAnswerQuestion("NOT_SURE");
+									});
 						} finally {
-							player1.setState(finalIsGuess ? ANSWERED_GUESS : ANSWERED);
+							if (finalIsGuess) {
+								player1.setState(ANSWERED_GUESS);
+							}
 							if (finalIsGuess && !player1.getCurrentGuess().isDone())
 								player1.setGuess("PLAYER WAS INACTIVE");
 						}
@@ -156,15 +162,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 						throw new RuntimeException(e);
 					}
 				});
-		if (!finalIsGuess) {
-			this.players.values()
-					.stream().filter(player -> player.getState() == ANSWERING)
-					.forEach(player -> {
-						player.setAnswer(NOT_SURE);
-						player.setState(ANSWERED);
-					});
-
-		}
+		this.players.values().stream()
+				.filter(player -> player.getState() == ANSWERING)
+				.forEach(player -> player.getPlayer().incrementBeingInactiveCount());
 		if (isGuess) {
 			Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
 					.filter(player -> (player.getState() == ANSWERING_GUESS
