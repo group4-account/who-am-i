@@ -16,16 +16,9 @@ import javax.validation.constraints.Pattern;
 @Builder
 public class CreatePlayerDto {
 
-	@NotBlank
-	@Pattern(regexp = "^[a-zA-Z0-9!@#$%^&*()+~+]*$", message = "Symbol _ is forbidden")
-	@Length(min = 2, max = 50)
 	String username;
 
-	@Email
-	@NotBlank
-	@Length(min = 3)
 	String email;
 
-	@NotBlank
 	String password;
 }
