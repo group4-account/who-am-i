@@ -44,7 +44,7 @@ class GameControllerTest {
 				.andExpect(status().isOk())
 				.andExpect(MockMvcResultMatchers.jsonPath("$[0]").doesNotHaveJsonPath());
 	}
-
+//g
 	@Test
 	void createGame() throws Exception {
 		GameDetails gameDetails = new GameDetails();
