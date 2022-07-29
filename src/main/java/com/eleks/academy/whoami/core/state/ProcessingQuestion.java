@@ -114,6 +114,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 		resetToDefault();
 		PlayerWithState currentPlayer = players.get(getCurrentTurn());
 		var isGuess = false;
+
 		try {
 			try {
 				currentPlayer.getQuestionMessage().get(maxTimeForQuestion, SECONDS);
@@ -135,7 +136,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 		}
 		var stateToBeChecked = isGuess ? ANSWERING_GUESS : ANSWERING;
 		boolean finalIsGuess = isGuess;
-
+		this.players.values().stream()
+				.filter(player -> player.getState() == ANSWERING)
+				.forEach(p -> p.setIsPlayerActiveThisTurn(true));
 		this.players.values()
 				.stream()
 				.parallel()
@@ -145,17 +148,16 @@ public final class ProcessingQuestion extends AbstractGameState {
 						try {
 							GetPlayerAnswerOnQuestionOrGuess(player1, finalIsGuess);
 							player1.getPlayer().zeroTimePlayersBeingInactive();
-							player1.setState(ANSWERED);
 						} catch (TimeoutException e) {
 							this.players.values()
-									.stream().filter(player -> player.getState() == ANSWERING && !player.getCurrentAnswer().isDone())
+									.stream().filter(player -> player.getState() == ANSWERING || player.getState() == ANSWERED
+											&& !player.getCurrentAnswer().isDone())
 									.forEach(player -> {
+										player.setIsPlayerActiveThisTurn(false);
 										player.setAnswerQuestion("NOT_SURE");
 									});
 						} finally {
-							if (finalIsGuess) {
-								player1.setState(ANSWERED_GUESS);
-							}
+							player1.setState(finalIsGuess ? ANSWERED_GUESS : ANSWERED);
 							if (finalIsGuess && !player1.getCurrentGuess().isDone())
 								player1.setGuess("PLAYER WAS INACTIVE");
 						}
@@ -163,9 +165,10 @@ public final class ProcessingQuestion extends AbstractGameState {
 						throw new RuntimeException(e);
 					}
 				});
-		this.players.values().stream()
-				.filter(player -> player.getState() == ANSWERING)
-				.forEach(player -> player.getPlayer().incrementBeingInactiveCount());
+		this.players.values()
+				.stream()
+				.filter(player -> !player.getIsPlayerActiveThisTurn())
+				.forEach(p -> p.getPlayer().incrementBeingInactiveCount());
 		if (isGuess) {
 			Map<Boolean, List<PlayerWithState>> booleanPlayersAnswerMap = this.players.values().stream()
 					.filter(player -> (player.getState() == ANSWERING_GUESS
@@ -277,7 +280,7 @@ public final class ProcessingQuestion extends AbstractGameState {
 	@SneakyThrows
 	private void setPlayersWhoFinishedGame(PlayerWithState playerWhoFinishedGame) {
 		this.playersWhoFinishedGame.put(playerWhoFinishedGame.getPlayer().getId(), playerWhoFinishedGame);
-		SECONDS.sleep(2);
+		SECONDS.sleep(5);
 		this.playersWhoFinishedGame.remove(playerWhoFinishedGame.getPlayer().getId());
 		changeTurnIfGameFinished();
 	}

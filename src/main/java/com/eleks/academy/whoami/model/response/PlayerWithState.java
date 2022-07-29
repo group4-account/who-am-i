@@ -28,6 +28,8 @@ public class PlayerWithState {
 
 	private Boolean isLeaving;
 
+	private Boolean isPlayerActiveThisTurn;
+
 	private CompletableFuture<String> questionFuture = new CompletableFuture<String>();
 
 	private CompletableFuture<String> guessFuture = new CompletableFuture<String>();
