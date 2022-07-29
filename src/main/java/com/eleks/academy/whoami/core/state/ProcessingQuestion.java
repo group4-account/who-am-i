@@ -320,7 +320,9 @@ public final class ProcessingQuestion extends AbstractGameState {
 				}
 			}
 			start = currentTimeMillis();
-			while (this.players.values().stream().allMatch(player -> player.getState() != ASKING) && isQuestion) {
+			while (this.players.values().stream().allMatch(player -> player.getState() != ASKING) &&
+			this.players.values().stream().noneMatch(player -> player.getState() != INACTIVE)
+					&& isQuestion) {
 				long now = currentTimeMillis();
 				timer = maxTimeForAnswer - MILLISECONDS.toSeconds(now - start);
 				if (timer <= 0) {
